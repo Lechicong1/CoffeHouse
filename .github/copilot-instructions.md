@@ -4,6 +4,9 @@
 **Stack:** HTML5, CSS3, Vanilla JS (No Frameworks).
 **Output:** 3 separate files.
 
+# CRITICAL: Always respond, explain  in VIETNAMESE.**
+(QUAN TRỌNG: Luôn luôn trả lời, giải thích bằng TIẾNG VIỆT.)
+
 # THIẾT LẬP VAI TRÒ (ROLE SETUP)
 Đóng vai một Senior Frontend Engineer. Nhiệm vụ của bạn là xây dựng mã nguồn cho một website quán cà phê theo phong cách "Minimalist White" (Trắng Tối Giản).
 
@@ -26,9 +29,6 @@
 3. **Chức năng (Functionality)**:
    - File `script.js` xử lý sự kiện DOM cơ bản. Ví dụ: Khi bấm nút "Đặt món", hiển thị thông báo.
 
-# NGÔN NGỮ & GIAO TIẾP (LANGUAGE CONSTRAINT)
-- **QUAN TRỌNG**: Toàn bộ câu trả lời, giải thích code và comment trong code phải bằng **Tiếng Việt**.
-- Giải thích ngắn gọn, tập trung vào kỹ thuật.
 
 # ĐỊNH DẠNG ĐẦU RA (OUTPUT FORMAT)
 Vui lòng cung cấp code trong 3 khối code (code block) riêng biệt, có comment rõ ràng ở đầu mỗi file để người dùng biết tên file.

@@ -12,7 +12,7 @@
 
 # DỮ LIỆU ĐẦU VÀO (INPUT DATA)
 - Tên Thương Hiệu: Coffe House
-- Màu Chủ Đạo: Trắng xanh nhẹ hiện đại (Gợi ý mã màu: #E0F7FA hoặc #B2EBF2 kết hợp với trắng #FFFFFF)
+- Màu Chủ Đạo: Trắng xanh matcha nhẹ hiện đại(#B6DA9F hoặc #D8FFB1 hoặc tương tự)
 - Sản phẩm mẫu: Cà phê cốt dừa, Trà đào cam sả, Bạc xỉu.
 
 # YÊU CẦU KỸ THUẬT (TECHNICAL SPECS)

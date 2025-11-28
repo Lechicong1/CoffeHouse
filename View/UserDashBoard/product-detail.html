@@ -1,0 +1,757 @@
+<!-- ===================================
+     FILE: product-detail.html
+     MÔ TẢ: Trang chi tiết sản phẩm
+     =================================== -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Chi tiết sản phẩm - Coffee House">
+    <title>Chi tiết sản phẩm - Coffee House</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* PRODUCT DETAIL STYLES */
+        .product-detail-section {
+            margin-top: 80px;
+            padding: 60px 5%;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .breadcrumb {
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: var(--text-light);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary-color);
+        }
+
+        .breadcrumb span {
+            color: var(--text-light);
+            margin: 0 10px;
+        }
+
+        .product-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 60px;
+        }
+
+        .product-images {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .main-image {
+            width: 100%;
+            height: 500px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .main-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .thumbnail-images {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+        }
+
+        .thumbnail {
+            width: 100%;
+            height: 100px;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .thumbnail:hover,
+        .thumbnail.active {
+            border-color: var(--primary-color);
+        }
+
+        .thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-info h1 {
+            font-size: 2.5rem;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+        }
+
+        .product-category {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: var(--text-dark);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .product-rating {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .stars {
+            color: #FFD700;
+            font-size: 1.2rem;
+        }
+
+        .rating-count {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .product-price {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 25px;
+        }
+
+        .product-description {
+            color: var(--text-light);
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 30px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #E0E0E0;
+        }
+
+        .product-options {
+            margin-bottom: 30px;
+        }
+
+        .option-group {
+            margin-bottom: 25px;
+        }
+
+        .option-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            color: var(--text-dark);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .size-options,
+        .topping-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .size-btn,
+        .topping-btn {
+            padding: 10px 20px;
+            border: 2px solid #E0E0E0;
+            background-color: var(--white);
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .size-btn:hover,
+        .topping-btn:hover {
+            border-color: var(--primary-color);
+        }
+
+        .size-btn.active,
+        .topping-btn.active {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .quantity-selector {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .quantity-selector label {
+            font-weight: 600;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background-color: var(--off-white);
+            padding: 8px 20px;
+            border-radius: 50px;
+        }
+
+        .quantity-btn {
+            background-color: var(--primary-color);
+            color: var(--text-dark);
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quantity-btn:hover {
+            background-color: var(--primary-dark);
+            transform: scale(1.1);
+        }
+
+        .quantity-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn-add-cart,
+        .btn-buy-now {
+            flex: 1;
+            padding: 18px 30px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-add-cart {
+            background-color: var(--white);
+            border: 2px solid var(--primary-color);
+            color: var(--text-dark);
+        }
+
+        .btn-add-cart:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(182, 218, 159, 0.4);
+        }
+
+        .btn-buy-now {
+            background-color: var(--primary-color);
+            color: var(--text-dark);
+        }
+
+        .btn-buy-now:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(182, 218, 159, 0.5);
+        }
+
+        .product-meta {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            padding: 25px;
+            background-color: var(--off-white);
+            border-radius: 15px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .meta-icon {
+            width: 45px;
+            height: 45px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .meta-text strong {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .meta-text span {
+            font-size: 1rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .product-tabs {
+            margin-top: 60px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid #E0E0E0;
+            margin-bottom: 30px;
+        }
+
+        .tab-btn {
+            padding: 15px 30px;
+            background: none;
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab-btn:hover,
+        .tab-btn.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .ingredients-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .ingredient-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px;
+            background-color: var(--off-white);
+            border-radius: 10px;
+        }
+
+        .ingredient-item::before {
+            content: "✓";
+            color: var(--primary-color);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .review-item {
+            padding: 25px;
+            background-color: var(--off-white);
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .reviewer-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .review-date {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 968px) {
+            .product-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .product-images {
+                position: static;
+            }
+
+            .product-info h1 {
+                font-size: 2rem;
+            }
+
+            .product-actions {
+                flex-direction: column;
+            }
+
+            .product-meta {
+                grid-template-columns: 1fr;
+            }
+
+            .ingredients-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER & NAVIGATION -->
+    <header>
+        <nav>
+            <a href="index.html" class="logo">COFFEE HOUSE</a>
+            
+            <ul class="nav-menu">
+                <li><a href="index.html">Trang chủ</a></li>
+                <li><a href="index.html#about">Giới thiệu</a></li>
+                <li><a href="index.html#menu">Thực đơn</a></li>
+                <li><a href="index.html#location">Địa chỉ</a></li>
+                <li><a href="about.html">Về chúng tôi</a></li>
+            </ul>
+            
+            <div class="auth-buttons">
+                <a href="../Auth/Login/login.html" class="btn-login">Đăng nhập</a>
+                <a href="../Auth/Register/register.html" class="btn-register">Đăng ký</a>
+            </div>
+            
+            <div class="cart-icon">
+                🛒
+                <span class="cart-count">0</span>
+            </div>
+            
+            <!-- Mobile Menu Toggle -->
+            <div class="menu-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <!-- PRODUCT DETAIL SECTION -->
+    <section class="product-detail-section">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="index.html">Trang chủ</a>
+            <span>›</span>
+            <a href="index.html#menu">Thực đơn</a>
+            <span>›</span>
+            <span id="product-category">Cà phê</span>
+            <span>›</span>
+            <strong id="breadcrumb-name">Cà Phê Cốt Dừa</strong>
+        </div>
+
+        <div class="product-container">
+            <!-- Product Images -->
+            <div class="product-images">
+                <div class="main-image">
+                    <img id="main-product-image" src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=800" alt="Cà Phê Cốt Dừa">
+                </div>
+                <div class="thumbnail-images">
+                    <div class="thumbnail active" data-image="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=800">
+                        <img src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=200" alt="Thumbnail 1">
+                    </div>
+                    <div class="thumbnail" data-image="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800">
+                        <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=200" alt="Thumbnail 2">
+                    </div>
+                    <div class="thumbnail" data-image="https://images.unsplash.com/photo-1497935586351-b67a49e012bf?w=800">
+                        <img src="https://images.unsplash.com/photo-1497935586351-b67a49e012bf?w=200" alt="Thumbnail 3">
+                    </div>
+                    <div class="thumbnail" data-image="https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=800">
+                        <img src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=200" alt="Thumbnail 4">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Info -->
+            <div class="product-info">
+                <span class="product-category" id="product-cat-badge">CÀ PHÊ</span>
+                <h1 id="product-name">Cà Phê Cốt Dừa</h1>
+                
+                <div class="product-rating">
+                    <div class="stars">★★★★★</div>
+                    <span class="rating-count">(4.9 - 128 đánh giá)</span>
+                </div>
+
+                <div class="product-price" id="product-price">45.000đ</div>
+
+                <div class="product-description" id="product-desc">
+                    <p>
+                        Cà phê cốt dừa là sự kết hợp hoàn hảo giữa hương vị đậm đà của cà phê Việt Nam 
+                        rang xay pha phin truyền thống và vị béo ngậy, thơm ngon của cốt dừa tươi.
+                    </p>
+                    <p>
+                        Món đồ uống này mang đến cảm giác mát lạnh, sảng khoái, với hậu vị ngọt nhẹ 
+                        từ cốt dừa hòa quyện cùng độ đắng đặc trưng của cà phê. Thích hợp thưởng thức 
+                        vào mọi thời điểm trong ngày.
+                    </p>
+                </div>
+
+                <!-- Product Options -->
+                <div class="product-options">
+                    <!-- Size -->
+                    <div class="option-group">
+                        <label>Kích thước</label>
+                        <div class="size-options">
+                            <button class="size-btn" data-size="S" data-price="45000">Size S</button>
+                            <button class="size-btn active" data-size="M" data-price="50000">Size M</button>
+                            <button class="size-btn" data-size="L" data-price="55000">Size L</button>
+                        </div>
+                    </div>
+
+                    <!-- Topping -->
+                    <div class="option-group">
+                        <label>Topping (Tùy chọn)</label>
+                        <div class="topping-options">
+                            <button class="topping-btn" data-topping="trân châu" data-price="5000">Trân châu +5k</button>
+                            <button class="topping-btn" data-topping="thạch" data-price="5000">Thạch +5k</button>
+                            <button class="topping-btn" data-topping="pudding" data-price="7000">Pudding +7k</button>
+                            <button class="topping-btn" data-topping="kem" data-price="10000">Kem +10k</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quantity -->
+                <div class="quantity-selector">
+                    <label>Số lượng</label>
+                    <div class="quantity-controls">
+                        <button class="quantity-btn" id="decrease-qty">-</button>
+                        <span class="quantity-value" id="quantity">1</span>
+                        <button class="quantity-btn" id="increase-qty">+</button>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="product-actions">
+                    <button class="btn-add-cart" id="add-to-cart">
+                        🛒 Thêm vào giỏ hàng
+                    </button>
+                    <button class="btn-buy-now" id="buy-now">
+                        ⚡ Đặt hàng ngay
+                    </button>
+                </div>
+
+                <!-- Product Meta -->
+                <div class="product-meta">
+                    <div class="meta-item">
+                        <div class="meta-icon">📦</div>
+                        <div class="meta-text">
+                            <strong>Giao hàng</strong>
+                            <span>15-30 phút</span>
+                        </div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-icon">✓</div>
+                        <div class="meta-text">
+                            <strong>Chất lượng</strong>
+                            <span>100% nguyên chất</span>
+                        </div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-icon">🔥</div>
+                        <div class="meta-text">
+                            <strong>Nhiệt độ</strong>
+                            <span>Nóng / Đá</span>
+                        </div>
+                    </div>
+                    <div class="meta-item">
+                        <div class="meta-icon">💚</div>
+                        <div class="meta-text">
+                            <strong>Đánh giá</strong>
+                            <span>4.9/5 ★</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Tabs -->
+        <div class="product-tabs">
+            <div class="tab-buttons">
+                <button class="tab-btn active" data-tab="description">Mô tả</button>
+                <button class="tab-btn" data-tab="ingredients">Thành phần</button>
+                <button class="tab-btn" data-tab="reviews">Đánh giá</button>
+            </div>
+
+            <!-- Tab: Description -->
+            <div class="tab-content active" id="tab-description">
+                <h3>Mô tả chi tiết</h3>
+                <p style="line-height: 1.8; color: var(--text-light); margin-bottom: 15px;">
+                    Cà phê cốt dừa là một trong những món đồ uống signature của Coffee House, được nghiên cứu 
+                    và phát triển dựa trên sở thích của khách hàng Việt Nam. Chúng tôi sử dụng cà phê Robusta 
+                    từ Tây Nguyên, được rang kỹ theo công thức riêng, kết hợp cùng cốt dừa tươi nguyên chất 
+                    từ miền Tây Nam Bộ.
+                </p>
+                <p style="line-height: 1.8; color: var(--text-light);">
+                    Mỗi tách cà phê được pha bằng phin truyền thống, đảm bảo giữ nguyên hương vị đậm đà. 
+                    Cốt dừa được chuẩn bị tươi mỗi ngày, không chất bảo quản, mang đến độ béo ngậy tự nhiên 
+                    và thơm ngon nhất.
+                </p>
+            </div>
+
+            <!-- Tab: Ingredients -->
+            <div class="tab-content" id="tab-ingredients">
+                <h3>Thành phần</h3>
+                <div class="ingredients-list">
+                    <div class="ingredient-item">Cà phê Robusta Tây Nguyên</div>
+                    <div class="ingredient-item">Cốt dừa tươi nguyên chất</div>
+                    <div class="ingredient-item">Sữa đặc</div>
+                    <div class="ingredient-item">Đường mía tự nhiên</div>
+                    <div class="ingredient-item">Đá viên tinh khiết</div>
+                    <div class="ingredient-item">Không chất bảo quản</div>
+                </div>
+            </div>
+
+            <!-- Tab: Reviews -->
+            <div class="tab-content" id="tab-reviews">
+                <h3>Đánh giá từ khách hàng</h3>
+                
+                <div class="review-item">
+                    <div class="review-header">
+                        <div>
+                            <div class="reviewer-name">Nguyễn Văn A</div>
+                            <div class="stars">★★★★★</div>
+                        </div>
+                        <div class="review-date">25/11/2024</div>
+                    </div>
+                    <p style="color: var(--text-light); line-height: 1.8;">
+                        Cà phê rất ngon, vị cốt dừa hòa quyện rất tuyệt. Mình rất thích! 
+                        Sẽ quay lại ủng hộ quán nhiều hơn nữa.
+                    </p>
+                </div>
+
+                <div class="review-item">
+                    <div class="review-header">
+                        <div>
+                            <div class="reviewer-name">Trần Thị B</div>
+                            <div class="stars">★★★★★</div>
+                        </div>
+                        <div class="review-date">23/11/2024</div>
+                    </div>
+                    <p style="color: var(--text-light); line-height: 1.8;">
+                        Lần đầu thử cà phê cốt dừa và thật sự rất ngạc nhiên. Vị không quá ngọt, 
+                        cà phê đậm đà. Giao hàng nhanh, đóng gói cẩn thận. 5 sao!
+                    </p>
+                </div>
+
+                <div class="review-item">
+                    <div class="review-header">
+                        <div>
+                            <div class="reviewer-name">Lê Văn C</div>
+                            <div class="stars">★★★★☆</div>
+                        </div>
+                        <div class="review-date">20/11/2024</div>
+                    </div>
+                    <p style="color: var(--text-light); line-height: 1.8;">
+                        Ngon, nhưng mình thấy hơi ngọt một tí. Lần sau sẽ yêu cầu ít đường hơn. 
+                        Nhìn chung vẫn rất ổn.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>COFFEE HOUSE</h3>
+                    <p>Mang đến trải nghiệm cà phê tuyệt vời nhất với không gian hiện đại và dịch vụ tận tâm.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-icon">f</a>
+                        <a href="#" class="social-icon">📷</a>
+                        <a href="#" class="social-icon">T</a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>LIÊN KẾT</h3>
+                    <a href="index.html">Trang chủ</a>
+                    <a href="index.html#about">Giới thiệu</a>
+                    <a href="index.html#menu">Thực đơn</a>
+                    <a href="index.html#location">Địa chỉ</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>CHÍNH SÁCH</h3>
+                    <a href="#">Chính sách bảo mật</a>
+                    <a href="#">Điều khoản sử dụng</a>
+                    <a href="#">Chính sách đổi trả</a>
+                    <a href="#">Hướng dẫn đặt hàng</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>LIÊN HỆ</h3>
+                    <p>📍 123 Nguyễn Huệ, Q.1, TP.HCM</p>
+                    <p>📞 1900 8888</p>
+                    <p>✉️ info@coffeehouse.vn</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Coffee House. All Rights Reserved. Made with ❤️ in Vietnam</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT -->
+    <script src="script.js"></script>
+    <script src="product-detail.js"></script>
+</body>
+</html>

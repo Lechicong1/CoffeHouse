@@ -116,6 +116,36 @@ class HeroSlider {
 // Khởi tạo slider
 const heroSlider = new HeroSlider();
 
+// ==================== CATEGORY FILTER ====================
+const categoryButtons = document.querySelectorAll('.category-btn');
+const menuCards = document.querySelectorAll('.menu-card');
+
+categoryButtons.forEach(button => {
+    button.addEventListener('click', () => {
+        // Xóa active class từ tất cả buttons
+        categoryButtons.forEach(btn => btn.classList.remove('active'));
+        
+        // Thêm active class cho button được click
+        button.classList.add('active');
+        
+        // Lấy category được chọn
+        const selectedCategory = button.getAttribute('data-category');
+        
+        // Filter menu cards
+        menuCards.forEach(card => {
+            const cardCategory = card.getAttribute('data-category');
+            
+            if (selectedCategory === 'all' || cardCategory === selectedCategory) {
+                card.style.display = 'block';
+                // Animation fade in
+                card.style.animation = 'fadeInUp 0.5s ease';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+});
+
 // ==================== SMOOTH SCROLL ====================
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function(e) {
@@ -275,6 +305,64 @@ if (cartIcon) {
         }
     });
 }
+
+// ==================== QUICK ADD TO CART ====================
+function addQuickToCart(productId) {
+    // Dữ liệu sản phẩm mẫu (sau này sẽ lấy từ API)
+    const products = {
+        1: { name: 'Cà Phê Cốt Dừa', category: 'coffee', price: 45000 },
+        2: { name: 'Bạc Xỉu Đặc Biệt', category: 'coffee', price: 38000 },
+        3: { name: 'Espresso Đậm Đà', category: 'coffee', price: 35000 },
+        4: { name: 'Trà Đào Cam Sả', category: 'tea', price: 42000 },
+        5: { name: 'Matcha Latte', category: 'tea', price: 48000 },
+        6: { name: 'Trà Sữa Trân Châu', category: 'tea', price: 40000 },
+        7: { name: 'Hạt Hướng Dương', category: 'snack', price: 25000 },
+        8: { name: 'Khô Gà Lá Chanh', category: 'snack', price: 35000 },
+        9: { name: 'Khoai Tây Chiên', category: 'snack', price: 30000 }
+    };
+    
+    const product = products[productId];
+    
+    if (product) {
+        const cartItem = {
+            id: productId,
+            name: product.name,
+            category: product.category,
+            size: 'M',
+            toppings: [],
+            quantity: 1,
+            price: product.price,
+            total: product.price
+        };
+        
+        let cart = JSON.parse(localStorage.getItem('cart')) || [];
+        cart.push(cartItem);
+        localStorage.setItem('cart', JSON.stringify(cart));
+        
+        // Cập nhật số lượng giỏ hàng
+        updateCartCountFromStorage();
+        
+        showNotification(`✓ Đã thêm ${product.name} vào giỏ hàng!`);
+    }
+}
+
+// ==================== UPDATE CART COUNT FROM STORAGE ====================
+function updateCartCountFromStorage() {
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    let totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    if (cartCount) {
+        cartCount.textContent = totalItems;
+        cartCount.style.transform = 'scale(1.3)';
+        setTimeout(() => {
+            cartCount.style.transform = 'scale(1)';
+        }, 300);
+    }
+}
+
+// Load cart count khi trang load
+window.addEventListener('load', () => {
+    updateCartCountFromStorage();
+});
 
 // ==================== CONSOLE LOG ====================
 console.log('🎉 Coffee House Website loaded successfully!');

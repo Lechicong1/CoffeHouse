@@ -20,7 +20,7 @@
             <ul class="nav-menu">
                 <li><a href="#home" class="active">Trang chủ</a></li>
                 <li><a href="#about">Giới thiệu</a></li>
-                <li><a href="#menu">Thực đơn</a></li>
+                <li><a href="menu.html">Thực đơn</a></li>
                 <li><a href="#location">Địa chỉ</a></li>
                 <li><a href="about.html">Về chúng tôi</a></li>
             </ul>
@@ -118,11 +118,14 @@
 
     <!-- MENU SECTION -->
     <section class="menu" id="menu">
-        <h2>THỰC ĐƠN ĐẶC BIỆT</h2>
+        <h2>THỰC ĐƠN NỔI BẬT</h2>
+        <p style="text-align: center; color: var(--text-light); margin-bottom: 40px; font-size: 1.1rem;">
+            Khám phá những món đồ uống và ăn vặt được yêu thích nhất tại Coffee House
+        </p>
         
         <div class="menu-grid">
-            <!-- Menu Item 1 -->
-            <div class="menu-card">
+            <!-- CÀ PHÊ -->
+            <div class="menu-card" data-category="coffee" data-id="1" onclick="window.location.href='product-detail.html?id=1'">
                 <div class="menu-card-image">
                     <img src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=500" alt="Cà Phê Cốt Dừa">
                     <span class="menu-badge">Mới</span>
@@ -132,13 +135,41 @@
                     <p>Cà phê rang xay pha phin kết hợp cốt dừa béo ngậy, thơm ngon độc đáo</p>
                     <div class="menu-card-footer">
                         <span class="price">45.000đ</span>
+                        <button class="btn-add" onclick="event.stopPropagation(); addQuickToCart(1)">Đặt món</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="menu-card" data-category="coffee" data-id="2">
+                <div class="menu-card-image">
+                    <img src="https://images.unsplash.com/photo-1517487881594-2787fef5ebf7?w=500" alt="Bạc Xỉu">
+                </div>
+                <div class="menu-card-content">
+                    <h3>BẠC XỈU ĐẶC BIỆT</h3>
+                    <p>Cà phê pha phin truyền thống với sữa tươi, vị ngọt dịu nhẹ, thơm ngon</p>
+                    <div class="menu-card-footer">
+                        <span class="price">38.000đ</span>
                         <button class="btn-add">Đặt món</button>
                     </div>
                 </div>
             </div>
             
-            <!-- Menu Item 2 -->
-            <div class="menu-card">
+            <div class="menu-card" data-category="coffee" data-id="3">
+                <div class="menu-card-image">
+                    <img src="https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500" alt="Espresso">
+                </div>
+                <div class="menu-card-content">
+                    <h3>ESPRESSO ĐẬM ĐÀ</h3>
+                    <p>Cà phê espresso ý nguyên chất, hương vị đậm đà cho người sành điệu</p>
+                    <div class="menu-card-footer">
+                        <span class="price">35.000đ</span>
+                        <button class="btn-add">Đặt món</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TRÀ -->
+            <div class="menu-card" data-category="tea" data-id="4">
                 <div class="menu-card-image">
                     <img src="https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=500" alt="Trà Đào Cam Sả">
                     <span class="menu-badge">Hot</span>
@@ -153,23 +184,7 @@
                 </div>
             </div>
             
-            <!-- Menu Item 3 -->
-            <div class="menu-card">
-                <div class="menu-card-image">
-                    <img src="https://images.unsplash.com/photo-1517487881594-2787fef5ebf7?w=500" alt="Bạc Xỉu">
-                </div>
-                <div class="menu-card-content">
-                    <h3>BẠC XỈU ĐẶC BIỆT</h3>
-                    <p>Cà phê pha phin truyền thống với sữa tươi, vị ngọt dịu nhẹ, thơm ngon</p>
-                    <div class="menu-card-footer">
-                        <span class="price">38.000đ</span>
-                        <button class="btn-add">Đặt món</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Menu Item 4 -->
-            <div class="menu-card">
+            <div class="menu-card" data-category="tea" data-id="5">
                 <div class="menu-card-image">
                     <img src="https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500" alt="Matcha Latte">
                 </div>
@@ -183,23 +198,7 @@
                 </div>
             </div>
             
-            <!-- Menu Item 5 -->
-            <div class="menu-card">
-                <div class="menu-card-image">
-                    <img src="https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500" alt="Espresso">
-                </div>
-                <div class="menu-card-content">
-                    <h3>ESPRESSO ĐẬM ĐÀ</h3>
-                    <p>Cà phê espresso ý nguyên chất, hương vị đậm đà cho người sành điệu</p>
-                    <div class="menu-card-footer">
-                        <span class="price">35.000đ</span>
-                        <button class="btn-add">Đặt món</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Menu Item 6 -->
-            <div class="menu-card">
+            <div class="menu-card" data-category="tea" data-id="6">
                 <div class="menu-card-image">
                     <img src="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=500" alt="Trà Sữa">
                 </div>
@@ -212,6 +211,14 @@
                     </div>
                 </div>
             </div>
+
+        </div>
+        
+        <!-- View All Button -->
+        <div style="text-align: center; margin-top: 50px;">
+            <a href="menu.html" class="btn btn-primary" style="display: inline-block; padding: 15px 50px; font-size: 1.1rem;">
+                Xem tất cả thực đơn →
+            </a>
         </div>
     </section>
 

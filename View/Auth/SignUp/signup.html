@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Đăng ký tài khoản Coffee House - Quán cà phê phong cách Minimalist">
+    <title>Đăng Ký - Coffee House</title>
+
+    <!-- Link CSS -->
+    <link rel="stylesheet" href="signup.css">
+</head>
+<body>
+    <!-- Container chính của form signup -->
+    <div class="signup-container">
+
+        <!-- Header - Logo & Tiêu đề -->
+        <div class="signup-header">
+            <div class="logo">☕</div>
+            <h1 class="signup-title">Coffee House</h1>
+            <p class="signup-subtitle">Tạo tài khoản mới</p>
+        </div>
+
+        <!-- Thông báo (ẩn mặc định) -->
+        <div id="alertBox" class="alert"></div>
+
+        <!-- Form đăng ký -->
+        <form id="signupForm" class="signup-form">
+
+            <!-- Nhóm Full Name -->
+            <div class="form-group">
+                <label for="fullname" class="form-label">Họ và Tên</label>
+                <input
+                    type="text"
+                    id="fullname"
+                    class="form-input"
+                    placeholder="Nhập họ và tên"
+                    autocomplete="name"
+                    required
+                >
+            </div>
+
+            <!-- Nhóm Email -->
+            <div class="form-group">
+                <label for="email" class="form-label">Email</label>
+                <input
+                    type="email"
+                    id="email"
+                    class="form-input"
+                    placeholder="example@email.com"
+                    autocomplete="email"
+                    required
+                >
+            </div>
+
+            <!-- Nhóm Username -->
+            <div class="form-group">
+                <label for="username" class="form-label">Tên đăng nhập</label>
+                <input
+                    type="text"
+                    id="username"
+                    class="form-input"
+                    placeholder="Nhập tên đăng nhập"
+                    autocomplete="username"
+                    required
+                >
+            </div>
+
+            <!-- Nhóm Password -->
+            <div class="form-group">
+                <label for="password" class="form-label">Mật khẩu</label>
+                <input
+                    type="password"
+                    id="password"
+                    class="form-input"
+                    placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
+                    autocomplete="new-password"
+                    required
+                >
+            </div>
+
+            <!-- Nhóm Confirm Password -->
+            <div class="form-group">
+                <label for="confirmPassword" class="form-label">Xác nhận mật khẩu</label>
+                <input
+                    type="password"
+                    id="confirmPassword"
+                    class="form-input"
+                    placeholder="Nhập lại mật khẩu"
+                    autocomplete="new-password"
+                    required
+                >
+            </div>
+
+            <!-- Checkbox - Điều khoản -->
+            <div class="form-checkbox-group">
+                <input
+                    type="checkbox"
+                    id="terms"
+                    class="form-checkbox"
+                    required
+                >
+                <label for="terms" class="form-checkbox-label">
+                    Tôi đồng ý với <a href="#" class="terms-link">Điều khoản sử dụng</a>
+                </label>
+            </div>
+
+            <!-- Nút đăng ký - Pill Shape -->
+            <button type="submit" class="btn-signup">
+                Đăng Ký
+            </button>
+
+        </form>
+
+        <!-- Footer - Links -->
+        <div class="signup-footer">
+            <span class="footer-text">Đã có tài khoản?</span>
+            <a href="../Login/login.html" class="footer-link">
+                Đăng nhập ngay
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Link JavaScript -->
+    <script src="signup.js"></script>
+</body>
+</html>

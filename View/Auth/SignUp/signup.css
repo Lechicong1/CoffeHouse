@@ -1,0 +1,339 @@
+/* ============================================
+   FILE: signup.css
+   DESCRIPTION: Stylesheet cho trang đăng ký
+   STYLE: Minimalist White với màu xanh nhẹ hiện đại
+   ============================================ */
+/* CSS Variables - Định nghĩa màu sắc chủ đạo */
+:root {
+    --primary-color: #b6da9f; /* Xanh matcha nhẹ */
+    --primary-dark: #9fc885; /* Xanh matcha đậm hơn */
+    --white: #ffffff;
+    --off-white: #fafafa; /* Trắng nhẹ không quá sáng */
+    --text-dark: #2c2c2c;
+    --text-light: #666666;
+    --accent-red: #e63946; /* Đỏ nhẹ cho highlight */
+    --shadow: rgba(0, 0, 0, 0.08);
+}
+/* Reset & Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f5faf2 0%, var(--off-white) 100%);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* Container chính */
+.signup-container {
+    background: var(--white);
+    border-radius: 20px;
+    box-shadow: 0 10px 40px var(--shadow);
+    padding: 60px 50px;
+    max-width: 500px;
+    width: 100%;
+    animation: fadeInUp 0.6s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Header - Logo & Title */
+.signup-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.logo {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    border-radius: 50%;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: var(--white);
+    font-weight: bold;
+}
+
+.signup-title {
+    font-size: 28px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: var(--text-dark);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+}
+
+.signup-subtitle {
+    font-size: 14px;
+    color: var(--text-light);
+    font-weight: normal;
+}
+
+/* Form Styles */
+.signup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-input {
+    padding: 15px 20px;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    font-size: 16px;
+    color: var(--text-dark);
+    background: var(--white);
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.form-input:focus {
+    border-color: var(--primary-dark);
+    box-shadow: 0 0 0 4px rgba(182, 218, 159, 0.15);
+    transform: translateY(-2px);
+}
+
+.form-input::placeholder {
+    color: var(--text-light);
+    opacity: 0.6;
+}
+
+/* Checkbox - Terms */
+.form-checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--primary-dark);
+    flex-shrink: 0;
+}
+
+.form-checkbox-label {
+    font-size: 14px;
+    color: var(--text-light);
+    cursor: pointer;
+    user-select: none;
+}
+
+.terms-link {
+    color: var(--primary-dark);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.terms-link:hover {
+    text-decoration: underline;
+}
+
+/* Button - Pill Shape */
+.btn-signup {
+    padding: 16px 40px;
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: var(--white);
+    border: none;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(182, 218, 159, 0.3);
+    margin-top: 10px;
+}
+
+.btn-signup:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(182, 218, 159, 0.4);
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+}
+
+.btn-signup:active {
+    transform: translateY(-1px);
+}
+
+.btn-signup:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Footer Links */
+.signup-footer {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.footer-text {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-right: 8px;
+}
+
+.footer-link {
+    font-size: 14px;
+    color: var(--primary-dark);
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.footer-link:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+/* Alert Message */
+.alert {
+    padding: 15px 20px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 20px;
+    display: none;
+    animation: slideDown 0.4s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert.show {
+    display: block;
+}
+
+.alert-success {
+    background: #e8f5e1;
+    color: var(--primary-dark);
+    border-left: 4px solid var(--primary-color);
+}
+
+.alert-error {
+    background: #fef2f2;
+    color: var(--accent-red);
+    border-left: 4px solid var(--accent-red);
+}
+
+.alert-warning {
+    background: #FFF3E0;
+    color: #E65100;
+    border-left: 4px solid #FF9800;
+}
+
+/* Password Strength Indicator */
+.password-strength {
+    margin-top: 8px;
+    height: 4px;
+    background: #E0E0E0;
+    border-radius: 2px;
+    overflow: hidden;
+    display: none;
+}
+
+.password-strength.show {
+    display: block;
+}
+
+.password-strength-bar {
+    height: 100%;
+    transition: all 0.3s ease;
+    border-radius: 2px;
+}
+
+.strength-weak {
+    width: 33%;
+    background: #F44336;
+}
+
+.strength-medium {
+    width: 66%;
+    background: #FF9800;
+}
+
+.strength-strong {
+    width: 100%;
+    background: #4CAF50;
+}
+
+.password-strength-text {
+    font-size: 12px;
+    margin-top: 4px;
+    font-weight: 500;
+}
+
+.text-weak {
+    color: #F44336;
+}
+
+.text-medium {
+    color: #FF9800;
+}
+
+.text-strong {
+    color: #4CAF50;
+}
+
+/* Responsive Design */
+@media (max-width: 576px) {
+    .signup-container {
+        padding: 40px 30px;
+    }
+
+    .signup-title {
+        font-size: 24px;
+    }
+
+    .logo {
+        width: 60px;
+        height: 60px;
+        font-size: 28px;
+    }
+
+    .signup-form {
+        gap: 18px;
+    }
+}

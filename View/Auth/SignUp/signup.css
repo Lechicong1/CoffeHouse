@@ -5,14 +5,14 @@
    ============================================ */
 /* CSS Variables - Định nghĩa màu sắc chủ đạo */
 :root {
-    --primary-white: #FFFFFF;
-    --light-cyan: #E0F7FA;
-    --medium-cyan: #B2EBF2;
-    --dark-cyan: #00BCD4;
-    --text-dark: #263238;
-    --text-gray: #607D8B;
-    --shadow-light: rgba(0, 188, 212, 0.1);
-    --shadow-medium: rgba(0, 188, 212, 0.2);
+    --primary-color: #b6da9f; /* Xanh matcha nhẹ */
+    --primary-dark: #9fc885; /* Xanh matcha đậm hơn */
+    --white: #ffffff;
+    --off-white: #fafafa; /* Trắng nhẹ không quá sáng */
+    --text-dark: #2c2c2c;
+    --text-light: #666666;
+    --accent-red: #e63946; /* Đỏ nhẹ cho highlight */
+    --shadow: rgba(0, 0, 0, 0.08);
 }
 /* Reset & Base Styles */
 * {
@@ -22,7 +22,7 @@
 }
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, var(--light-cyan) 0%, var(--primary-white) 100%);
+    background: linear-gradient(135deg, #f5faf2 0%, var(--off-white) 100%);
     min-height: 100vh;
     display: flex;
     justify-content: center;
@@ -32,9 +32,9 @@ body {
 
 /* Container chính */
 .signup-container {
-    background: var(--primary-white);
+    background: var(--white);
     border-radius: 20px;
-    box-shadow: 0 10px 40px var(--shadow-light);
+    box-shadow: 0 10px 40px var(--shadow);
     padding: 60px 50px;
     max-width: 500px;
     width: 100%;
@@ -61,14 +61,14 @@ body {
 .logo {
     width: 80px;
     height: 80px;
-    background: linear-gradient(135deg, var(--medium-cyan), var(--dark-cyan));
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     border-radius: 50%;
     margin: 0 auto 20px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 36px;
-    color: var(--primary-white);
+    color: var(--white);
     font-weight: bold;
 }
 
@@ -83,7 +83,7 @@ body {
 
 .signup-subtitle {
     font-size: 14px;
-    color: var(--text-gray);
+    color: var(--text-light);
     font-weight: normal;
 }
 
@@ -110,23 +110,23 @@ body {
 
 .form-input {
     padding: 15px 20px;
-    border: 2px solid var(--light-cyan);
+    border: 2px solid #e5e7eb;
     border-radius: 12px;
     font-size: 16px;
     color: var(--text-dark);
-    background: var(--primary-white);
+    background: var(--white);
     transition: all 0.3s ease;
     outline: none;
 }
 
 .form-input:focus {
-    border-color: var(--dark-cyan);
-    box-shadow: 0 0 0 4px var(--shadow-light);
+    border-color: var(--primary-dark);
+    box-shadow: 0 0 0 4px rgba(182, 218, 159, 0.15);
     transform: translateY(-2px);
 }
 
 .form-input::placeholder {
-    color: var(--text-gray);
+    color: var(--text-light);
     opacity: 0.6;
 }
 
@@ -141,19 +141,19 @@ body {
     width: 20px;
     height: 20px;
     cursor: pointer;
-    accent-color: var(--dark-cyan);
+    accent-color: var(--primary-dark);
     flex-shrink: 0;
 }
 
 .form-checkbox-label {
     font-size: 14px;
-    color: var(--text-gray);
+    color: var(--text-light);
     cursor: pointer;
     user-select: none;
 }
 
 .terms-link {
-    color: var(--dark-cyan);
+    color: var(--primary-dark);
     text-decoration: none;
     font-weight: 600;
 }
@@ -165,8 +165,8 @@ body {
 /* Button - Pill Shape */
 .btn-signup {
     padding: 16px 40px;
-    background: linear-gradient(135deg, var(--medium-cyan), var(--dark-cyan));
-    color: var(--primary-white);
+    background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    color: var(--white);
     border: none;
     border-radius: 50px;
     font-size: 16px;
@@ -175,14 +175,14 @@ body {
     letter-spacing: 1px;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px var(--shadow-medium);
+    box-shadow: 0 4px 15px rgba(182, 218, 159, 0.3);
     margin-top: 10px;
 }
 
 .btn-signup:hover {
     transform: translateY(-3px);
-    box-shadow: 0 6px 20px var(--shadow-medium);
-    background: linear-gradient(135deg, var(--dark-cyan), var(--medium-cyan));
+    box-shadow: 0 6px 20px rgba(182, 218, 159, 0.4);
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
 }
 
 .btn-signup:active {
@@ -203,20 +203,20 @@ body {
 
 .footer-text {
     font-size: 14px;
-    color: var(--text-gray);
+    color: var(--text-light);
     margin-right: 8px;
 }
 
 .footer-link {
     font-size: 14px;
-    color: var(--dark-cyan);
+    color: var(--primary-dark);
     text-decoration: none;
     font-weight: 600;
     transition: all 0.3s ease;
 }
 
 .footer-link:hover {
-    color: var(--text-dark);
+    color: var(--primary-color);
     text-decoration: underline;
 }
 
@@ -247,15 +247,15 @@ body {
 }
 
 .alert-success {
-    background: #E8F5E9;
-    color: #2E7D32;
-    border-left: 4px solid #4CAF50;
+    background: #e8f5e1;
+    color: var(--primary-dark);
+    border-left: 4px solid var(--primary-color);
 }
 
 .alert-error {
-    background: #FFEBEE;
-    color: #C62828;
-    border-left: 4px solid #F44336;
+    background: #fef2f2;
+    color: var(--accent-red);
+    border-left: 4px solid var(--accent-red);
 }
 
 .alert-warning {

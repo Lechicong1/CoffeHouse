@@ -1,0 +1,578 @@
+<!-- ===================================
+     FILE: about.html
+     MÔ TẢ: Trang Giới thiệu chi tiết về Coffee House
+     =================================== -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Giới thiệu về Coffee House - Câu chuyện, sứ mệnh và giá trị của chúng tôi">
+    <title>Về Coffee House - Câu chuyện của chúng tôi</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* ADDITIONAL STYLES FOR ABOUT PAGE */
+        .page-hero {
+            margin-top: 80px;
+            height: 50vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                        url('https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=1200') center/cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-align: center;
+        }
+
+        .page-hero h1 {
+            font-size: 3.5rem;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
+        }
+
+        .story-section {
+            padding: 80px 5%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .story-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            margin-bottom: 80px;
+        }
+
+        .story-content.reverse {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .story-content.reverse .story-image {
+            order: 2;
+        }
+
+        .story-content.reverse .story-text {
+            order: 1;
+        }
+
+        .story-image {
+            width: 100%;
+            height: 400px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px var(--shadow);
+        }
+
+        .story-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .story-image:hover img {
+            transform: scale(1.05);
+        }
+
+        .story-text h2 {
+            text-align: left;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .story-text p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .story-text ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .story-text li {
+            padding: 10px 0;
+            font-size: 1.05rem;
+            color: var(--text-light);
+        }
+
+        .story-text li::before {
+            content: "✓ ";
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-top: 50px;
+        }
+
+        .value-card {
+            background: var(--white);
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 5px 20px var(--shadow);
+            transition: transform 0.3s ease;
+        }
+
+        .value-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .value-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .value-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .value-card p {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .timeline {
+            background: var(--white);
+            padding: 80px 5%;
+        }
+
+        .timeline h2 {
+            color: var(--primary-color);
+            margin-bottom: 50px;
+        }
+
+        .timeline-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .timeline-item {
+            display: grid;
+            grid-template-columns: 1fr 80px 1fr;
+            gap: 30px;
+            margin-bottom: 50px;
+            align-items: center;
+        }
+
+        .timeline-item:nth-child(even) .timeline-content:first-child {
+            order: 3;
+        }
+
+        .timeline-content {
+            background: var(--off-white);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px var(--shadow);
+        }
+
+        .timeline-content h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .timeline-dot {
+            width: 80px;
+            height: 80px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            color: var(--text-dark);
+            box-shadow: 0 0 0 10px var(--off-white);
+            position: relative;
+            z-index: 1;
+        }
+
+        .team-section {
+            padding: 80px 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .team-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 50px;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+        }
+
+        .team-member {
+            text-align: center;
+        }
+
+        .team-photo {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            overflow: hidden;
+            border: 5px solid var(--primary-color);
+        }
+
+        .team-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .team-member h3 {
+            color: var(--text-dark);
+            margin-bottom: 5px;
+        }
+
+        .team-member .role {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 968px) {
+            .page-hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .story-content,
+            .story-content.reverse {
+                grid-template-columns: 1fr;
+            }
+
+            .story-content.reverse .story-image,
+            .story-content.reverse .story-text {
+                order: unset;
+            }
+
+            .timeline-item {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline-item:nth-child(even) .timeline-content:first-child {
+                order: unset;
+            }
+
+            .timeline-dot {
+                margin: 0 auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER & NAVIGATION -->
+    <header>
+        <nav>
+            <a href="index.html" class="logo">COFFEE HOUSE</a>
+            
+            <ul class="nav-menu">
+                <li><a href="index.html">Trang chủ</a></li>
+                <li><a href="index.html#about">Giới thiệu</a></li>
+                <li><a href="menu.html">Thực đơn</a></li>
+                <li><a href="index.html#location">Địa chỉ</a></li>
+                <li><a href="about.html" class="active">Về chúng tôi</a></li>
+            </ul>
+            
+            <div class="auth-buttons">
+                <a href="../Auth/Login/login.html" class="btn-login">Đăng nhập</a>
+                <a href="../Auth/Register/register.html" class="btn-register">Đăng ký</a>
+            </div>
+            
+            <div class="cart-icon">
+                🛒
+                <span class="cart-count">0</span>
+            </div>
+            
+            <!-- Mobile Menu Toggle -->
+            <div class="menu-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <!-- PAGE HERO -->
+    <section class="page-hero">
+        <div>
+            <h1>CÂU CHUYỆN CỦA CHÚNG TÔI</h1>
+            <p style="font-size: 1.2rem; color: white;">Hành trình mang cà phê Việt Nam đến gần hơn với mọi người</p>
+        </div>
+    </section>
+
+    <!-- STORY SECTION -->
+    <section class="story-section">
+        <!-- Our Beginning -->
+        <div class="story-content">
+            <div class="story-image">
+                <img src="https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=800" alt="Our Beginning">
+            </div>
+            <div class="story-text">
+                <h2>KHỞI ĐẦU CỦA CHÚNG TÔI</h2>
+                <p>
+                    Coffee House ra đời từ năm 2015 với một ước mơ đơn giản: mang đến cho người Việt 
+                    một không gian cà phê hiện đại, thoải mái nhưng vẫn giữ được bản sắc văn hóa 
+                    cà phê truyền thống.
+                </p>
+                <p>
+                    Từ một cửa hàng nhỏ với 10 bàn ghế, chúng tôi đã không ngừng nỗ lực để mở rộng 
+                    và phát triển. Ngày nay, Coffee House tự hào có mặt tại nhiều vị trí đắc địa, 
+                    phục vụ hàng ngàn khách hàng mỗi ngày.
+                </p>
+            </div>
+        </div>
+
+        <!-- Our Philosophy -->
+        <div class="story-content reverse">
+            <div class="story-image">
+                <img src="https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800" alt="Our Philosophy">
+            </div>
+            <div class="story-text">
+                <h2>TRIẾT LÝ KINH DOANH</h2>
+                <p>
+                    Chúng tôi tin rằng cà phê không chỉ là một loại đồ uống, mà là cầu nối kết 
+                    nối con người với nhau. Mỗi tách cà phê tại Coffee House được pha chế với 
+                    tâm huyết và sự chăm chút tỉ mỉ.
+                </p>
+                <ul>
+                    <li>Chất lượng là ưu tiên số 1</li>
+                    <li>Không gian thoải mái, sang trọng</li>
+                    <li>Dịch vụ tận tâm, chu đáo</li>
+                    <li>Giá cả hợp lý, phù hợp túi tiền</li>
+                    <li>Không ngừng đổi mới và sáng tạo</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Our Coffee -->
+        <div class="story-content">
+            <div class="story-image">
+                <img src="https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=800" alt="Our Coffee">
+            </div>
+            <div class="story-text">
+                <h2>CÀ PHÊ CỦA CHÚNG TÔI</h2>
+                <p>
+                    Coffee House sử dụng 100% hạt cà phê Arabica và Robusta nguyên chất từ Tây Nguyên - 
+                    vùng đất nổi tiếng với cà phê chất lượng cao. Mỗi hạt cà phê được tuyển chọn kỹ 
+                    lưỡng, rang xay theo công thức riêng.
+                </p>
+                <p>
+                    Chúng tôi làm việc trực tiếp với nông dân địa phương, đảm bảo nguồn gốc rõ ràng 
+                    và giá trị công bằng cho người trồng cà phê. Điều này không chỉ đảm bảo chất lượng 
+                    mà còn góp phần phát triển bền vững cho cộng đồng.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- VALUES SECTION -->
+    <section class="story-section" style="background: var(--off-white);">
+        <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 20px;">GIÁ TRỊ CỐT LÕI</h2>
+        <p style="text-align: center; max-width: 800px; margin: 0 auto 50px; color: var(--text-light);">
+            Những giá trị mà chúng tôi luôn hướng đến và thực hiện trong mọi hoạt động kinh doanh
+        </p>
+        
+        <div class="values-grid">
+            <div class="value-card">
+                <div class="value-icon">☕</div>
+                <h3>CHẤT LƯỢNG</h3>
+                <p>Cam kết cung cấp sản phẩm và dịch vụ chất lượng cao nhất, không bao giờ thỏa hiệp</p>
+            </div>
+
+            <div class="value-card">
+                <div class="value-icon">💚</div>
+                <h3>TẬN TÂM</h3>
+                <p>Phục vụ khách hàng bằng cả trái tim, luôn lắng nghe và thấu hiểu nhu cầu</p>
+            </div>
+
+            <div class="value-card">
+                <div class="value-icon">🌱</div>
+                <h3>BỀN VỮNG</h3>
+                <p>Cam kết bảo vệ môi trường và phát triển bền vững cùng cộng đồng</p>
+            </div>
+
+            <div class="value-card">
+                <div class="value-icon">✨</div>
+                <h3>SÁNG TẠO</h3>
+                <p>Không ngừng đổi mới, sáng tạo để mang đến trải nghiệm tốt nhất</p>
+            </div>
+
+            <div class="value-card">
+                <div class="value-icon">🤝</div>
+                <h3>TRUNG THỰC</h3>
+                <p>Minh bạch trong mọi hoạt động, xây dựng niềm tin với khách hàng</p>
+            </div>
+
+            <div class="value-card">
+                <div class="value-icon">🎯</div>
+                <h3>TẬN TÂM</h3>
+                <p>Luôn đặt khách hàng làm trung tâm trong mọi quyết định kinh doanh</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- TIMELINE SECTION -->
+    <section class="timeline">
+        <h2>HÀNH TRÌNH PHÁT TRIỂN</h2>
+        
+        <div class="timeline-container">
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <h3>Ý tưởng ra đời</h3>
+                    <p>Những người sáng lập bắt đầu với ý tưởng tạo ra một không gian cà phê khác biệt</p>
+                </div>
+                <div class="timeline-dot">2015</div>
+                <div></div>
+            </div>
+
+            <div class="timeline-item">
+                <div></div>
+                <div class="timeline-dot">2016</div>
+                <div class="timeline-content">
+                    <h3>Cửa hàng đầu tiên</h3>
+                    <p>Khai trương cửa hàng đầu tiên tại trung tâm TP.HCM với 10 bàn ghế</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <h3>Mở rộng quy mô</h3>
+                    <p>Mở thêm 5 chi nhánh mới và đạt 10,000 khách hàng thường xuyên</p>
+                </div>
+                <div class="timeline-dot">2018</div>
+                <div></div>
+            </div>
+
+            <div class="timeline-item">
+                <div></div>
+                <div class="timeline-dot">2020</div>
+                <div class="timeline-content">
+                    <h3>Chuyển đổi số</h3>
+                    <p>Ra mắt ứng dụng đặt hàng online và hệ thống giao hàng tận nơi</p>
+                </div>
+            </div>
+
+            <div class="timeline-item">
+                <div class="timeline-content">
+                    <h3>Hôm nay</h3>
+                    <p>20+ cửa hàng trên toàn quốc, phục vụ hơn 50,000 khách hàng mỗi tháng</p>
+                </div>
+                <div class="timeline-dot">2024</div>
+                <div></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- TEAM SECTION -->
+    <section class="team-section">
+        <h2>ĐỘI NGŨ CỦA CHÚNG TÔI</h2>
+        
+        <div class="team-grid">
+            <div class="team-member">
+                <div class="team-photo">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300" alt="Nguyễn Văn A">
+                </div>
+                <h3>NGUYỄN VĂN A</h3>
+                <p class="role">CEO & Founder</p>
+                <p>Người sáng lập với 15 năm kinh nghiệm trong ngành F&B</p>
+            </div>
+
+            <div class="team-member">
+                <div class="team-photo">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300" alt="Trần Thị B">
+                </div>
+                <h3>TRẦN THỊ B</h3>
+                <p class="role">Head Barista</p>
+                <p>Chuyên gia pha chế với nhiều giải thưởng quốc tế</p>
+            </div>
+
+            <div class="team-member">
+                <div class="team-photo">
+                    <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300" alt="Lê Văn C">
+                </div>
+                <h3>LÊ VĂN C</h3>
+                <p class="role">Operations Manager</p>
+                <p>Đảm bảo vận hành mượt mà tại tất cả các chi nhánh</p>
+            </div>
+
+            <div class="team-member">
+                <div class="team-photo">
+                    <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300" alt="Phạm Thị D">
+                </div>
+                <h3>PHẠM THỊ D</h3>
+                <p class="role">Marketing Director</p>
+                <p>Xây dựng thương hiệu và kết nối với khách hàng</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA SECTION -->
+    <section style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); padding: 80px 5%; text-align: center; color: var(--text-dark);">
+        <h2 style="color: var(--text-dark); margin-bottom: 20px;">HÃY ĐẾN VÀ TRẢI NGHIỆM</h2>
+        <p style="font-size: 1.2rem; margin-bottom: 30px; color: var(--text-dark);">
+            Ghé thăm Coffee House để cảm nhận không khí thân thiện và thưởng thức cà phê tuyệt vời
+        </p>
+        <a href="index.html#location" class="btn" style="background: var(--text-dark); color: var(--white);">Tìm cửa hàng gần nhất</a>
+        <a href="index.html#menu" class="btn btn-secondary" style="margin-left: 15px;">Xem thực đơn</a>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>COFFEE HOUSE</h3>
+                    <p>Mang đến trải nghiệm cà phê tuyệt vời nhất với không gian hiện đại và dịch vụ tận tâm.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-icon">f</a>
+                        <a href="#" class="social-icon">📷</a>
+                        <a href="#" class="social-icon">T</a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>LIÊN KẾT</h3>
+                    <a href="index.html">Trang chủ</a>
+                    <a href="index.html#about">Giới thiệu</a>
+                    <a href="index.html#menu">Thực đơn</a>
+                    <a href="index.html#location">Địa chỉ</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>CHÍNH SÁCH</h3>
+                    <a href="#">Chính sách bảo mật</a>
+                    <a href="#">Điều khoản sử dụng</a>
+                    <a href="#">Chính sách đổi trả</a>
+                    <a href="#">Hướng dẫn đặt hàng</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>LIÊN HỆ</h3>
+                    <p>📍 123 Nguyễn Huệ, Q.1, TP.HCM</p>
+                    <p>📞 1900 8888</p>
+                    <p>✉️ info@coffeehouse.vn</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Coffee House. All Rights Reserved. Made with ❤️ in Vietnam</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT -->
+    <script src="script.js"></script>
+</body>
+</html>

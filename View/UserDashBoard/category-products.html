@@ -1,0 +1,268 @@
+<!-- ===================================
+     FILE: category-products.html
+     MÔ TẢ: Trang hiển thị sản phẩm theo danh mục
+     =================================== -->
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Danh sách sản phẩm - Coffee House">
+    <title>Sản phẩm - Coffee House</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Category Products Page Styles */
+        .category-hero {
+            margin-top: 80px;
+            height: 50vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+                        url('https://images.unsplash.com/photo-1447933601403-0c6688de566e?w=1200') center/cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            position: relative;
+        }
+
+        .category-hero.tea {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                        url('https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=1200') center/cover;
+        }
+
+        .category-hero.snack {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                        url('https://images.unsplash.com/photo-1599490659213-e2b9527bd087?w=1200') center/cover;
+        }
+
+        .category-hero-content {
+            text-align: center;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+
+        .category-hero h1 {
+            font-size: 4rem;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
+            margin-bottom: 15px;
+        }
+
+        .category-hero p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .products-container {
+            padding: 80px 5%;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .breadcrumb {
+            margin-bottom: 40px;
+            font-size: 0.95rem;
+        }
+
+        .breadcrumb a {
+            color: var(--text-light);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb a:hover {
+            color: var(--primary-color);
+        }
+
+        .breadcrumb span {
+            color: var(--text-light);
+            margin: 0 10px;
+        }
+
+        .products-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+
+        .products-count {
+            color: var(--text-light);
+            font-size: 1rem;
+        }
+
+        .sort-filter {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .sort-select {
+            padding: 10px 20px;
+            border: 2px solid #E0E0E0;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            background-color: var(--white);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sort-select:hover {
+            border-color: var(--primary-color);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        @media (max-width: 1200px) {
+            .products-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .category-hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .products-header {
+                flex-direction: column;
+                gap: 20px;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER & NAVIGATION -->
+    <header>
+        <nav>
+            <a href="index.html" class="logo">COFFEE HOUSE</a>
+            
+            <ul class="nav-menu">
+                <li><a href="index.html">Trang chủ</a></li>
+                <li><a href="index.html#about">Giới thiệu</a></li>
+                <li><a href="menu.html" class="active">Thực đơn</a></li>
+                <li><a href="index.html#location">Địa chỉ</a></li>
+                <li><a href="about.html">Về chúng tôi</a></li>
+            </ul>
+            
+            <div class="auth-buttons">
+                <a href="../Auth/Login/login.html" class="btn-login">Đăng nhập</a>
+                <a href="../Auth/Register/register.html" class="btn-register">Đăng ký</a>
+            </div>
+            
+            <div class="cart-icon">
+                🛒
+                <span class="cart-count">0</span>
+            </div>
+            
+            <!-- Mobile Menu Toggle -->
+            <div class="menu-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <!-- CATEGORY HERO -->
+    <section class="category-hero" id="category-hero">
+        <div class="category-hero-content">
+            <h1 id="category-title">CÀ PHÊ</h1>
+            <p id="category-description">
+                Sự kết hợp hoàn hảo giữa hạt cà phê Robusta & Arabica thượng hạng
+            </p>
+        </div>
+    </section>
+
+    <!-- PRODUCTS SECTION -->
+    <section class="products-container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="index.html">Trang chủ</a>
+            <span>›</span>
+            <a href="menu.html">Thực đơn</a>
+            <span>›</span>
+            <strong id="breadcrumb-category">Cà phê</strong>
+        </div>
+
+        <!-- Products Header -->
+        <div class="products-header">
+            <div>
+                <h2 id="products-title" style="color: var(--primary-color); margin-bottom: 10px;">CÀ PHÊ</h2>
+                <p class="products-count"><span id="products-count">9</span> sản phẩm</p>
+            </div>
+            <div class="sort-filter">
+                <select class="sort-select" id="sort-select" onchange="sortProducts()">
+                    <option value="default">Mặc định</option>
+                    <option value="price-asc">Giá: Thấp đến Cao</option>
+                    <option value="price-desc">Giá: Cao đến Thấp</option>
+                    <option value="name-asc">Tên: A-Z</option>
+                    <option value="name-desc">Tên: Z-A</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="products-grid" id="products-grid">
+            <!-- Products will be loaded here by JavaScript -->
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>COFFEE HOUSE</h3>
+                    <p>Mang đến trải nghiệm cà phê tuyệt vời nhất với không gian hiện đại và dịch vụ tận tâm.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-icon">f</a>
+                        <a href="#" class="social-icon">📷</a>
+                        <a href="#" class="social-icon">T</a>
+                    </div>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>LIÊN KẾT</h3>
+                    <a href="index.html">Trang chủ</a>
+                    <a href="index.html#about">Giới thiệu</a>
+                    <a href="menu.html">Thực đơn</a>
+                    <a href="index.html#location">Địa chỉ</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>CHÍNH SÁCH</h3>
+                    <a href="#">Chính sách bảo mật</a>
+                    <a href="#">Điều khoản sử dụng</a>
+                    <a href="#">Chính sách đổi trả</a>
+                    <a href="#">Hướng dẫn đặt hàng</a>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>LIÊN HỆ</h3>
+                    <p>📍 123 Nguyễn Huệ, Q.1, TP.HCM</p>
+                    <p>📞 1900 8888</p>
+                    <p>✉️ info@coffeehouse.vn</p>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2024 Coffee House. All Rights Reserved. Made with ❤️ in Vietnam</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT -->
+    <script src="script.js"></script>
+    <script src="category-products.js"></script>
+</body>
+</html>

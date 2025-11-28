@@ -46,8 +46,50 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        if (password.length < 6) {
-            showAlert('Mật khẩu phải có ít nhất 6 ký tự', 'error');
+        
+        // ==================== HARD-CODED CREDENTIALS ====================
+        // Danh sách tài khoản hard-coded
+        const accounts = {
+            admin: {
+                username: 'admin',
+                password: 'admin',
+                role: 'admin',
+                dashboard: '../../AdminDashBoard/admin.html'
+            },
+            employee: {
+                username: 'employee',
+                password: 'employee',
+                role: 'employee',
+                dashboard: '../../EmployeeDashBoard/staff.html'
+            },
+            shipper: {
+                username: 'shipper',
+                password: 'shipper123',
+                role: 'shipper',
+                dashboard: '../../ShipperDashBoard/test.html'
+            },
+            user: {
+                username: 'user',
+                password: 'user123',
+                role: 'user',
+                dashboard: '../../UserDashBoard/index.html'
+            }
+        };
+
+        // Kiểm tra tài khoản
+        let foundAccount = null;
+        for (let key in accounts) {
+            if (accounts[key].username === username && accounts[key].password === password) {
+                foundAccount = accounts[key];
+                break;
+            }
+        }
+
+        // Nếu tài khoản không đúng
+        if (!foundAccount) {
+            showAlert('Tên đăng nhập hoặc mật khẩu không chính xác!', 'error');
+            passwordInput.value = ''; // Xóa mật khẩu
+            passwordInput.focus();
             return;
         }
 
@@ -58,13 +100,23 @@ document.addEventListener('DOMContentLoaded', function() {
             clearSavedCredentials();
         }
 
-        // Hiển thị thông báo thành công
-        showAlert('Đăng nhập thành công! Đang chuyển hướng...', 'success');
+        // Lưu thông tin user vào localStorage
+        localStorage.setItem('currentUser', JSON.stringify({
+            username: foundAccount.username,
+            role: foundAccount.role
+        }));
 
-        // Giả lập đăng nhập (thay bằng API call thực tế)
+        // Hiển thị thông báo thành công
+        showAlert(`Đăng nhập thành công với vai trò ${foundAccount.role.toUpperCase()}! Đang chuyển hướng...`, 'success');
+
+        // Chuyển hướng đến dashboard tương ứng
         setTimeout(() => {
-            console.log('Login Data:', { username, password, remember });
-            // window.location.href = '/dashboard'; // Chuyển hướng sau khi đăng nhập
+            console.log('Login Data:', { 
+                username: foundAccount.username, 
+                role: foundAccount.role,
+                dashboard: foundAccount.dashboard
+            });
+            window.location.href = foundAccount.dashboard;
         }, 1500);
     }
 

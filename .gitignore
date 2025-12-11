@@ -1,0 +1,38 @@
+# .gitignore cho COFFEE_PHP Project
+
+# Environment files - QUAN TRỌNG: Không commit credentials!
+.env
+.env.local
+.env.*.local
+
+# IDE và Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+error.log
+access.log
+
+# Temporary files
+tmp/
+temp/
+cache/
+
+# Vendor (nếu dùng Composer sau này)
+/vendor/
+
+# Node modules (nếu có frontend build)
+node_modules/
+
+# Upload files (tùy theo business logic)
+# uploads/
+# public/uploads/

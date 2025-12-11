@@ -1,8 +1,8 @@
 <?php
 namespace web\Services;
 
+use web\Models\UserEntity;
 use web\Repositories\UserRepository;
-use web\Models\Entity\UserEntity;
 
 class UserService {
 

@@ -5,7 +5,7 @@
  * TABLE: promotions
  * AUTHOR: Coffee House System
  */
-namespace web\Models\Entity;
+namespace web\Models;
 class PromotionEntity {
     // Properties từ bảng promotions
     public $id;

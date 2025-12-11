@@ -5,7 +5,7 @@
  * TABLE: orders
  * AUTHOR: Coffee House System
  */
-namespace web\Models\Entity;
+namespace web\Models;
 class OrderEntity {
     // Properties từ bảng orders
     public $id;

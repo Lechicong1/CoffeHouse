@@ -5,7 +5,7 @@
  * TABLE: reviews
  * AUTHOR: Coffee House System
  */
-namespace web\Models\Entity;
+namespace web\Models;
 class ReviewEntity {
     // Properties từ bảng reviews
     public $id;

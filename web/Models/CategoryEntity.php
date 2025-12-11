@@ -5,7 +5,7 @@
  * TABLE: categories
  * AUTHOR: Coffee House System
  */
-namespace web\Models\Entity;
+namespace web\Models;
 class CategoryEntity {
     // Properties từ bảng categories
     public $id;

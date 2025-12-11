@@ -5,7 +5,7 @@
  * TABLE: product_sizes
  * AUTHOR: Coffee House System
  */
-namespace web\Models\Entity;
+namespace web\Models;
 class ProductSizeEntity {
     // Properties từ bảng product_sizes
     public $id;

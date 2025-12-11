@@ -5,7 +5,7 @@
  * TABLE: payments
  * AUTHOR: Coffee House System
  */
-namespace web\Models\Entity;
+namespace web\Models;
 class PaymentEntity {
     // Properties từ bảng payments
     public $id;

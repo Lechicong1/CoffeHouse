@@ -64,9 +64,9 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             shipper: {
                 username: 'shipper',
-                password: 'shipper123',
+                password: 'shipper',
                 role: 'shipper',
-                dashboard: '../../ShipperDashBoard/test.html'
+                dashboard: '../../ShipperDashBoard/shipperdemo.html'
             },
             user: {
                 username: 'user',

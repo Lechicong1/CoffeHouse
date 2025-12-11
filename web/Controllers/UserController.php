@@ -51,9 +51,13 @@ class UserController extends Controller {
                 return;
             }
             
-            $this->service->register($_POST);
-            header("Location: /users");
-            exit;
+            $result = $this->service->register($_POST);
+            if ($result) {
+                // Redirect về login hoặc homepage
+                $baseUrl = dirname($_SERVER['SCRIPT_NAME']);
+                header("Location: $baseUrl/../web/Views/Auth/Login/login.html");
+                exit;
+            }
         } catch (\Exception $e) {
             http_response_code(400);
             echo "Registration failed: " . $e->getMessage();

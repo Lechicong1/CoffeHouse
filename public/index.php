@@ -13,6 +13,18 @@ use Config\Router;
 
 $router = new Router();
 
+// Home routes
 $router->get("/", "HomeController@index");
+$router->get("/index.php", "HomeController@index");
+
+// Auth routes
+$router->get("/login", "AuthController@showLoginPage");
+$router->post("/api/login", "AuthController@handleLogin");
+$router->get("/logout", "AuthController@logout");
+$router->get("/api/check-auth", "AuthController@checkAuth");
+
+// User routes (cần authentication)
+$router->get("/users", "UserController@index");
+$router->get("/users/{id}", "UserController@detail");
 
 $router->dispatch();

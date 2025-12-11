@@ -7,22 +7,37 @@ use PDOException;
 class Database {
     private static $conn = null;
 
-    private static $host = "localhost";
-    private static $db_name = "coffee_php";
-    private static $username = "root";
-    private static $password = "742005";
+    // Sử dụng getenv() để đọc từ environment variables (tốt hơn hardcode)
+    private static $host;
+    private static $db_name;
+    private static $username;
+    private static $password;
+    
+    private static function loadConfig() {
+        // Đọc từ $_ENV hoặc dùng default values
+        self::$host = $_ENV['DB_HOST'] ?? 'localhost';
+        self::$db_name = $_ENV['DB_NAME'] ?? 'coffee_php';
+        self::$username = $_ENV['DB_USER'] ?? 'root';
+        self::$password = $_ENV['DB_PASS'] ?? '742005';
+    }
 
     public static function connect() {
         if (self::$conn === null) {
+            self::loadConfig();
+            
             try {
+                $dsn = "mysql:host=" . self::$host . ";dbname=" . self::$db_name . ";charset=utf8mb4";
                 self::$conn = new PDO(
-                    "mysql:host=" . self::$host . ";dbname=" . self::$db_name,
+                    $dsn,
                     self::$username,
-                    self::$password
+                    self::$password,
+                    [
+                        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                        PDO::ATTR_EMULATE_PREPARES => false,
+                        PDO::ATTR_PERSISTENT => false
+                    ]
                 );
-
-                self::$conn->exec("SET NAMES utf8");
-                self::$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
             } catch (PDOException $e) {
                 die("Database connection error: " . $e->getMessage());

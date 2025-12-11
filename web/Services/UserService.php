@@ -45,7 +45,7 @@ class UserService {
         }
         
         $user = new UserEntity();
-        $user->username = $data["username"];
+        $user->username = trim($data["username"]); // Trim whitespace
         $user->password_hash = password_hash($data["password"], PASSWORD_BCRYPT);
         $user->full_name = $data["full_name"] ?? null;
         $user->email = $data["email"] ?? null;

@@ -26,7 +26,21 @@ class Router {
 
     public function dispatch() {
         $method = $_SERVER['REQUEST_METHOD'];
-        $path = strtok($_SERVER['REQUEST_URI'], '?');
+        
+        // Kiểm tra nếu có query parameter 'url'
+        if (isset($_GET['url'])) {
+            $path = '/' . trim($_GET['url'], '/');
+        } else {
+            $uri = strtok($_SERVER['REQUEST_URI'], '?');
+            
+            // Loại bỏ /COFFEE_PHP/public khỏi URI để lấy path thực
+            $scriptName = dirname($_SERVER['SCRIPT_NAME']);
+            $path = str_replace($scriptName, '', $uri);
+            $path = $path ?: '/';
+        }
+        
+        // Sanitize path - chống path traversal
+        $path = preg_replace('#/+#', '/', $path); // Loại bỏ // duplicate slashes
         
         // Xử lý route với parameters {id}
         foreach ($this->routes[$method] ?? [] as $route => $action) {
@@ -41,7 +55,8 @@ class Router {
                 
                 if (!class_exists($controllerClass)) {
                     http_response_code(500);
-                    echo "Controller not found: $controllerClass";
+                    header('Content-Type: application/json');
+                    echo json_encode(['error' => 'Internal server error']);
                     return;
                 }
                 
@@ -49,7 +64,8 @@ class Router {
                 
                 if (!method_exists($controllerObj, $methodName)) {
                     http_response_code(500);
-                    echo "Method not found: $methodName";
+                    header('Content-Type: application/json');
+                    echo json_encode(['error' => 'Internal server error']);
                     return;
                 }
                 
@@ -59,6 +75,7 @@ class Router {
         }
 
         http_response_code(404);
-        echo "404 Not Found";
+        header('Content-Type: application/json');
+        echo json_encode(['error' => 'Route not found']);
     }
 }

@@ -1,13 +1,19 @@
 <?php
-
-class OrderItem {
+/**
+ * FILE: CartItemEntity.php
+ * DESCRIPTION: Entity CartItem - Chứa properties từ bảng cart_items
+ * TABLE: cart_items
+ * AUTHOR: Coffee House System
+ */
+namespace web\Models\Entity;
+class CartItemEntity {
+    // Properties từ bảng cart_items
     public $id;
-    public $order_id;
+    public $user_id;
     public $product_id;
     public $size_id;
     public $quantity;
-    public $price_at_purchase;
-    public $note;
+    public $created_at;
 
     /**
      * Constructor - Khởi tạo entity rỗng hoặc từ array
@@ -16,12 +22,11 @@ class OrderItem {
     public function __construct($data = []) {
         if (!empty($data)) {
             $this->id = $data['id'] ?? null;
-            $this->order_id = $data['order_id'] ?? null;
+            $this->user_id = $data['user_id'] ?? null;
             $this->product_id = $data['product_id'] ?? null;
             $this->size_id = $data['size_id'] ?? null;
             $this->quantity = $data['quantity'] ?? 1;
-            $this->price_at_purchase = $data['price_at_purchase'] ?? 0;
-            $this->note = $data['note'] ?? null;
+            $this->created_at = $data['created_at'] ?? null;
         }
     }
 }

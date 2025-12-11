@@ -1,6 +1,13 @@
 <?php
-
-class Product {
+/**
+ * FILE: ProductEntity.php
+ * DESCRIPTION: Entity Product - Chứa properties từ bảng products
+ * TABLE: products
+ * AUTHOR: Coffee House System
+ */
+namespace web\Models\Entity;
+class ProductEntity {
+    // Properties từ bảng products
     public $id;
     public $category_id;
     public $name;
@@ -8,7 +15,6 @@ class Product {
     public $base_price;
     public $image_url;
     public $is_active;
-
 
     /**
      * Constructor - Khởi tạo entity rỗng hoặc từ array
@@ -22,7 +28,7 @@ class Product {
             $this->description = $data['description'] ?? null;
             $this->base_price = $data['base_price'] ?? null;
             $this->image_url = $data['image_url'] ?? null;
-            $this->is_active = $data['is_active'] ?? 1;
+            $this->is_active = $data['is_active'] ?? true;
         }
     }
 }

@@ -1,36 +1,34 @@
 <?php
-/**
- * FILE: Database.php
- * DESCRIPTION: Kết nối cơ sở dữ liệu MySQL
- * AUTHOR: Coffee House System
- */
+namespace Config;
+
+use PDO;
+use PDOException;
 
 class Database {
-    private $host = "localhost";        // Host database
-    private $db_name = "coffee_php"; // Tên database
-    private $username = "root";          // Username MySQL
-    private $password = "742005";              // Password MySQL
-    private $conn;
+    private static $conn = null;
 
-    /**
-     * Kết nối database
-     */
-    public function getConnection() {
-        $this->conn = null;
+    private static $host = "localhost";
+    private static $db_name = "coffee_php";
+    private static $username = "root";
+    private static $password = "742005";
 
-        try {
-            $this->conn = new PDO(
-                "mysql:host=" . $this->host . ";dbname=" . $this->db_name,
-                $this->username,
-                $this->password
-            );
-            $this->conn->exec("set names utf8");
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch(PDOException $exception) {
-            echo "Connection error: " . $exception->getMessage();
+    public static function connect() {
+        if (self::$conn === null) {
+            try {
+                self::$conn = new PDO(
+                    "mysql:host=" . self::$host . ";dbname=" . self::$db_name,
+                    self::$username,
+                    self::$password
+                );
+
+                self::$conn->exec("SET NAMES utf8");
+                self::$conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+            } catch (PDOException $e) {
+                die("Database connection error: " . $e->getMessage());
+            }
         }
 
-        return $this->conn;
+        return self::$conn;
     }
 }
-?>

@@ -1,6 +1,13 @@
 <?php
-
-class ProductSize {
+/**
+ * FILE: ProductSizeEntity.php
+ * DESCRIPTION: Entity ProductSize - Chứa properties từ bảng product_sizes
+ * TABLE: product_sizes
+ * AUTHOR: Coffee House System
+ */
+namespace web\Models\Entity;
+class ProductSizeEntity {
+    // Properties từ bảng product_sizes
     public $id;
     public $product_id;
     public $size_name;

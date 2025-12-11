@@ -1,6 +1,13 @@
 <?php
-
-class Category {
+/**
+ * FILE: CategoryEntity.php
+ * DESCRIPTION: Entity Category - Chứa properties từ bảng categories
+ * TABLE: categories
+ * AUTHOR: Coffee House System
+ */
+namespace web\Models\Entity;
+class CategoryEntity {
+    // Properties từ bảng categories
     public $id;
     public $name;
     public $description;

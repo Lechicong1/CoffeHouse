@@ -1,16 +1,18 @@
 <?php
-namespace web\Repositories;
-
-use Config\Database;
-use PDO;
-use web\Models\UserEntity;
-
+/**
+ * UserRepository - Xử lý truy vấn database cho bảng users
+ */
 class UserRepository {
 
     private $conn;
 
     public function __construct() {
-        $this->conn = Database::connect();
+        // Include Database và UserEntity
+        require_once './Config/Database.php';
+        require_once './web/Models/UserEntity.php';
+
+        $db = new Database();
+        $this->conn = $db->getConnection();
     }
 
     /**
@@ -19,16 +21,15 @@ class UserRepository {
     public function findAll() {
         try {
             $sql = "SELECT * FROM users ORDER BY id DESC";
-            $stmt = $this->conn->prepare($sql);
-            $stmt->execute();
+            $result = mysqli_query($this->conn, $sql);
 
             $list = [];
-            while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            while ($row = mysqli_fetch_assoc($result)) {
                 $list[] = new UserEntity($row);
             }
             return $list;
-        } catch (\PDOException $e) {
-            throw new \Exception("Database error in findAll: " . $e->getMessage());
+        } catch (Exception $e) {
+            throw new Exception("Database error in findAll: " . $e->getMessage());
         }
     }
 

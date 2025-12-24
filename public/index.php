@@ -1,30 +1,17 @@
 <?php
-// Autoloader cho các class theo namespace
-spl_autoload_register(function ($class) {
-    $class = str_replace('\\', '/', $class);
-    $file = __DIR__ . '/../' . $class . '.php';
-    
-    if (file_exists($file)) {
-        require_once $file;
-    }
-});
+/**
+ * Entry Point - Điểm vào chính của ứng dụng
+ * File này sẽ được Apache/Nginx gọi đầu tiên
+ */
 
-use Config\Router;
+// Bật hiển thị lỗi (chỉ dùng khi Development)
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-$router = new Router();
+// Include các file Config cần thiết
+require_once __DIR__ . '/../Config/Database.php';
+require_once __DIR__ . '/../Config/Controller.php';
+require_once __DIR__ . '/../Config/Router.php';
 
-// Home routes
-$router->get("/", "HomeController@index");
-$router->get("/index.php", "HomeController@index");
-
-// Auth routes
-$router->get("/login", "AuthController@showLoginPage");
-$router->post("/api/login", "AuthController@handleLogin");
-$router->get("/logout", "AuthController@logout");
-$router->get("/api/check-auth", "AuthController@checkAuth");
-
-// User routes (cần authentication)
-$router->get("/users", "UserController@index");
-$router->get("/users/{id}", "UserController@detail");
-
-$router->dispatch();
+// Khởi tạo Router - Router sẽ tự động xử lý URL và gọi Controller
+$app = new Router();

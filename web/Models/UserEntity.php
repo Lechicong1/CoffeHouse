@@ -5,7 +5,6 @@
  * TABLE: users
  * AUTHOR: Coffee House System
  */
-namespace web\Models;
 
 class UserEntity {
     // Properties từ bảng users

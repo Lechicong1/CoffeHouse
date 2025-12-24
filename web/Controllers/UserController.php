@@ -1,14 +1,14 @@
 <?php
-namespace web\Controllers;
-
-use Config\Controller;
-use web\Services\UserService;
-
+/**
+ * UserController - Xử lý các thao tác liên quan đến User
+ */
 class UserController extends Controller {
 
     private $service;
 
     public function __construct() {
+        // Include Service cần thiết
+        require_once './web/Services/UserService.php';
         $this->service = new UserService();
     }
 

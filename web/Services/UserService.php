@@ -1,14 +1,15 @@
 <?php
-namespace web\Services;
-
-use web\Models\UserEntity;
-use web\Repositories\UserRepository;
-
+/**
+ * UserService - Xử lý logic nghiệp vụ về User
+ */
 class UserService {
 
     private $repo;
 
     public function __construct() {
+        // Include Repository và Entity cần thiết
+        require_once './web/Repositories/UserRepository.php';
+        require_once './web/Models/UserEntity.php';
         $this->repo = new UserRepository();
     }
 

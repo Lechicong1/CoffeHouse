@@ -54,11 +54,13 @@ class AdminController extends Controller
 
     /**
      * Hiển thị trang quản lý nhân viên
+     * Redirect sang EmployeeController để xử lý (theo đúng nguyên tắc MVC)
      */
     public function employees()
     {
-        $_GET['section'] = 'employees';
-        $this->renderAdminView();
+        // Chuyển toàn bộ xử lý sang EmployeeController
+        header('Location: ?url=Employee/Get_data');
+        exit;
     }
 
     /**

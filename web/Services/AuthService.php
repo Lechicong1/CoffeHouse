@@ -1,13 +1,14 @@
 <?php
-namespace web\Services;
-
-use web\Repositories\UserRepository;
-
+/**
+ * AuthService - Xử lý logic nghiệp vụ về xác thực
+ */
 class AuthService {
 
     private $userRepo;
 
     public function __construct() {
+        // Include Repository cần thiết
+        require_once './web/Repositories/UserRepository.php';
         $this->userRepo = new UserRepository();
         
         // Khởi động session nếu chưa có

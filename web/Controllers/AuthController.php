@@ -1,9 +1,7 @@
 <?php
-namespace web\Controllers;
-
-use Config\Controller;
-use web\Services\AuthService;
-
+/**
+ * AuthController - Xử lý xác thực người dùng
+ */
 class AuthController extends Controller {
 
     private $authService;
@@ -13,6 +11,8 @@ class AuthController extends Controller {
     private const LOGIN_PATH = '/COFFEE_PHP/public/views/Auth/Login/login.html';
 
     public function __construct() {
+        // Include Service cần thiết
+        require_once './web/Services/AuthService.php';
         $this->authService = new AuthService();
     }
 

@@ -1,81 +1,68 @@
 <?php
-namespace Config;
-
+/**
+ * Class Router - Điều hướng request trong MVC
+ * Xử lý URL và gọi Controller -> Action tương ứng
+ */
 class Router {
-    private $routes = [];
+    protected $controller = "HomeController";  // Controller mặc định
+    protected $action = "index";                // Action mặc định
+    protected $params = [];                     // Mảng parameters
 
-    public function get($path, $action) {
-        $this->addRoute('GET', $path, $action);
-    }
-    
-    public function post($path, $action) {
-        $this->addRoute('POST', $path, $action);
-    }
-    
-    public function put($path, $action) {
-        $this->addRoute('PUT', $path, $action);
-    }
-    
-    public function delete($path, $action) {
-        $this->addRoute('DELETE', $path, $action);
-    }
-    
-    private function addRoute($method, $path, $action) {
-        $this->routes[$method][$path] = $action;
-    }
+    /**
+     * Constructor - Khởi tạo và xử lý routing
+     */
+    public function __construct() {
+        $arr = $this->processURL();
 
-    public function dispatch() {
-        $method = $_SERVER['REQUEST_METHOD'];
-        
-        // Kiểm tra nếu có query parameter 'url'
-        if (isset($_GET['url'])) {
-            $path = '/' . trim($_GET['url'], '/');
-        } else {
-            $uri = strtok($_SERVER['REQUEST_URI'], '?');
-            
-            // Loại bỏ /COFFEE_PHP/public khỏi URI để lấy path thực
-            $scriptName = dirname($_SERVER['SCRIPT_NAME']);
-            $path = str_replace($scriptName, '', $uri);
-            $path = $path ?: '/';
-        }
-        
-        // Sanitize path - chống path traversal
-        $path = preg_replace('#/+#', '/', $path); // Loại bỏ // duplicate slashes
-        
-        // Xử lý route với parameters {id}
-        foreach ($this->routes[$method] ?? [] as $route => $action) {
-            $pattern = preg_replace('/\{[a-zA-Z0-9_]+\}/', '([a-zA-Z0-9_]+)', $route);
-            $pattern = '#^' . $pattern . '$#';
-            
-            if (preg_match($pattern, $path, $matches)) {
-                array_shift($matches); // Bỏ full match
-                
-                list($controller, $methodName) = explode("@", $action);
-                $controllerClass = "web\\Controllers\\$controller";
-                
-                if (!class_exists($controllerClass)) {
-                    http_response_code(500);
-                    header('Content-Type: application/json');
-                    echo json_encode(['error' => 'Internal server error']);
-                    return;
-                }
-                
-                $controllerObj = new $controllerClass;
-                
-                if (!method_exists($controllerObj, $methodName)) {
-                    http_response_code(500);
-                    header('Content-Type: application/json');
-                    echo json_encode(['error' => 'Internal server error']);
-                    return;
-                }
-                
-                call_user_func_array([$controllerObj, $methodName], $matches);
-                return;
+        // ===== XỬ LÝ CONTROLLER =====
+        if ($arr != null) {
+            // Kiểm tra file Controller có tồn tại không
+            if (file_exists('./web/Controllers/' . $arr[0] . '.php')) {
+                $this->controller = $arr[0];
+                unset($arr[0]);
             }
         }
 
-        http_response_code(404);
-        header('Content-Type: application/json');
-        echo json_encode(['error' => 'Route not found']);
+        // Include Controller file
+        require_once './web/Controllers/' . $this->controller . '.php';
+        $this->controller = new $this->controller;
+
+        // ===== XỬ LÝ ACTION (METHOD) =====
+        if (isset($arr[1])) {
+            // Kiểm tra method có tồn tại trong Controller không
+            if (method_exists($this->controller, $arr[1])) {
+                $this->action = $arr[1];
+                unset($arr[1]);
+            }
+        }
+
+        // ===== XỬ LÝ PARAMETERS =====
+        $this->params = $arr ? array_values($arr) : [];
+
+        // ===== GỌI CONTROLLER -> ACTION VỚI PARAMS =====
+        // Tương đương: $controller->action($param1, $param2, ...)
+        call_user_func_array([$this->controller, $this->action], $this->params);
+    }
+
+    /**
+     * Xử lý URL từ $_GET['url']
+     * @return array|null - Mảng các phần tử URL hoặc null
+     *
+     * VD: URL = "User/profile/123"
+     *     => ['User', 'profile', '123']
+     */
+    private function processURL() {
+        if (isset($_GET['url'])) {
+            // Loại bỏ khoảng trắng đầu/cuối và dấu /
+            $url = trim($_GET['url'], '/');
+
+            // Lọc URL để bảo mật (xóa các ký tự nguy hiểm)
+            $url = filter_var($url, FILTER_SANITIZE_URL);
+
+            // Tách URL thành mảng theo dấu /
+            return explode('/', $url);
+        }
+
+        return null;
     }
 }

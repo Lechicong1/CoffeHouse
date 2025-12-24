@@ -1,14 +1,28 @@
 <?php
-namespace web\Controllers;
-
-use Config\Controller;
-
+/**
+ * HomeController - Xử lý trang chủ
+ */
 class HomeController extends Controller {
 
+    /**
+     * Action mặc định - Hiển thị trang chủ
+     */
     public function index() {
-        // Redirect về file HTML tĩnh để CSS/JS load đúng
-        $baseUrl = dirname($_SERVER['SCRIPT_NAME']);
-        header("Location: $baseUrl/../web/Views/UserDashBoard/index.html");
-        exit;
+        // Hiển thị trang chủ (index.html trong UserDashBoard)
+        $this->view('UserDashBoard/index.html');
+    }
+
+    /**
+     * Hiển thị trang menu
+     */
+    public function menu() {
+        $this->view('UserDashBoard/menu.html');
+    }
+
+    /**
+     * Hiển thị trang about
+     */
+    public function about() {
+        $this->view('UserDashBoard/about.html');
     }
 }

@@ -1,6 +1,13 @@
 <?php
-
-class CartItem {
+/**
+ * FILE: CartItemEntity.php
+ * DESCRIPTION: Entity CartItem - Chứa properties từ bảng cart_items
+ * TABLE: cart_items
+ * AUTHOR: Coffee House System
+ */
+namespace web\Models;
+class CartItemEntity {
+    // Properties từ bảng cart_items
     public $id;
     public $user_id;
     public $product_id;

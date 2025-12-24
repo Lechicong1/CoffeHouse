@@ -1,6 +1,13 @@
 <?php
-
-class OrderItem {
+/**
+ * FILE: OrderItemEntity.php
+ * DESCRIPTION: Entity OrderItem - Chứa properties từ bảng order_items
+ * TABLE: order_items
+ * AUTHOR: Coffee House System
+ */
+namespace web\Models;
+class OrderItemEntity {
+    // Properties từ bảng order_items
     public $id;
     public $order_id;
     public $product_id;
@@ -20,7 +27,7 @@ class OrderItem {
             $this->product_id = $data['product_id'] ?? null;
             $this->size_id = $data['size_id'] ?? null;
             $this->quantity = $data['quantity'] ?? 1;
-            $this->price_at_purchase = $data['price_at_purchase'] ?? 0;
+            $this->price_at_purchase = $data['price_at_purchase'] ?? null;
             $this->note = $data['note'] ?? null;
         }
     }

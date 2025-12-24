@@ -1,11 +1,18 @@
 <?php
-
-class Review {
+/**
+ * FILE: ReviewEntity.php
+ * DESCRIPTION: Entity Review - Chứa properties từ bảng reviews
+ * TABLE: reviews
+ * AUTHOR: Coffee House System
+ */
+namespace web\Models;
+class ReviewEntity {
+    // Properties từ bảng reviews
     public $id;
     public $user_id;
     public $product_id;
     public $order_id;
-    public $rating; // 1-5 stars
+    public $rating; // 1 to 5 stars
     public $comment;
     public $created_at;
 

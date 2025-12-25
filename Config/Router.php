@@ -16,9 +16,15 @@ class Router {
 
         // ===== XỬ LÝ CONTROLLER =====
         if ($arr != null) {
+            // Tự động thêm "Controller" vào tên nếu chưa có
+            $controllerName = $arr[0];
+            if (!str_ends_with($controllerName, 'Controller')) {
+                $controllerName .= 'Controller';
+            }
+            
             // Kiểm tra file Controller có tồn tại không
-            if (file_exists('./web/Controllers/' . $arr[0] . '.php')) {
-                $this->controller = $arr[0];
+            if (file_exists('./web/Controllers/' . $controllerName . '.php')) {
+                $this->controller = $controllerName;
                 unset($arr[0]);
             }
         }

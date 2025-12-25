@@ -9,44 +9,37 @@ $menuItems = [
     [
         'icon' => '📊',
         'text' => 'Tổng quan',
+        'url' => '/web/Views/AdminDashBoard/dashboard.php', // Trang tĩnh hoặc trang chủ
         'target' => 'dashboard',
         'description' => 'Xem tổng quan hệ thống'
     ],
     [
         'icon' => '🛍️',
         'text' => 'Đơn hàng',
+        'url' => '?url=Order',
         'target' => 'orders',
         'description' => 'Quản lý đơn hàng'
     ],
     [
         'icon' => '☕',
         'text' => 'Sản phẩm',
+        'url' => '?url=Product',
         'target' => 'products',
         'description' => 'Quản lý sản phẩm'
     ],
     [
         'icon' => '👥',
         'text' => 'Khách hàng',
+        'url' => '?url=Customer',
         'target' => 'customers',
         'description' => 'Quản lý khách hàng'
     ],
     [
         'icon' => '👔',
         'text' => 'Nhân viên',
+        'url' => '?url=Employee',
         'target' => 'employees',
         'description' => 'Quản lý nhân viên'
-    ],
-    [
-        'icon' => '📈',
-        'text' => 'Doanh thu',
-        'target' => 'revenue',
-        'description' => 'Thống kê doanh thu'
-    ],
-    [
-        'icon' => '⚙️',
-        'text' => 'Cài đặt',
-        'target' => 'settings',
-        'description' => 'Cài đặt hệ thống'
     ],
 ];
 ?>
@@ -60,7 +53,7 @@ $menuItems = [
         <?php foreach ($menuItems as $item): ?>
             <li class="menu-item <?= ($currentSection === $item['target']) ? 'active' : '' ?>" 
                 data-target="<?= $item['target'] ?>">
-                <a href="?section=<?= $item['target'] ?>" 
+                <a href="<?= $item['url'] ?>"
                    class="menu-link"
                    title="<?= $item['description'] ?>">
                     <span class="icon"><?= $item['icon'] ?></span>

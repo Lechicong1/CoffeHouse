@@ -1,10 +1,12 @@
 <?php
 include_once './web/Entity/EmployeeEntity.php';
 
+use web\Entity\EmployeeEntity;
+
 class EmployeeRepository extends ConnectDatabase {
 
     public function findAll() {
-        $sql = "SELECT * FROM employee ORDER BY created_at DESC";
+        $sql = "SELECT * FROM employee ORDER BY id DESC";
         $result = mysqli_query($this->con, $sql);
 
         $employees = [];

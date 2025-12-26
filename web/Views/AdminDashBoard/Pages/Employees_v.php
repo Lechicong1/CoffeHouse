@@ -75,14 +75,13 @@ $roles = [
                     <th>Email</th>
                     <th>Số điện thoại</th>
                     <th>Lương</th>
-                    <th>Ngày tạo</th>
                     <th>Thao tác</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($employees)): ?>
                     <tr>
-                        <td colspan="9" style="padding: 40px; text-align: center; color: #999;">
+                        <td colspan="8" style="padding: 40px; text-align: center; color: #999;">
                             📭 Không có nhân viên nào!
                         </td>
                     </tr>
@@ -104,9 +103,6 @@ $roles = [
                             <td><?= htmlspecialchars($employee->phonenumber) ?></td>
                             <td style="font-weight: 600; color: #27ae60;">
                                 <?= $employee->getFormattedSalary() ?>
-                            </td>
-                            <td style="color: #666;">
-                                <?= date('d/m/Y', strtotime($employee->created_at)) ?>
                             </td>
                             <td>
                                 <button class="btn-edit" onclick='openEmployeeModal("edit", <?= htmlspecialchars(json_encode($employee->toArray())) ?>)' title="Sửa">

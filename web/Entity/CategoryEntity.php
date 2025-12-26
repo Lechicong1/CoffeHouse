@@ -23,5 +23,16 @@ class CategoryEntity {
             $this->description = $data['description'] ?? null;
         }
     }
+
+    /**
+     * Chuyển entity thành array
+     */
+    public function toArray() {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'description' => $this->description
+        ];
+    }
 }
 ?>

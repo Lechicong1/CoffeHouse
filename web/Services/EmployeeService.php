@@ -2,6 +2,9 @@
 /**
  * EmployeeService - Xử lý logic nghiệp vụ cho Employee
  */
+
+use web\Entity\EmployeeEntity;
+
 class EmployeeService extends Service {
 
     private $employeeRepo;

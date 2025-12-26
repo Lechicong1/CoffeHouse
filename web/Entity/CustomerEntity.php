@@ -41,7 +41,7 @@ class CustomerEntity {
             'phone' => $this->phone,
             'email' => $this->email,
             'points' => $this->points,
-            'status' => $this->status,
+            'status' => $this->status
         ];
     }
 }

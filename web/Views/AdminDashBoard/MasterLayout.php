@@ -71,7 +71,7 @@ $currentSection = $data['section'] ?? 'dashboard';
                         </a>
                     </li>
                     <li class="menu-item <?= $currentSection === 'categories' ? 'active' : '' ?>" data-target="categories">
-                        <a href="?url=Category" class="menu-link">
+                        <a href="http://localhost/COFFEE_PHP/CategoryController" class="menu-link">
                             <span class="menu-icon">🏷️</span>
                             <span class="menu-text">DANH MỤC</span>
                         </a>

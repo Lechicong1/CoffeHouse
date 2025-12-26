@@ -12,6 +12,7 @@ session_start();
 include_once './Config/ConnectDatabase.php';      // Thay ./MVC/Core/connectDB.php
 include_once './Config/Controller.php';    // Thay ./MVC/Core/controller.php
 include_once './Config/Router.php';        // Thay ./MVC/Core/app.php
+include  './Config/Service.php';       // Thay ./MVC/Core/service.php
 
 include_once './web/brigde.php';
 

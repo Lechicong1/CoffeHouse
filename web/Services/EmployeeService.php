@@ -51,8 +51,7 @@ class EmployeeService extends Service {
      * Tạo nhân viên mới
      */
     public function createEmployee($data) {
-        error_log("=== EmployeeService::createEmployee called ===");
-        error_log("Input data: " . print_r($data, true));
+
         
         // Validate dữ liệu
         $this->validateEmployeeData($data);
@@ -64,44 +63,35 @@ class EmployeeService extends Service {
             error_log("✗ Username already exists: " . $data['username']);
             throw new Exception("Username đã tồn tại");
         }
-        error_log("✓ Username is unique");
 
         // Kiểm tra email đã tồn tại chưa
         if (!empty($data['email']) && $this->checkEmailExists($data['email'])) {
             error_log("✗ Email already exists: " . $data['email']);
             throw new Exception("Email đã tồn tại");
         }
-        error_log("✓ Email is unique");
 
         // Tạo entity
         $employee = new EmployeeEntity();
         $employee->username = trim($data['username']);
-        $employee->password = password_hash($data['password'], PASSWORD_DEFAULT);
+        $employee->password = trim($data['password']);
         $employee->fullname = trim($data['fullname']);
         $employee->email = trim($data['email']);
         $employee->phonenumber = trim($data['phonenumber']);
         $employee->address = trim($data['address'] ?? '');
         $employee->roleId = $data['roleId'];
         $employee->luong = $data['luong'];
-        
-        error_log("✓ Entity created: " . print_r($employee, true));
 
         // Lưu vào database
         $result = $this->employeeRepo->create($employee);
-        error_log("Repository create result: " . ($result ? 'TRUE' : 'FALSE'));
         
         if ($result) {
-            error_log("✅ Employee created successfully");
             return ['success' => true, 'message' => 'Tạo nhân viên thành công'];
         } else {
-            error_log("❌ Failed to create employee in database");
             return ['success' => false, 'message' => 'Lỗi khi tạo nhân viên'];
         }
     }
 
-    /**
-     * Cập nhật nhân viên
-     */
+
     public function updateEmployee($id, $data) {
         // Kiểm tra nhân viên có tồn tại không
         $employee = $this->employeeRepo->findById($id);
@@ -177,23 +167,8 @@ class EmployeeService extends Service {
         }
     }
 
-    /**
-     * Lấy thống kê nhân viên
-     */
-    public function getStatistics() {
-        return [
-            'total' => $this->employeeRepo->count(),
-            'manager' => $this->employeeRepo->countByRole(1),
-            'barista' => $this->employeeRepo->countByRole(2),
-            'cashier' => $this->employeeRepo->countByRole(3),
-            'waiter' => $this->employeeRepo->countByRole(4),
-            'cleaner' => $this->employeeRepo->countByRole(5)
-        ];
-    }
 
-    /**
-     * Kiểm tra username đã tồn tại chưa
-     */
+
     public function checkUsernameExists($username) {
         $employee = $this->employeeRepo->findByUsername($username);
         return $employee !== null;

@@ -56,7 +56,7 @@ $roles = [
 
     <!-- Search Bar -->
     <div style="margin-bottom: 24px;">
-        <form method="POST" action="?url=Employee/timkiem" class="search-form">
+        <form method="POST" action="EmployeeController/timkiem" class="search-form">
             <input type="text" name="txtSearch" class="search-input" placeholder="🔍 Tìm kiếm theo tên, email, số điện thoại..." value="<?= htmlspecialchars($keyword) ?>">
             <button type="submit" name="btnTimkiem" class="btn-primary">🔍 Tìm kiếm</button>
         </form>
@@ -107,7 +107,7 @@ $roles = [
                                 <button class="btn-edit" onclick='openEmployeeModal("edit", <?= htmlspecialchars(json_encode($employee->toArray())) ?>)' title="Sửa">
                                     ✏️ Sửa
                                 </button>
-                                <form method="POST" action="?url=Employee/del" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa không?')">
+                                <form method="POST" action="EmployeeController/del" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa không?')">
                                     <input type="hidden" name="txtId" value="<?= $employee->id ?>">
                                     <button type="submit" name="btnXoa" class="btn-delete">🗑️ Xóa</button>
                                 </form>

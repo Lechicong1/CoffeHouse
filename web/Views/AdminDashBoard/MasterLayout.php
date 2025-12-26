@@ -30,7 +30,7 @@ $currentSection = $data['section'] ?? 'dashboard';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Coffee House Admin - <?= ucfirst($currentSection) ?></title>
     <base href="http://localhost/COFFEE_PHP/">
-    <link rel="stylesheet" href="web/Views/AdminDashBoard/admin-style.css">
+    <link rel="stylesheet" href="Public/Css/admin-style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -118,12 +118,6 @@ $currentSection = $data['section'] ?? 'dashboard';
                 </div>
 
                 <div class="header-right">
-                    <!-- Search Bar -->
-                    <div class="search-box">
-                        <input type="text" placeholder="Tìm kiếm..." class="search-input">
-                        <span class="search-icon">🔍</span>
-                    </div>
-
                     <!-- Notifications -->
                     <button class="header-btn notification-btn">
                         <span class="btn-icon">🔔</span>
@@ -204,7 +198,7 @@ $currentSection = $data['section'] ?? 'dashboard';
     </div>
 
     <!-- JavaScript -->
-    <script src="web/Views/AdminDashBoard/admin-script.js"></script>
+    <script src="Public/Js/admin-main.js"></script>
     <script>
         // Truyền section hiện tại vào JavaScript
         window.CURRENT_SECTION = '<?= $currentSection ?>';

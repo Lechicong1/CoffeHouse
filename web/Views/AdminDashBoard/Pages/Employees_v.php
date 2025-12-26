@@ -24,7 +24,7 @@ $roles = [
 ?>
 
 <!-- Import CSS riêng cho trang Employees -->
-<link rel="stylesheet" href="web/Views/AdminDashBoard/Pages/employees-page.css">
+<link rel="stylesheet" href="Public/Css/employees-page.css">
 
 <section id="employees" class="content-section">
     <!-- Header Section -->
@@ -61,30 +61,6 @@ $roles = [
             <input type="text" name="search" class="search-input" placeholder="🔍 Tìm kiếm theo tên, email, số điện thoại..." value="<?= htmlspecialchars($keyword) ?>">
             <button type="submit" class="btn-primary">🔍 Tìm kiếm</button>
         </form>
-    </div>
-
-    <!-- Statistics Cards -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-value"><?= $stats['manager'] ?></div>
-            <div class="stat-label">Quản lý</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value"><?= $stats['barista'] ?></div>
-            <div class="stat-label">Pha chế</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value"><?= $stats['cashier'] ?></div>
-            <div class="stat-label">Thu ngân</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value"><?= $stats['waiter'] ?></div>
-            <div class="stat-label">Phục vụ</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value"><?= $stats['cleaner'] ?></div>
-            <div class="stat-label">Vệ sinh</div>
-        </div>
     </div>
 
     <!-- Employees Table -->
@@ -234,106 +210,12 @@ $roles = [
     </div>
 </div>
 
+<!-- JavaScript -->
+<script src="Public/Js/employees-page.js"></script>
 <script>
-/**
- * MỞ MODAL THÊM/SỬA NHÂN VIÊN
- */
-function openEmployeeModal(action, employeeData = null) {
-    const modal = document.getElementById('employeeModal');
-    const form = document.getElementById('employeeForm');
-    const title = document.getElementById('modalTitle');
-    const passwordGroup = document.getElementById('passwordGroup');
-    const usernameField = document.getElementById('username');
-    const submitBtn = form.querySelector('button[type="submit"]');
-
-    if (!modal) {
-        alert('Lỗi: Không tìm thấy modal!');
-        return;
-    }
-
-    // Reset form
-    form.reset();
-
-    if (action === 'add') {
-        // Chế độ thêm mới
-        title.textContent = '➕ Thêm nhân viên mới';
-        form.action = '?url=Employee/ins';
-        passwordGroup.style.display = 'block';
-        usernameField.readOnly = false;
-        document.getElementById('password').required = true;
-
-        submitBtn.name = 'btnThem';
-        submitBtn.innerHTML = '<span>✅</span> Lưu lại';
-    } else {
-        // Chế độ sửa
-        title.textContent = '✏️ Sửa thông tin nhân viên';
-        form.action = '?url=Employee/upd';
-
-        // Điền dữ liệu vào form
-        document.getElementById('employeeId').value = employeeData.id;
-        document.getElementById('username').value = employeeData.username;
-        document.getElementById('fullname').value = employeeData.fullname;
-        document.getElementById('email').value = employeeData.email || '';
-        document.getElementById('phonenumber').value = employeeData.phonenumber;
-        document.getElementById('address').value = employeeData.address || '';
-        document.getElementById('roleId').value = employeeData.roleId;
-        document.getElementById('luong').value = employeeData.luong;
-
-        passwordGroup.style.display = 'none';
-        usernameField.readOnly = true;
-        document.getElementById('password').required = false;
-
-        submitBtn.name = 'btnCapnhat';
-        submitBtn.innerHTML = '<span>✅</span> Cập nhật';
-    }
-
-    // HIỂN THỊ MODAL
-    modal.classList.add('active');
-}
-
-/**
- * ĐÓNG MODAL
- */
-function closeEmployeeModal() {
-    const modal = document.getElementById('employeeModal');
-    if (modal) {
-        modal.classList.remove('active');
-        setTimeout(() => {
-            document.getElementById('employeeForm').reset();
-        }, 300);
-    }
-}
-
-// Event Listeners
-document.addEventListener('DOMContentLoaded', function() {
-    const modal = document.getElementById('employeeModal');
-
-    if (modal) {
-        // Click outside để đóng
-        modal.addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeEmployeeModal();
-            }
-        });
-    }
-
-    // Nhấn ESC để đóng
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            const modal = document.getElementById('employeeModal');
-            if (modal && modal.classList.contains('active')) {
-                closeEmployeeModal();
-            }
-        }
-    });
-
-    // Hiển thị thông báo nếu có
-    <?php if ($successMessage): ?>
-        alert('<?= addslashes($successMessage) ?>');
-    <?php endif; ?>
-
-    <?php if ($errorMessage): ?>
-        alert('<?= addslashes($errorMessage) ?>');
-    <?php endif; ?>
-});
+    // Truyền messages từ PHP sang JavaScript
+    window.EMPLOYEE_MESSAGES = {
+        success: <?= $successMessage ? "'" . addslashes($successMessage) . "'" : 'null' ?>,
+        error: <?= $errorMessage ? "'" . addslashes($errorMessage) . "'" : 'null' ?>
+    };
 </script>

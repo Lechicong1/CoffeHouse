@@ -5,7 +5,6 @@
  * TABLE: ingredients
  * AUTHOR: Coffee House System
  */
-namespace web\Entity;
 class IngredientEntity
 {
     // Properties từ bảng ingredients
@@ -13,7 +12,6 @@ class IngredientEntity
     public $name;
     public $unit;
     public $stock_quantity;
-    public $updated_at;
 
     /**
      * Constructor - Khởi tạo entity rỗng hoặc từ array
@@ -26,8 +24,56 @@ class IngredientEntity
             $this->name = $data['name'] ?? null;
             $this->unit = $data['unit'] ?? null;
             $this->stock_quantity = $data['stock_quantity'] ?? 0;
-            $this->updated_at = $data['updated_at'] ?? null;
         }
+    }
+
+    /**
+     * Chuyển entity thành array
+     * @return array
+     */
+    public function toArray() {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'unit' => $this->unit,
+            'stock_quantity' => $this->stock_quantity
+        ];
+    }
+
+    /**
+     * Lấy trạng thái tồn kho
+     * @return string
+     */
+    public function getStockStatus() {
+        if ($this->stock_quantity <= 0) {
+            return 'Hết hàng';
+        } elseif ($this->stock_quantity < 10) {
+            return 'Sắp hết';
+        } else {
+            return 'Còn hàng';
+        }
+    }
+
+    /**
+     * Lấy class CSS cho trạng thái
+     * @return string
+     */
+    public function getStockStatusClass() {
+        if ($this->stock_quantity <= 0) {
+            return 'status-out';
+        } elseif ($this->stock_quantity < 10) {
+            return 'status-low';
+        } else {
+            return 'status-ok';
+        }
+    }
+
+    /**
+     * Format số lượng với đơn vị
+     * @return string
+     */
+    public function getFormattedQuantity() {
+        return number_format($this->stock_quantity, 0, ',', '.') . ' ' . $this->unit;
     }
 }
 ?>

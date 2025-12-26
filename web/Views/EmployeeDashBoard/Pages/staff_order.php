@@ -34,14 +34,6 @@
                 </div>
                 <i class="fas fa-leaf fa-5x category-img" style="color: #eee;"></i>
             </div>
-            <div class="category-card warning" data-category="snack">
-                <div class="category-status">Sắp hết <i class="fas fa-info-circle"></i></div>
-                <div class="category-content">
-                    <h3>Bánh</h3>
-                    <span>10 món</span>
-                </div>
-                <i class="fas fa-cookie-bite fa-5x category-img" style="color: #eee;"></i>
-            </div>
         </div>
 
         <!-- Menu Grid -->
@@ -70,20 +62,18 @@
 
         <div class="customer-details">
             <div class="input-box">
-                <label>Tên Khách</label>
-                <input type="text" value="Khách Lẻ">
+                <input type="text" value="Khách Lẻ" placeholder="Tên Khách">
             </div>
             <div class="input-box">
-                <label>Bàn Số</label>
                 <select>
+                    <option value="" disabled selected>Bàn Số</option>
                     <option>Bàn 1</option>
                     <option>Bàn 2</option>
                     <option>Bàn 3</option>
                 </select>
             </div>
             <div class="input-box" id="order-id-group" style="display: none;">
-                <label>Mã Đơn</label>
-                <input type="text" id="order-id" readonly>
+                <input type="text" id="order-id" readonly placeholder="Mã Đơn">
             </div>
         </div>
 
@@ -131,6 +121,17 @@
         </div>
 
         <button class="confirm-btn" onclick="processPayment()" style="background: var(--primary-green); color: white; border: none; padding: 15px 40px; border-radius: 30px; font-size: 1rem; cursor: pointer; width: 100%;">Xác Nhận</button>
+    </div>
+</div>
+
+<!-- SIZE SELECTION MODAL -->
+<div class="modal" id="size-modal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4); align-items: center; justify-content: center;">
+    <div class="modal-content" style="background-color: #fefefe; margin: auto; padding: 20px; border: 1px solid #888; width: 300px; border-radius: 15px; text-align: center;">
+        <span class="close-modal" onclick="closeSizeModal()" style="float: right; cursor: pointer; font-size: 1.5rem;">&times;</span>
+        <h3 id="size-modal-title" style="margin-bottom: 20px;">Chọn Size</h3>
+        <div id="size-options" style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- Size options injected by JS -->
+        </div>
     </div>
 </div>
 

@@ -42,7 +42,6 @@ class CustomerEntity {
             'email' => $this->email,
             'points' => $this->points,
             'status' => $this->status,
-            'created_at' => $this->created_at,
         ];
     }
 }

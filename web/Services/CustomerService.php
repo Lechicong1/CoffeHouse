@@ -78,8 +78,7 @@ class CustomerService extends Service {
             'phone' => $data['phone'],
             'email' => $data['email'] ?? null,
             'points' => isset($data['points']) ? (int)$data['points'] : 0,
-            'status' => isset($data['status']) ? (int)$data['status'] : 1,
-            'roleId' => isset($data['roleId']) ? (int)$data['roleId'] : 0
+            'status' => isset($data['status']) ? (int)$data['status'] : 1
         ]);
 
         // Lưu vào database

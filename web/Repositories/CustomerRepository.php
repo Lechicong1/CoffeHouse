@@ -135,19 +135,19 @@ class CustomerRepository extends ConnectDatabase {
      * @return bool
      */
     public function create($customer) {
-        $sql = "INSERT INTO customers (username, password, full_name, phone, email, points, status, roleId) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        // customers table schema: username, password, full_name, phone, email, points, status
+        $sql = "INSERT INTO customers (username, password, full_name, phone, email, points, status) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "sssssiii",
+        mysqli_stmt_bind_param($stmt, "sssssii",
             $customer->username,
             $customer->password,
             $customer->full_name,
             $customer->phone,
             $customer->email,
             $customer->points,
-            $customer->status,
-            $customer->roleId
+            $customer->status
         );
 
         return mysqli_stmt_execute($stmt);

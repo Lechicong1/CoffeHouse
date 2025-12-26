@@ -61,6 +61,39 @@ body {
   margin-bottom: 40px;
 }
 
+/* Back button (trở về trang chủ) */
+.back-button-container {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  border-radius: 50px;
+  border: 2px solid var(--primary-color);
+  color: var(--primary-color);
+  background: transparent;
+  text-decoration: none;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0.4px;
+  transition: all 0.2s ease;
+  min-width: 170px;
+}
+
+.btn-back:hover {
+  background: linear-gradient(
+    135deg,
+    var(--primary-color),
+    var(--primary-dark)
+  );
+  color: #fff;
+  transform: translateY(-2px);
+}
+
 .logo {
   width: 80px;
   height: 80px;

@@ -20,9 +20,9 @@
 
     <!-- PAGE HERO -->
     <section class="page-hero">
-        <div>
+        <div class="hero-inner">
             <h1>CÂU CHUYỆN CỦA CHÚNG TÔI</h1>
-            <p style="font-size: 1.2rem; color: white;">Hành trình mang cà phê Việt Nam đến gần hơn với mọi người</p>
+            <p class="hero-subtitle">Hành trình mang cà phê Việt Nam đến gần hơn với mọi người</p>
         </div>
     </section>
 
@@ -93,11 +93,9 @@
 
     <!-- VALUES SECTION -->
     <section class="story-section" style="background: var(--off-white);">
-        <h2 style="text-align: center; color: var(--primary-color); margin-bottom: 20px;">GIÁ TRỊ CỐT LÕI</h2>
-        <p style="text-align: center; max-width: 800px; margin: 0 auto 50px; color: var(--text-light);">
-            Những giá trị mà chúng tôi luôn hướng đến và thực hiện trong mọi hoạt động kinh doanh
-        </p>
-        
+        <h2 class="values-title">GIÁ TRỊ CỐT LÕI</h2>
+        <p class="values-desc">Những giá trị mà chúng tôi luôn hướng đến và thực hiện trong mọi hoạt động kinh doanh</p>
+
         <div class="values-grid">
             <div class="value-card">
                 <div class="value-icon">☕</div>
@@ -233,13 +231,15 @@
     </section>
 
     <!-- CTA SECTION -->
-    <section style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); padding: 80px 5%; text-align: center; color: var(--text-dark);">
-        <h2 style="color: var(--text-dark); margin-bottom: 20px;">HÃY ĐẾN VÀ TRẢI NGHIỆM</h2>
-        <p style="font-size: 1.2rem; margin-bottom: 30px; color: var(--text-dark);">
-            Ghé thăm Coffee House để cảm nhận không khí thân thiện và thưởng thức cà phê tuyệt vời
-        </p>
-        <a href="index.php#location" class="btn" style="background: var(--text-dark); color: var(--white);">Tìm cửa hàng gần nhất</a>
-        <a href="index.php#menu" class="btn btn-secondary" style="margin-left: 15px;">Xem thực đơn</a>
+    <section class="cta-section">
+        <div class="cta-inner">
+            <h2>HÃY ĐẾN VÀ TRẢI NGHIỆM</h2>
+            <p class="cta-desc">Ghé thăm Coffee House để cảm nhận không khí thân thiện và thưởng thức cà phê tuyệt vời</p>
+            <div style="margin-top:20px;">
+                <a href="/COFFEE_PHP/User/index#location" class="btn btn-primary">Tìm cửa hàng gần nhất</a>
+                <a href="/COFFEE_PHP/User/menu" class="btn btn-secondary" style="margin-left: 15px;">Xem thực đơn</a>
+            </div>
+        </div>
     </section>
 
     <?php include __DIR__ . '/footer.php'; ?>

@@ -19,6 +19,11 @@
             <p class="login-subtitle">Đăng nhập để tiếp tục</p>
         </div>
 
+        <!-- Back button -->
+        <div class="back-button-container">
+            <a href="/COFFEE_PHP/User/index" class="btn-back">← Quay lại trang chủ</a>
+        </div>
+
         <!-- Thông báo (ẩn mặc định) -->
         <div id="alertBox" class="alert"></div>
 

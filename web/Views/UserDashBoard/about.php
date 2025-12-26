@@ -1,5 +1,5 @@
 <!-- ===================================
-     FILE: about.html
+     FILE: about.php
      MÔ TẢ: Trang Giới thiệu chi tiết về Coffee House
      =================================== -->
 <!DOCTYPE html>
@@ -9,285 +9,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Giới thiệu về Coffee House - Câu chuyện, sứ mệnh và giá trị của chúng tôi">
     <title>Về Coffee House - Câu chuyện của chúng tôi</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        /* ADDITIONAL STYLES FOR ABOUT PAGE */
-        .page-hero {
-            margin-top: 80px;
-            height: 50vh;
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
-                        url('https://images.unsplash.com/photo-1442512595331-e89e73853f31?w=1200') center/cover;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-align: center;
-        }
-
-        .page-hero h1 {
-            font-size: 3.5rem;
-            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
-        }
-
-        .story-section {
-            padding: 80px 5%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .story-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
-            align-items: center;
-            margin-bottom: 80px;
-        }
-
-        .story-content.reverse {
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .story-content.reverse .story-image {
-            order: 2;
-        }
-
-        .story-content.reverse .story-text {
-            order: 1;
-        }
-
-        .story-image {
-            width: 100%;
-            height: 400px;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px var(--shadow);
-        }
-
-        .story-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.5s ease;
-        }
-
-        .story-image:hover img {
-            transform: scale(1.05);
-        }
-
-        .story-text h2 {
-            text-align: left;
-            color: var(--primary-color);
-            margin-bottom: 20px;
-        }
-
-        .story-text p {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            margin-bottom: 20px;
-        }
-
-        .story-text ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .story-text li {
-            padding: 10px 0;
-            font-size: 1.05rem;
-            color: var(--text-light);
-        }
-
-        .story-text li::before {
-            content: "✓ ";
-            color: var(--primary-color);
-            font-weight: bold;
-            margin-right: 10px;
-        }
-
-        .values-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
-            margin-top: 50px;
-        }
-
-        .value-card {
-            background: var(--white);
-            padding: 40px 30px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 5px 20px var(--shadow);
-            transition: transform 0.3s ease;
-        }
-
-        .value-card:hover {
-            transform: translateY(-10px);
-        }
-
-        .value-icon {
-            font-size: 3rem;
-            margin-bottom: 20px;
-        }
-
-        .value-card h3 {
-            color: var(--primary-color);
-            margin-bottom: 15px;
-        }
-
-        .value-card p {
-            font-size: 1rem;
-            line-height: 1.6;
-        }
-
-        .timeline {
-            background: var(--white);
-            padding: 80px 5%;
-        }
-
-        .timeline h2 {
-            color: var(--primary-color);
-            margin-bottom: 50px;
-        }
-
-        .timeline-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        .timeline-item {
-            display: grid;
-            grid-template-columns: 1fr 80px 1fr;
-            gap: 30px;
-            margin-bottom: 50px;
-            align-items: center;
-        }
-
-        .timeline-item:nth-child(even) .timeline-content:first-child {
-            order: 3;
-        }
-
-        .timeline-content {
-            background: var(--off-white);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px var(--shadow);
-        }
-
-        .timeline-content h3 {
-            color: var(--primary-color);
-            margin-bottom: 10px;
-        }
-
-        .timeline-dot {
-            width: 80px;
-            height: 80px;
-            background: var(--primary-color);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.2rem;
-            color: var(--text-dark);
-            box-shadow: 0 0 0 10px var(--off-white);
-            position: relative;
-            z-index: 1;
-        }
-
-        .team-section {
-            padding: 80px 5%;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .team-section h2 {
-            color: var(--primary-color);
-            margin-bottom: 50px;
-        }
-
-        .team-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
-        }
-
-        .team-member {
-            text-align: center;
-        }
-
-        .team-photo {
-            width: 200px;
-            height: 200px;
-            border-radius: 50%;
-            margin: 0 auto 20px;
-            overflow: hidden;
-            border: 5px solid var(--primary-color);
-        }
-
-        .team-photo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .team-member h3 {
-            color: var(--text-dark);
-            margin-bottom: 5px;
-        }
-
-        .team-member .role {
-            color: var(--primary-color);
-            font-weight: 600;
-            margin-bottom: 10px;
-        }
-
-        @media (max-width: 968px) {
-            .page-hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .story-content,
-            .story-content.reverse {
-                grid-template-columns: 1fr;
-            }
-
-            .story-content.reverse .story-image,
-            .story-content.reverse .story-text {
-                order: unset;
-            }
-
-            .timeline-item {
-                grid-template-columns: 1fr;
-            }
-
-            .timeline-item:nth-child(even) .timeline-content:first-child {
-                order: unset;
-            }
-
-            .timeline-dot {
-                margin: 0 auto;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/user-style.css">
+    <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/user-about.css">
 </head>
 <body>
     <!-- HEADER & NAVIGATION -->
     <header>
         <nav>
-            <a href="index.html" class="logo">COFFEE HOUSE</a>
-            
+            <a href="/COFFEE_PHP/User/index" class="logo">COFFEE HOUSE</a>
+
             <ul class="nav-menu">
-                <li><a href="index.html">Trang chủ</a></li>
-                <li><a href="index.html#about">Giới thiệu</a></li>
-                <li><a href="menu.html">Thực đơn</a></li>
-                <li><a href="index.html#location">Địa chỉ</a></li>
-                <li><a href="about.html" class="active">Về chúng tôi</a></li>
+                <li><a href="/COFFEE_PHP/User/index">Trang chủ</a></li>
+                <li><a href="/COFFEE_PHP/User/index#about">Giới thiệu</a></li>
+                <li><a href="/COFFEE_PHP/User/menu">Thực đơn</a></li>
+                <li><a href="/COFFEE_PHP/User/index#location">Địa chỉ</a></li>
+                <li><a href="/COFFEE_PHP/User/about" class="active">Về chúng tôi</a></li>
             </ul>
             
             <div class="auth-buttons">
-                <a href="../Auth/Login/login.html" class="btn-login">Đăng nhập</a>
-                <a href="../Auth/Register/register.html" class="btn-register">Đăng ký</a>
+                <a href="Auth/login" class="btn-login">Đăng nhập</a>
+                <a href="Auth/register" class="btn-register">Đăng ký</a>
             </div>
             
             <div class="cart-icon">
@@ -524,8 +265,8 @@
         <p style="font-size: 1.2rem; margin-bottom: 30px; color: var(--text-dark);">
             Ghé thăm Coffee House để cảm nhận không khí thân thiện và thưởng thức cà phê tuyệt vời
         </p>
-        <a href="index.html#location" class="btn" style="background: var(--text-dark); color: var(--white);">Tìm cửa hàng gần nhất</a>
-        <a href="index.html#menu" class="btn btn-secondary" style="margin-left: 15px;">Xem thực đơn</a>
+        <a href="index.php#location" class="btn" style="background: var(--text-dark); color: var(--white);">Tìm cửa hàng gần nhất</a>
+        <a href="index.php#menu" class="btn btn-secondary" style="margin-left: 15px;">Xem thực đơn</a>
     </section>
 
     <!-- FOOTER -->
@@ -544,10 +285,10 @@
                 
                 <div class="footer-section">
                     <h3>LIÊN KẾT</h3>
-                    <a href="index.html">Trang chủ</a>
-                    <a href="index.html#about">Giới thiệu</a>
-                    <a href="index.html#menu">Thực đơn</a>
-                    <a href="index.html#location">Địa chỉ</a>
+                    <a href="index.php">Trang chủ</a>
+                    <a href="index.php#about">Giới thiệu</a>
+                    <a href="index.php#menu">Thực đơn</a>
+                    <a href="index.php#location">Địa chỉ</a>
                 </div>
                 
                 <div class="footer-section">
@@ -573,6 +314,6 @@
     </footer>
 
     <!-- JAVASCRIPT -->
-    <script src="script.js"></script>
+    <script src="../../../Public/Js/user-main.js"></script>
 </body>
 </html>

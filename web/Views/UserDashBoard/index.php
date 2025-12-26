@@ -1,6 +1,6 @@
 <!-- ===================================
-     FILE: index.html
-     MÔ TẢ: Trang chủ Coffee House - Minimalist White Style
+     FILE: index.php
+     MÔ TẢ: Trang chủ Coffee House - Minimalist White Style (Dynamic)
      =================================== -->
 <!DOCTYPE html>
 <html lang="vi">
@@ -9,25 +9,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Coffee House - Quán cà phê phong cách tối giản, hiện đại">
     <title>Coffee House - Trải nghiệm cà phê đặc biệt</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/user-style.css">
 </head>
 <body>
     <!-- HEADER & NAVIGATION -->
     <header>
         <nav>
-            <a href="#" class="logo">COFFEE HOUSE</a>
-            
+            <a href="/COFFEE_PHP/User/index" class="logo">COFFEE HOUSE</a>
+
             <ul class="nav-menu">
-                <li><a href="#home" class="active">Trang chủ</a></li>
-                <li><a href="#about">Giới thiệu</a></li>
-                <li><a href="menu.html">Thực đơn</a></li>
-                <li><a href="#location">Địa chỉ</a></li>
-                <li><a href="about.html">Về chúng tôi</a></li>
+                <li><a href="/COFFEE_PHP/User/index" class="active">Trang chủ</a></li>
+                <li><a href="/COFFEE_PHP/User/index#about">Giới thiệu</a></li>
+                <li><a href="/COFFEE_PHP/User/menu">Thực đơn</a></li>
+                <li><a href="/COFFEE_PHP/User/index#location">Địa chỉ</a></li>
+                <li><a href="/COFFEE_PHP/User/about">Về chúng tôi</a></li>
             </ul>
             
             <div class="auth-buttons">
-                <a href="../Auth/Login/login.html" class="btn-login">Đăng nhập</a>
-                <a href="../Auth/Register/register.html" class="btn-register">Đăng ký</a>
+                <a href="/COFFEE_PHP/Auth/login" class="btn-login">Đăng nhập</a>
+                <a href="/COFFEE_PHP/Auth/register" class="btn-register">Đăng ký</a>
             </div>
             
             <div class="cart-icon">
@@ -112,7 +112,7 @@
                 ✓ Không gian sạch sẽ, thoáng mát<br>
                 ✓ Phục vụ tận tâm, chu đáo
             </p>
-            <a href="about.html" class="btn btn-primary">Xem chi tiết</a>
+            <a href="about.php" class="btn btn-primary">Xem chi tiết</a>
         </div>
     </section>
 
@@ -124,99 +124,57 @@
         </p>
         
         <div class="menu-grid">
-            <!-- CÀ PHÊ -->
-            <div class="menu-card" data-category="coffee" data-id="1" onclick="window.location.href='product-detail.html?id=1'">
-                <div class="menu-card-image">
-                    <img src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=500" alt="Cà Phê Cốt Dừa">
-                    <span class="menu-badge">Mới</span>
+            <?php if (isset($products) && !empty($products)): ?>
+                <?php
+                // Giới hạn chỉ hiển thị 6 sản phẩm đầu tiên trên trang chủ
+                $displayProducts = array_slice($products, 0, 6);
+                foreach ($displayProducts as $product):
+                    // Lấy giá nhỏ nhất từ các size
+                    $minPrice = null;
+                    if (!empty($product->sizes)) {
+                        $prices = array_column($product->sizes, 'price');
+                        $minPrice = min($prices);
+                    }
+                ?>
+                <div class="menu-card" data-product-id="<?= $product->id ?>">
+                    <a href="/COFFEE_PHP/User/productDetail?id=<?= $product->id ?>" style="text-decoration: none; color: inherit;">
+                        <div class="menu-card-image">
+                            <?php if (!empty($product->image_url)): ?>
+                                <img src="/COFFEE_PHP/<?= htmlspecialchars($product->image_url) ?>" alt="<?= htmlspecialchars($product->name) ?>">
+                            <?php else: ?>
+                                <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500" alt="<?= htmlspecialchars($product->name) ?>">
+                            <?php endif; ?>
+                            <?php if ($product->created_at && strtotime($product->created_at) > strtotime('-7 days')): ?>
+                                <span class="menu-badge">Mới</span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="menu-card-content">
+                            <h3><?= strtoupper(htmlspecialchars($product->name)) ?></h3>
+                            <p><?= htmlspecialchars($product->description) ?></p>
+                            <div class="menu-card-footer">
+                                <span class="price">
+                                    <?php if ($minPrice): ?>
+                                        Từ <?= number_format($minPrice, 0, ',', '.') ?>đ
+                                    <?php else: ?>
+                                        Liên hệ
+                                    <?php endif; ?>
+                                </span>
+                                <button class="btn-add" onclick="event.preventDefault(); event.stopPropagation(); window.location.href='/COFFEE_PHP/User/productDetail?id=<?= $product->id ?>'">Đặt món</button>
+                            </div>
+                        </div>
+                    </a>
                 </div>
-                <div class="menu-card-content">
-                    <h3>CÀ PHÊ CỐT DỪA</h3>
-                    <p>Cà phê rang xay pha phin kết hợp cốt dừa béo ngậy, thơm ngon độc đáo</p>
-                    <div class="menu-card-footer">
-                        <span class="price">45.000đ</span>
-                        <button class="btn-add" onclick="event.stopPropagation(); addQuickToCart(1)">Đặt món</button>
-                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-light);">
+                    <p>Hiện tại chưa có sản phẩm nào. Vui lòng quay lại sau!</p>
                 </div>
-            </div>
-            
-            <div class="menu-card" data-category="coffee" data-id="2">
-                <div class="menu-card-image">
-                    <img src="https://images.unsplash.com/photo-1517487881594-2787fef5ebf7?w=500" alt="Bạc Xỉu">
-                </div>
-                <div class="menu-card-content">
-                    <h3>BẠC XỈU ĐẶC BIỆT</h3>
-                    <p>Cà phê pha phin truyền thống với sữa tươi, vị ngọt dịu nhẹ, thơm ngon</p>
-                    <div class="menu-card-footer">
-                        <span class="price">38.000đ</span>
-                        <button class="btn-add">Đặt món</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="menu-card" data-category="coffee" data-id="3">
-                <div class="menu-card-image">
-                    <img src="https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=500" alt="Espresso">
-                </div>
-                <div class="menu-card-content">
-                    <h3>ESPRESSO ĐẬM ĐÀ</h3>
-                    <p>Cà phê espresso ý nguyên chất, hương vị đậm đà cho người sành điệu</p>
-                    <div class="menu-card-footer">
-                        <span class="price">35.000đ</span>
-                        <button class="btn-add">Đặt món</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- TRÀ -->
-            <div class="menu-card" data-category="tea" data-id="4">
-                <div class="menu-card-image">
-                    <img src="https://images.unsplash.com/photo-1556679343-c7306c1976bc?w=500" alt="Trà Đào Cam Sả">
-                    <span class="menu-badge">Hot</span>
-                </div>
-                <div class="menu-card-content">
-                    <h3>TRÀ ĐÀO CAM SẢ</h3>
-                    <p>Hương vị tươi mát từ đào, cam, sả tự nhiên - thức uống giải nhiệt hoàn hảo</p>
-                    <div class="menu-card-footer">
-                        <span class="price">42.000đ</span>
-                        <button class="btn-add">Đặt món</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="menu-card" data-category="tea" data-id="5">
-                <div class="menu-card-image">
-                    <img src="https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500" alt="Matcha Latte">
-                </div>
-                <div class="menu-card-content">
-                    <h3>MATCHA LATTE</h3>
-                    <p>Bột matcha Nhật Bản nguyên chất kết hợp sữa tươi, vị đắng nhẹ thanh mát</p>
-                    <div class="menu-card-footer">
-                        <span class="price">48.000đ</span>
-                        <button class="btn-add">Đặt món</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="menu-card" data-category="tea" data-id="6">
-                <div class="menu-card-image">
-                    <img src="https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=500" alt="Trà Sữa">
-                </div>
-                <div class="menu-card-content">
-                    <h3>TRÀ SỮA TRÂN CHÂU</h3>
-                    <p>Trà sữa ngọt ngào với trân châu dai ngon, thức uống được yêu thích nhất</p>
-                    <div class="menu-card-footer">
-                        <span class="price">40.000đ</span>
-                        <button class="btn-add">Đặt món</button>
-                    </div>
-                </div>
-            </div>
-
+            <?php endif; ?>
         </div>
         
         <!-- View All Button -->
         <div style="text-align: center; margin-top: 50px;">
-            <a href="menu.html" class="btn btn-primary" style="display: inline-block; padding: 15px 50px; font-size: 1.1rem;">
+            <a href="/COFFEE_PHP/User/menu" class="btn btn-primary" style="display: inline-block; padding: 15px 50px; font-size: 1.1rem;">
                 Xem tất cả thực đơn →
             </a>
         </div>
@@ -287,10 +245,10 @@
                 
                 <div class="footer-section">
                     <h3>LIÊN KẾT</h3>
-                    <a href="#about">Giới thiệu</a>
-                    <a href="#menu">Thực đơn</a>
-                    <a href="#location">Địa chỉ</a>
-                    <a href="about.html">Về chúng tôi</a>
+                    <a href="/COFFEE_PHP/User/index#about">Giới thiệu</a>
+                    <a href="/COFFEE_PHP/User/menu">Thực đơn</a>
+                    <a href="/COFFEE_PHP/User/index#location">Địa chỉ</a>
+                    <a href="/COFFEE_PHP/User/about">Về chúng tôi</a>
                 </div>
                 
                 <div class="footer-section">
@@ -314,8 +272,5 @@
             </div>
         </div>
     </footer>
-
-    <!-- JAVASCRIPT -->
-    <script src="script.js"></script>
 </body>
 </html>

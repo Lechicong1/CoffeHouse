@@ -77,7 +77,7 @@ class EmployeeController extends Controller {
                     'email' => $_POST['txtEmail'] ?? null,
                     'phonenumber' => $_POST['txtPhonenumber'],
                     'address' => $_POST['txtAddress'] ?? null,
-                    'roleId' => (int)$_POST['ddlRoleId'],
+                    'roleName' => $_POST['ddlRoleName'],
                     'luong' => (float)$_POST['txtLuong']
                 ];
                 
@@ -125,7 +125,7 @@ class EmployeeController extends Controller {
                     'email' => $_POST['txtEmail'] ?? null,
                     'phonenumber' => $_POST['txtPhonenumber'],
                     'address' => $_POST['txtAddress'] ?? null,
-                    'roleId' => (int)$_POST['ddlRoleId'],
+                    'roleName' => $_POST['ddlRoleName'],
                     'luong' => (float)$_POST['txtLuong']
                 ];
                 

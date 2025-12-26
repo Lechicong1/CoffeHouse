@@ -14,7 +14,7 @@ class EmployeeEntity {
     public $email;
     public $phonenumber;
     public $address;
-    public $roleId;
+    public $roleName;
     public $luong;
 
     /**
@@ -30,23 +30,28 @@ class EmployeeEntity {
             $this->email = $data['email'] ?? null;
             $this->phonenumber = $data['phonenumber'] ?? null;
             $this->address = $data['address'] ?? null;
-            $this->roleId = $data['roleId'] ?? null;
+            $this->roleName = $data['roleName'] ?? null;
             $this->luong = $data['luong'] ?? null;
         }
     }
 
     /**
-     * Lấy tên vai trò
+     * Lấy tên vai trò hiển thị đầy đủ
      */
     public function getRoleName() {
-        $roles = [
-            1 => 'Quản lý',
-            2 => 'Pha chế',
-            3 => 'Thu ngân',
-            4 => 'Phục vụ',
-            5 => 'Vệ sinh'
+        return $this->roleName ?? 'Không xác định';
+    }
+
+    /**
+     * Lấy tên vai trò để hiển thị (tên đầy đủ)
+     */
+    public function getRoleDisplayName() {
+        $roleMap = [
+            'ORDER' => 'Nhân viên Order',
+            'BARTENDER' => 'Nhân viên Pha chế',
+            'SHIPPER' => 'Nhân viên Giao hàng'
         ];
-        return $roles[$this->roleId] ?? 'Không xác định';
+        return $roleMap[$this->roleName] ?? 'Không xác định';
     }
 
     /**
@@ -67,8 +72,8 @@ class EmployeeEntity {
             'email' => $this->email,
             'phonenumber' => $this->phonenumber,
             'address' => $this->address,
-            'roleId' => $this->roleId,
-            'roleName' => $this->getRoleName(),
+            'roleName' => $this->roleName,
+            'roleDisplayName' => $this->getRoleDisplayName(),
             'luong' => $this->luong,
             'formattedSalary' => $this->getFormattedSalary()
         ];

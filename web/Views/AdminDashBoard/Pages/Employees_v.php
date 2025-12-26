@@ -15,11 +15,9 @@ $errorMessage = $data['errorMessage'] ?? null;
 
 // Danh sách vai trò truyền từ Controller (dynamic) - nếu không có thì fallback
 $roles = $data['roles'] ?? [
-    1 => 'Quản lý',
-    2 => 'Pha chế',
-    3 => 'Thu ngân',
-    4 => 'Phục vụ',
-    5 => 'Vệ sinh'
+    'ORDER' => 'Nhân viên Order',
+    'BARTENDER' => 'Nhân viên Pha chế',
+    'SHIPPER' => 'Nhân viên Giao hàng'
 ];
 ?>
 
@@ -39,8 +37,8 @@ $roles = $data['roles'] ?? [
                 <input type="hidden" name="url" value="Employee">
                 <select class="filter-select" name="role" onchange="this.form.submit()">
                     <option value="all" <?= $roleFilter === 'all' ? 'selected' : '' ?>>Tất cả vai trò</option>
-                    <?php foreach ($roles as $id => $name): ?>
-                        <option value="<?= $id ?>" <?= $roleFilter == $id ? 'selected' : '' ?>>
+                    <?php foreach ($roles as $value => $name): ?>
+                        <option value="<?= $value ?>" <?= $roleFilter == $value ? 'selected' : '' ?>>
                             <?= $name ?>
                         </option>
                     <?php endforeach; ?>
@@ -56,7 +54,7 @@ $roles = $data['roles'] ?? [
 
     <!-- Search Bar -->
     <div style="margin-bottom: 24px;">
-        <form method="POST" action="?url=Employee/timkiem" class="search-form">
+        <form method="POST" action="EmployeeController/timkiem" class="search-form">
             <input type="text" name="txtSearch" class="search-input" placeholder="🔍 Tìm kiếm theo tên, email, số điện thoại..." value="<?= htmlspecialchars($keyword) ?>">
             <button type="submit" name="btnTimkiem" class="btn-primary">🔍 Tìm kiếm</button>
         </form>
@@ -94,8 +92,8 @@ $roles = $data['roles'] ?? [
                             <td><strong><?= htmlspecialchars($employee->username) ?></strong></td>
                             <td><?= htmlspecialchars($employee->fullname) ?></td>
                             <td>
-                                <span class="badge badge-role-<?= $employee->roleId ?>">
-                                    <?= $employee->getRoleName() ?>
+                                <span class="badge badge-role-<?= strtolower($employee->roleName) ?>">
+                                    <?= $employee->getRoleDisplayName() ?>
                                 </span>
                             </td>
                             <td><?= htmlspecialchars($employee->email ?? '-') ?></td>
@@ -107,7 +105,7 @@ $roles = $data['roles'] ?? [
                                 <button class="btn-edit" onclick='openEmployeeModal("edit", <?= htmlspecialchars(json_encode($employee->toArray())) ?>)' title="Sửa">
                                     ✏️ Sửa
                                 </button>
-                                <form method="POST" action="?url=Employee/del" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa không?')">
+                                <form method="POST" action="EmployeeController/del" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa không?')">
                                     <input type="hidden" name="txtId" value="<?= $employee->id ?>">
                                     <button type="submit" name="btnXoa" class="btn-delete">🗑️ Xóa</button>
                                 </form>
@@ -172,9 +170,9 @@ $roles = $data['roles'] ?? [
 
                 <div class="form-group">
                     <label><span class="label-icon">💼</span> Vai trò</label>
-                    <select id="roleId" name="ddlRoleId" required>
-                        <?php foreach ($roles as $id => $name): ?>
-                            <option value="<?= $id ?>"><?= $name ?></option>
+                    <select id="roleId" name="ddlRoleName" required>
+                        <?php foreach ($roles as $value => $name): ?>
+                            <option value="<?= $value ?>"><?= $name ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>

@@ -22,24 +22,14 @@ class EmployeeService extends Service {
     }
 
     /**
-     * Lấy danh sách roles (từ RolesRepository). Nếu DB lỗi, trả về fallback.
-     * @return array
+     * Lấy danh sách roles với định dạng mới
+     * @return array [value => label]
      */
     public function getRoles() {
-        try {
-            $rolesRepo = $this->repository('RolesRepository');
-            $roles = $rolesRepo->findAll();
-            if (!empty($roles)) return $roles;
-        } catch (Exception $e) {
-            // ignore and fallback
-        }
-
         return [
-            1 => 'Admin',
-            2 => 'Staff',
-            3 => 'Manager',
-            4 => 'Shipper',
-            5 => 'Customer'
+            'ORDER' => 'Nhân viên Order',
+            'BARTENDER' => 'Nhân viên Pha chế',
+            'SHIPPER' => 'Nhân viên Giao hàng'
         ];
     }
 
@@ -57,8 +47,8 @@ class EmployeeService extends Service {
     /**
      * Lấy nhân viên theo vai trò
      */
-    public function getEmployeesByRole($roleId) {
-        return $this->employeeRepo->findByRole($roleId);
+    public function getEmployeesByRole($roleName) {
+        return $this->employeeRepo->findByRole($roleName);
     }
 
     /**
@@ -87,7 +77,7 @@ class EmployeeService extends Service {
         $employee->email = trim($data['email']);
         $employee->phonenumber = trim($data['phonenumber']);
         $employee->address = trim($data['address'] ?? '');
-        $employee->roleId = $data['roleId'];
+        $employee->roleName = $data['roleName'];
         $employee->luong = $data['luong'];
 
         // Lưu vào database
@@ -116,7 +106,7 @@ class EmployeeService extends Service {
         $employee->email = trim($data['email']);
         $employee->phonenumber = trim($data['phonenumber']);
         $employee->address = trim($data['address'] ?? '');
-        $employee->roleId = $data['roleId'];
+        $employee->roleName = $data['roleName'];
         $employee->luong = $data['luong'];
 
         // Lưu vào database
@@ -234,8 +224,8 @@ class EmployeeService extends Service {
             throw new Exception("Số điện thoại phải có 10 chữ số");
         }
 
-        // Validate roleId
-        if (!isset($data['roleId']) || !in_array($data['roleId'], [1, 2, 3, 4, 5])) {
+        // Validate roleName
+        if (!isset($data['roleName']) || !in_array($data['roleName'], ['ORDER', 'BARTENDER', 'SHIPPER'])) {
             throw new Exception("Vai trò không hợp lệ");
         }
 

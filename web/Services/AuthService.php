@@ -105,19 +105,16 @@ class AuthService extends Service {
     }
 
     /**
-     * Xác định URL redirect theo roleId và userType
+     * Xác định URL redirect theo roleName và userType
      * @param string $userType
-     * @param int $roleId
+     * @param string $roleName
      * @return string
      */
-    public function getRedirectUrl($userType, $roleId) {
+    public function getRedirectUrl($userType, $roleName) {
         if ($userType === 'employee') {
-            // Employee: roleId 1 = Admin, 2-5 = Staff
-            if ($roleId === 1) {
-                return '/COFFEE_PHP/EmployeeController/GetData';
-            } else {
-                return '/COFFEE_PHP/EmployeeController/GetData';
-            }
+            // Employee: chuyển hướng dựa trên roleName
+            // Tất cả nhân viên đều vào trang quản lý
+            return '/COFFEE_PHP/EmployeeController/GetData';
         } else {
             // Customer
             return '/COFFEE_PHP/CustomerController/GetData';

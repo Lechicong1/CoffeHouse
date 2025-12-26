@@ -179,6 +179,22 @@
     display: inline-block;
 }
 
+.badge-role-order {
+    background: #b6da9f;
+    color: #2c2c2c;
+}
+
+.badge-role-bartender {
+    background: #f6ad55;
+    color: white;
+}
+
+.badge-role-shipper {
+    background: #4299e1;
+    color: white;
+}
+
+/* Giữ lại các badge cũ để backward compatibility nếu cần */
 .badge-role-1 {
     background: #b6da9f;
     color: #2c2c2c;

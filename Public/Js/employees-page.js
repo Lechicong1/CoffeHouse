@@ -45,7 +45,7 @@ function openEmployeeModal(action, employeeData = null) {
         document.getElementById('email').value = employeeData.email || '';
         document.getElementById('phonenumber').value = employeeData.phonenumber;
         document.getElementById('address').value = employeeData.address || '';
-        document.getElementById('roleId').value = employeeData.roleId;
+        document.getElementById('roleId').value = employeeData.roleName;
         document.getElementById('luong').value = employeeData.luong;
 
         passwordGroup.style.display = 'none';

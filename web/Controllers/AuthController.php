@@ -52,7 +52,7 @@ class AuthController extends Controller {
             $_SESSION['user'] = [
                 'id' => $user->id,
                 'username' => $user->username,
-                'roleId' => $user->roleId ?? null,
+                'roleName' => $user->roleName ?? null,
                 'type' => $userType,
                 'fullname' => $userType === 'employee' ? $user->fullname : $user->full_name
             ];
@@ -63,8 +63,8 @@ class AuthController extends Controller {
             }
 
             // Lấy redirect URL từ service
-            $roleId = isset($user->roleId) ? (int)$user->roleId : 0;
-            $redirect = $authService->getRedirectUrl($userType, $roleId);
+            $roleName = isset($user->roleName) ? $user->roleName : '';
+            $redirect = $authService->getRedirectUrl($userType, $roleName);
 
             echo "<script>
                 alert('{$result['message']}');

@@ -149,9 +149,10 @@
             align-items: center;
             gap: 10px;
             background: white;
-            padding: 5px 15px 5px 5px;
+            padding: 5px 15px 5px 4px;
             border-radius: 30px;
             box-shadow: var(--shadow);
+
         }
 
         .user-profile img {

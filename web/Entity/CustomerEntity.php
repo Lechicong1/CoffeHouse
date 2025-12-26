@@ -16,7 +16,7 @@ class CustomerEntity {
     public $email;
     public $points;
     public $status;
-    public $roleId;
+
 
     /**
      * Constructor - Khởi tạo entity rỗng hoặc từ array
@@ -32,7 +32,6 @@ class CustomerEntity {
             $this->email = $data['email'] ?? null;
             $this->points = isset($data['points']) ? (int)$data['points'] : 0;
             $this->status = isset($data['status']) ? (int)$data['status'] : 1;
-            $this->roleId = isset($data['roleId']) ? (int)$data['roleId'] : 0;
         }
     }
 

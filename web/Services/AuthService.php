@@ -112,12 +112,17 @@ class AuthService extends Service {
      */
     public function getRedirectUrl($userType, $roleName) {
         if ($userType === 'employee') {
-            // Employee: chuyển hướng dựa trên roleName
-            // Tất cả nhân viên đều vào trang quản lý
+            // Chỉ những role sau được coi là nhân viên phục vụ (đi vào giao diện nhân viên)
+            $staffRoles = ['ORDER', 'BARTENDER', 'SHIPPER'];
+            if (in_array(strtoupper($roleName), $staffRoles)) {
+                return '/COFFEE_PHP/EmployeeController/GetData';
+            }
+
+            // Nếu là employee nhưng không thuộc nhóm phục vụ, mặc định chuyển sang trang quản trị nhân viên
             return '/COFFEE_PHP/EmployeeController/GetData';
         } else {
-            // Customer
-            return '/COFFEE_PHP/CustomerController/GetData';
+            // Customer -> chuyển về trang User dashboard (index)
+            return '/COFFEE_PHP/User/index';
         }
     }
 
@@ -291,7 +296,7 @@ class AuthService extends Service {
         // Lưu mật khẩu nguyên bản (plain-text) theo yêu cầu
         $plainPassword = $data['password'];
 
-        // Tạo customer mới
+        // Tạo customer mới (customers table không có roleId)
         $custRepo = $this->repository('CustomerRepository');
         
         // Tạo entity
@@ -302,8 +307,7 @@ class AuthService extends Service {
             'phone' => $data['phone'],
             'email' => $data['email'] ?? '',
             'points' => 0,
-            'status' => 1,
-            'roleId' => 5
+            'status' => 1
         ]);
 
         // Lưu vào database

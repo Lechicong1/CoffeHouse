@@ -15,10 +15,24 @@
             <li><a href="/COFFEE_PHP/User/about" class="<?= ($currentPage ?? '') === 'about' ? 'active' : '' ?>">Về chúng tôi</a></li>
         </ul>
 
-        <div class="auth-buttons">
-            <a href="/COFFEE_PHP/Auth/login" class="btn-login">Đăng nhập</a>
-            <a href="/COFFEE_PHP/Auth/showSignup" class="btn-register">Đăng ký</a>
-        </div>
+        <?php
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+        $currentUser = $_SESSION['user'] ?? null;
+
+        if ($currentUser && isset($currentUser['type']) && $currentUser['type'] === 'customer') :
+        ?>
+            <div class="user-profile">
+                <span class="user-greeting">Xin chào, <?= htmlspecialchars($currentUser['fullname'] ?? $currentUser['username']) ?></span>
+                <a href="/COFFEE_PHP/Auth/logout" class="user-logout">Đăng xuất</a>
+            </div>
+        <?php else: ?>
+            <div class="auth-buttons">
+                <a href="/COFFEE_PHP/Auth/login" class="btn-login">Đăng nhập</a>
+                <a href="/COFFEE_PHP/Auth/showSignup" class="btn-register">Đăng ký</a>
+            </div>
+        <?php endif; ?>
 
         <div class="cart-icon">
             🛒

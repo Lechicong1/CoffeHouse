@@ -16,29 +16,29 @@ class CategoryController extends Controller {
      * Hiển thị danh sách danh mục (Method mặc định)
      */
     function GetData() {
-        try {
-            // Xử lý tìm kiếm nếu có
-            $keyword = $_GET['search'] ?? '';
-            $categories = empty($keyword) 
-                ? $this->categoryService->getAllCategories() 
-                : $this->categoryService->searchCategories($keyword);
+        $this->view('AdminDashBoard/MasterLayout', [
+            'page' => 'Categories_v',
+            'section' => 'categories',
+            'categories' => $this->categoryService->getAllCategories(),
+            'stats' => $this->categoryService->getStats(),
+            'keyword' => ''
+        ]);
+    }
 
-            $stats = $this->categoryService->getStats();
-
+    /**
+     * Tìm kiếm danh mục
+     */
+    function timkiem() {
+        if (isset($_POST['btnTimkiem'])) {
+            $keyword = $_POST['txtSearch'] ?? '';
+            $categories = $this->categoryService->searchCategories($keyword);
+            
             $this->view('AdminDashBoard/MasterLayout', [
                 'page' => 'Categories_v',
                 'section' => 'categories',
                 'categories' => $categories,
-                'stats' => $stats,
+                'stats' => $this->categoryService->getStats(),
                 'keyword' => $keyword
-            ]);
-        } catch (Exception $e) {
-            $this->view('AdminDashBoard/MasterLayout', [
-                'page' => 'Categories_v',
-                'section' => 'categories',
-                'categories' => [],
-                'stats' => ['total' => 0],
-                'errorMessage' => $e->getMessage()
             ]);
         }
     }

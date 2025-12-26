@@ -56,10 +56,9 @@ $roles = [
 
     <!-- Search Bar -->
     <div style="margin-bottom: 24px;">
-        <form method="GET" action="" class="search-form">
-            <input type="hidden" name="url" value="Employee">
-            <input type="text" name="search" class="search-input" placeholder="🔍 Tìm kiếm theo tên, email, số điện thoại..." value="<?= htmlspecialchars($keyword) ?>">
-            <button type="submit" class="btn-primary">🔍 Tìm kiếm</button>
+        <form method="POST" action="?url=Employee/timkiem" class="search-form">
+            <input type="text" name="txtSearch" class="search-input" placeholder="🔍 Tìm kiếm theo tên, email, số điện thoại..." value="<?= htmlspecialchars($keyword) ?>">
+            <button type="submit" name="btnTimkiem" class="btn-primary">🔍 Tìm kiếm</button>
         </form>
     </div>
 

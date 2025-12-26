@@ -51,24 +51,8 @@ class EmployeeService extends Service {
      * Tạo nhân viên mới
      */
     public function createEmployee($data) {
-
-        
-        // Validate dữ liệu
+        // Validate dữ liệu (bao gồm cả check username và email trùng)
         $this->validateEmployeeData($data);
-        error_log("✓ Validation passed");
-
-        // Kiểm tra username đã tồn tại chưa
-        $existingEmployee = $this->employeeRepo->findByUsername($data['username']);
-        if ($existingEmployee) {
-            error_log("✗ Username already exists: " . $data['username']);
-            throw new Exception("Username đã tồn tại");
-        }
-
-        // Kiểm tra email đã tồn tại chưa
-        if (!empty($data['email']) && $this->checkEmailExists($data['email'])) {
-            error_log("✗ Email already exists: " . $data['email']);
-            throw new Exception("Email đã tồn tại");
-        }
 
         // Tạo entity
         $employee = new EmployeeEntity();
@@ -99,13 +83,8 @@ class EmployeeService extends Service {
             throw new Exception("Nhân viên không tồn tại");
         }
 
-        // Validate dữ liệu (không bao gồm password)
-        $this->validateEmployeeData($data, true);
-
-        // Kiểm tra email đã tồn tại chưa (loại trừ chính nhân viên này)
-        if (!empty($data['email']) && $this->checkEmailExists($data['email'], $id)) {
-            throw new Exception("Email đã tồn tại");
-        }
+        // Validate dữ liệu (bao gồm cả check email trùng, loại trừ chính user này)
+        $this->validateEmployeeData($data, true, $id);
 
         // Cập nhật thông tin
         $employee->fullname = trim($data['fullname']);
@@ -191,7 +170,7 @@ class EmployeeService extends Service {
     /**
      * Validate dữ liệu nhân viên
      */
-    private function validateEmployeeData($data, $isUpdate = false) {
+    private function validateEmployeeData($data, $isUpdate = false, $excludeId = null) {
         // Validate username (chỉ khi tạo mới)
         if (!$isUpdate) {
             if (empty($data['username']) || strlen(trim($data['username'])) < 3) {
@@ -202,16 +181,27 @@ class EmployeeService extends Service {
             if (empty($data['password']) || strlen($data['password']) < 6) {
                 throw new Exception("Mật khẩu phải có ít nhất 6 ký tự");
             }
+            
+            // Kiểm tra username đã tồn tại chưa
+            $existingEmployee = $this->employeeRepo->findByUsername($data['username']);
+            if ($existingEmployee) {
+                throw new Exception("Username đã tồn tại");
+            }
         }
 
         // Validate fullname
-        if (empty($data['fullname']) || strlen(trim($data['fullname'])) < 3) {
+        if (empty($data['fullname']) || strlen(trim($data['fullna`me'])) < 3) {
             throw new Exception("Họ tên phải có ít nhất 3 ký tự");
         }
 
         // Validate email
         if (!empty($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
             throw new Exception("Email không hợp lệ");
+        }
+        
+        // Kiểm tra email đã tồn tại chưa
+        if (!empty($data['email']) && $this->checkEmailExists($data['email'], $excludeId)) {
+            throw new Exception("Email đã tồn tại");
         }
 
         // Validate phone

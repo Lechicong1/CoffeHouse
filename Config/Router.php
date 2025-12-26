@@ -4,7 +4,7 @@
  * Xử lý URL và gọi Controller -> Action tương ứng
  */
 class Router {
-    protected $controller = "HomeController";  // Controller mặc định
+    protected $controller = "EmployeeController";  // Controller mặc định
     protected $action = "GetData";                // Action mặc định
     protected $params = [];                     // Mảng parameters
 

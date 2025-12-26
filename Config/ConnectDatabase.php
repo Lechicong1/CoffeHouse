@@ -1,10 +1,10 @@
 <?php
 /**
- * Class Database - Kết nối cơ sở dữ liệu
+ * Class ConnectDatabase - Kết nối cơ sở dữ liệu
  * Sử dụng MySQLi theo mô hình MVC truyền thống
  */
-class Database {
-    private $host = 'localhost';
+class ConnectDatabase {
+    private $host = '127.0.0.1';
     private $username = 'root';
     private $password = '';
     private $database = 'coffee_php';

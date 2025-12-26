@@ -7,11 +7,11 @@ class UserRepository {
     private $conn;
 
     public function __construct() {
-        // Include Database và UserEntity
-        require_once './Config/Database.php';
-        require_once './web/Models/UserEntity.php';
+        // Include ConnectDatabase và UserEntity
+        require_once './Config/ConnectDatabase.php';
+        require_once './web/Entity/UserEntity.php';
 
-        $db = new Database();
+        $db = new ConnectDatabase();
         $this->conn = $db->getConnection();
     }
 
@@ -29,7 +29,7 @@ class UserRepository {
             }
             return $list;
         } catch (Exception $e) {
-            throw new Exception("Database error in findAll: " . $e->getMessage());
+            throw new Exception("ConnectDatabase error in findAll: " . $e->getMessage());
         }
     }
 
@@ -45,7 +45,7 @@ class UserRepository {
             $data = $stmt->fetch(PDO::FETCH_ASSOC);
             return $data ? new UserEntity($data) : null;
         } catch (\PDOException $e) {
-            throw new \Exception("Database error in findById: " . $e->getMessage());
+            throw new \Exception("ConnectDatabase error in findById: " . $e->getMessage());
         }
     }
 
@@ -61,7 +61,7 @@ class UserRepository {
             $data = $stmt->fetch(PDO::FETCH_ASSOC);
             return $data ? new UserEntity($data) : null;
         } catch (\PDOException $e) {
-            throw new \Exception("Database error in findByUsername: " . $e->getMessage());
+            throw new \Exception("ConnectDatabase error in findByUsername: " . $e->getMessage());
         }
     }
 
@@ -86,7 +86,7 @@ class UserRepository {
                 $user->avatar_url
             ]);
         } catch (\PDOException $e) {
-            throw new \Exception("Database error in create: " . $e->getMessage());
+            throw new \Exception("ConnectDatabase error in create: " . $e->getMessage());
         }
     }
 
@@ -110,7 +110,7 @@ class UserRepository {
                 $user->id,
             ]);
         } catch (\PDOException $e) {
-            throw new \Exception("Database error in update: " . $e->getMessage());
+            throw new \Exception("ConnectDatabase error in update: " . $e->getMessage());
         }
     }
 
@@ -123,7 +123,7 @@ class UserRepository {
             $stmt = $this->conn->prepare($sql);
             return $stmt->execute([$id]);
         } catch (\PDOException $e) {
-            throw new \Exception("Database error in delete: " . $e->getMessage());
+            throw new \Exception("ConnectDatabase error in delete: " . $e->getMessage());
         }
     }
 }

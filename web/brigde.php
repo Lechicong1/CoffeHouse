@@ -13,7 +13,7 @@ define('PUBLIC_URL', BASE_URL . 'public/');
 // Đường dẫn tới các thư mục
 define('VIEW_PATH', __DIR__ . '/Views/');
 define('CONTROLLER_PATH', __DIR__ . '/Controllers/');
-define('MODEL_PATH', __DIR__ . '/Models/');
+define('MODEL_PATH', __DIR__ . '/Entity/');
 
 // Đường dẫn assets
 define('CSS_URL', PUBLIC_URL . 'css/');

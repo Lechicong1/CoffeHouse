@@ -53,7 +53,7 @@ $currentSection = $data['section'] ?? 'dashboard';
                         </a>
                     </li>
                     <li class="menu-item <?= $currentSection === 'products' ? 'active' : '' ?>" data-target="products">
-                        <a href="/COFFEE_PHP/admin/products" class="menu-link">
+                        <a href="ProductController" class="menu-link">
                             <span class="menu-icon">🛒</span>
                             <span class="menu-text">SẢN PHẨM</span>
                         </a>
@@ -62,6 +62,12 @@ $currentSection = $data['section'] ?? 'dashboard';
                         <a href="http://localhost/COFFEE_PHP/IngredientController" class="menu-link">
                             <span class="menu-icon">📦</span>
                             <span class="menu-text">NGUYÊN LIỆU</span>
+                        </a>
+                    </li>
+                    <li class="menu-item <?= $currentSection === 'inventory_imports' ? 'active' : '' ?>" data-target="inventory_imports">
+                        <a href="http://localhost/COFFEE_PHP/InventoryImportController" class="menu-link">
+                            <span class="menu-icon">📥</span>
+                            <span class="menu-text">NHẬP KHO</span>
                         </a>
                     </li>
                     <li class="menu-item <?= $currentSection === 'orders' ? 'active' : '' ?>" data-target="orders">
@@ -83,13 +89,13 @@ $currentSection = $data['section'] ?? 'dashboard';
                         </a>
                     </li>
                     <li class="menu-item <?= $currentSection === 'customers' ? 'active' : '' ?>" data-target="customers">
-                        <a href="/COFFEE_PHP/admin/customers" class="menu-link">
+                        <a href="/COFFEE_PHP/CustomerController/GetData" class="menu-link">
                             <span class="menu-icon">👤</span>
                             <span class="menu-text">KHÁCH HÀNG</span>
                         </a>
                     </li>
-                    <li class="menu-item <?= $currentSection === 'promotions' ? 'active' : '' ?>" data-target="promotions">
-                        <a href="/COFFEE_PHP/admin/promotions" class="menu-link">
+                    <li class="menu-item <?= $currentSection === 'vouchers' ? 'active' : '' ?>" data-target="vouchers">
+                        <a href="/COFFEE_PHP/VoucherController/GetData" class="menu-link">
                             <span class="menu-icon">🎁</span>
                             <span class="menu-text">KHUYẾN MÃI</span>
                         </a>
@@ -111,7 +117,7 @@ $currentSection = $data['section'] ?? 'dashboard';
 
             <!-- Logout -->
             <div class="sidebar-footer">
-                <a href="/COFFEE_PHP/logout" class="menu-link logout-link">
+                <a href="/COFFEE_PHP/Auth/logout" class="menu-link logout-link">
                     <span class="menu-icon">🚪</span>
                     <span class="menu-text">ĐĂNG XUẤT</span>
                 </a>

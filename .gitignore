@@ -36,3 +36,9 @@ node_modules/
 # Upload files (tùy theo business logic)
 # uploads/
 # public/uploads/
+
+
+.gitignore
+
+/Config/ConnectDatabase.php
+/Public/Assets/

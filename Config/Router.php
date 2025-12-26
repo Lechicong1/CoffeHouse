@@ -16,8 +16,10 @@ class Router {
 
         // ===== XỬ LÝ CONTROLLER =====
         if ($arr != null) {
-            // Tự động thêm "Controller" vào tên nếu chưa có
             $controllerName = $arr[0];
+
+            // Nếu đã có đuôi "Controller", giữ nguyên
+            // Nếu chưa có, thêm "Controller" vào
             if (!str_ends_with($controllerName, 'Controller')) {
                 $controllerName .= 'Controller';
             }

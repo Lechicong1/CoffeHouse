@@ -13,8 +13,8 @@ $roleFilter = $data['roleFilter'] ?? 'all';
 $successMessage = $data['successMessage'] ?? null;
 $errorMessage = $data['errorMessage'] ?? null;
 
-// Định nghĩa danh sách vai trò
-$roles = [
+// Danh sách vai trò truyền từ Controller (dynamic) - nếu không có thì fallback
+$roles = $data['roles'] ?? [
     1 => 'Quản lý',
     2 => 'Pha chế',
     3 => 'Thu ngân',

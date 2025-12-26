@@ -1,0 +1,286 @@
+<?php
+require_once __DIR__ . '/../Entity/VoucherEntity.php';
+use web\Entity\VoucherEntity;
+
+class VoucherService extends Service {
+
+    /**
+     * Lấy tất cả voucher
+     * @return array
+     */
+    public function getAllVouchers() {
+        $repository = $this->repository('VoucherRepository');
+        return $repository->findAll();
+    }
+
+    /**
+     * Lấy voucher theo ID
+     * @param int $id
+     * @return VoucherEntity|null
+     */
+    public function getVoucherById($id) {
+        $repository = $this->repository('VoucherRepository');
+        return $repository->findById($id);
+    }
+
+    /**
+     * Tìm kiếm voucher
+     * @param string $keyword
+     * @return array
+     */
+    public function searchVouchers($keyword) {
+        $repository = $this->repository('VoucherRepository');
+        return $repository->search($keyword);
+    }
+
+    /**
+     * Tạo voucher mới
+     * @param array $data
+     * @return array ['success' => bool, 'message' => string]
+     */
+    public function createVoucher($data) {
+        // Validate dữ liệu
+        $validation = $this->validateVoucherData($data);
+        if (!$validation['valid']) {
+            return [
+                'success' => false,
+                'message' => $validation['message']
+            ];
+        }
+
+        $repository = $this->repository('VoucherRepository');
+
+        // Kiểm tra tên voucher đã tồn tại
+        $existingVoucher = $repository->findByName($data['name']);
+        if ($existingVoucher) {
+            return [
+                'success' => false,
+                'message' => 'Tên voucher đã tồn tại!'
+            ];
+        }
+
+        // Tạo entity
+        $voucher = new VoucherEntity([
+            'name' => $data['name'],
+            'point_cost' => (int)$data['point_cost'],
+            'discount_type' => $data['discount_type'],
+            'discount_value' => (float)$data['discount_value'],
+            'max_discount_value' => !empty($data['max_discount_value']) ? (float)$data['max_discount_value'] : null,
+            'min_bill_total' => !empty($data['min_bill_total']) ? (float)$data['min_bill_total'] : 0,
+            'start_date' => !empty($data['start_date']) ? $data['start_date'] : null,
+            'end_date' => !empty($data['end_date']) ? $data['end_date'] : null,
+            'quantity' => !empty($data['quantity']) ? (int)$data['quantity'] : null,
+            'used_count' => 0,
+            'is_active' => isset($data['is_active']) ? (int)$data['is_active'] : 1
+        ]);
+
+        // Lưu vào database
+        $result = $repository->create($voucher);
+
+        if ($result) {
+            return [
+                'success' => true,
+                'message' => 'Thêm voucher thành công!'
+            ];
+        } else {
+            return [
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi thêm voucher!'
+            ];
+        }
+    }
+
+    /**
+     * Cập nhật voucher
+     * @param int $id
+     * @param array $data
+     * @return array ['success' => bool, 'message' => string]
+     */
+    public function updateVoucher($id, $data) {
+        $repository = $this->repository('VoucherRepository');
+
+        // Kiểm tra voucher tồn tại
+        $voucher = $repository->findById($id);
+        if (!$voucher) {
+            return [
+                'success' => false,
+                'message' => 'Không tìm thấy voucher!'
+            ];
+        }
+
+        // Validate dữ liệu
+        $validation = $this->validateVoucherData($data, $id);
+        if (!$validation['valid']) {
+            return [
+                'success' => false,
+                'message' => $validation['message']
+            ];
+        }
+
+        // Kiểm tra tên voucher đã tồn tại (trừ voucher hiện tại)
+        $existingVoucher = $repository->findByName($data['name'], $id);
+        if ($existingVoucher) {
+            return [
+                'success' => false,
+                'message' => 'Tên voucher đã tồn tại!'
+            ];
+        }
+
+        // Cập nhật thông tin
+        $voucher->name = $data['name'];
+        $voucher->point_cost = (int)$data['point_cost'];
+        $voucher->discount_type = $data['discount_type'];
+        $voucher->discount_value = (float)$data['discount_value'];
+        $voucher->max_discount_value = !empty($data['max_discount_value']) ? (float)$data['max_discount_value'] : null;
+        $voucher->min_bill_total = !empty($data['min_bill_total']) ? (float)$data['min_bill_total'] : 0;
+        $voucher->start_date = !empty($data['start_date']) ? $data['start_date'] : null;
+        $voucher->end_date = !empty($data['end_date']) ? $data['end_date'] : null;
+        $voucher->quantity = !empty($data['quantity']) ? (int)$data['quantity'] : null;
+        $voucher->used_count = isset($data['used_count']) ? (int)$data['used_count'] : $voucher->used_count;
+        $voucher->is_active = isset($data['is_active']) ? (int)$data['is_active'] : 1;
+
+        // Lưu vào database
+        $result = $repository->update($voucher);
+
+        if ($result) {
+            return [
+                'success' => true,
+                'message' => 'Cập nhật voucher thành công!'
+            ];
+        } else {
+            return [
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi cập nhật voucher!'
+            ];
+        }
+    }
+
+    /**
+     * Xóa voucher
+     * @param int $id
+     * @return array ['success' => bool, 'message' => string]
+     */
+    public function deleteVoucher($id) {
+        $repository = $this->repository('VoucherRepository');
+
+        // Kiểm tra voucher tồn tại
+        $voucher = $repository->findById($id);
+        if (!$voucher) {
+            return [
+                'success' => false,
+                'message' => 'Không tìm thấy voucher!'
+            ];
+        }
+
+        // Xóa voucher
+        $result = $repository->delete($id);
+
+        if ($result) {
+            return [
+                'success' => true,
+                'message' => 'Xóa voucher thành công!'
+            ];
+        } else {
+            return [
+                'success' => false,
+                'message' => 'Có lỗi xảy ra khi xóa voucher!'
+            ];
+        }
+    }
+
+    /**
+     * Đếm tổng số voucher
+     * @return int
+     */
+    public function countVouchers() {
+        $repository = $this->repository('VoucherRepository');
+        return $repository->countAll();
+    }
+
+    /**
+     * Đếm voucher đang hoạt động
+     * @return int
+     */
+    public function countActiveVouchers() {
+        $repository = $this->repository('VoucherRepository');
+        return $repository->countActive();
+    }
+
+    /**
+     * Lấy voucher đang còn hiệu lực
+     * @return array
+     */
+    public function getActiveVouchers() {
+        $repository = $this->repository('VoucherRepository');
+        return $repository->findActiveVouchers();
+    }
+
+    /**
+     * Validate dữ liệu voucher
+     * @param array $data
+     * @param int|null $id ID voucher (dùng khi update)
+     * @return array ['valid' => bool, 'message' => string]
+     */
+    private function validateVoucherData($data, $id = null) {
+        // Kiểm tra tên voucher
+        if (empty($data['name']) || strlen(trim($data['name'])) < 3) {
+            return [
+                'valid' => false,
+                'message' => 'Tên voucher phải có ít nhất 3 ký tự!'
+            ];
+        }
+
+        // Kiểm tra point cost
+        if (!isset($data['point_cost']) || $data['point_cost'] < 0) {
+            return [
+                'valid' => false,
+                'message' => 'Điểm đổi phải là số không âm!'
+            ];
+        }
+
+        // Kiểm tra discount type
+        if (empty($data['discount_type']) || !in_array($data['discount_type'], ['FIXED', 'PERCENT'])) {
+            return [
+                'valid' => false,
+                'message' => 'Loại giảm giá không hợp lệ!'
+            ];
+        }
+
+        // Kiểm tra discount value
+        if (!isset($data['discount_value']) || $data['discount_value'] <= 0) {
+            return [
+                'valid' => false,
+                'message' => 'Giá trị giảm phải lớn hơn 0!'
+            ];
+        }
+
+        // Nếu là phần trăm, kiểm tra không vượt quá 100
+        if ($data['discount_type'] === 'PERCENT' && $data['discount_value'] > 100) {
+            return [
+                'valid' => false,
+                'message' => 'Phần trăm giảm không được vượt quá 100%!'
+            ];
+        }
+
+        // Kiểm tra ngày bắt đầu và kết thúc
+        if (!empty($data['start_date']) && !empty($data['end_date'])) {
+            if (strtotime($data['end_date']) < strtotime($data['start_date'])) {
+                return [
+                    'valid' => false,
+                    'message' => 'Ngày kết thúc phải sau ngày bắt đầu!'
+                ];
+            }
+        }
+
+        // Kiểm tra số lượng
+        if (!empty($data['quantity']) && $data['quantity'] < 0) {
+            return [
+                'valid' => false,
+                'message' => 'Số lượng không được âm!'
+            ];
+        }
+
+        return ['valid' => true, 'message' => ''];
+    }
+}
+?>

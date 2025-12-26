@@ -20,22 +20,23 @@ class EmployeeController extends Controller {
         $this->view('AdminDashBoard/MasterLayout', [
             'page' => 'Employees_v',
             'section' => 'employees',
-            'employees' => $this->employeeService->getAllEmployees()
+            'employees' => $this->employeeService->getAllEmployees(),
+            'keyword' => ''
         ]);
     }
-    
+
     /**
-     * Tìm kiếm nhân viên (POST)
+     * Tìm kiếm nhân viên
      */
     function timkiem() {
         if (isset($_POST['btnTimkiem'])) {
             $keyword = $_POST['txtSearch'] ?? '';
-            $kq = $this->employeeService->searchEmployees($keyword);
+            $employees = $this->employeeService->searchEmployees($keyword);
             
             $this->view('AdminDashBoard/MasterLayout', [
                 'page' => 'Employees_v',
                 'section' => 'employees',
-                'employees' => $kq,
+                'employees' => $employees,
                 'keyword' => $keyword
             ]);
         }
@@ -46,39 +47,48 @@ class EmployeeController extends Controller {
      */
     function ins() {
         if (isset($_POST['btnThem'])) {
-            // Kiểm tra username có trùng không
-            if ($this->employeeService->checkUsernameExists($_POST['txtUsername'])) {
-                echo "<script>alert('Username đã tồn tại!')</script>";
-                $this->view('AdminDashBoard/MasterLayout', [
-                    'page' => 'Employees_v',
-                    'section' => 'employees',
-                    'employees' => $this->employeeService->getAllEmployees()
-                ]);
-                return;
-            }
-            
-            $data = [
-                'username' => $_POST['txtUsername'],
-                'password' => $_POST['txtPassword'],
-                'fullname' => $_POST['txtFullname'],
-                'email' => $_POST['txtEmail'] ?? null,
-                'phonenumber' => $_POST['txtPhonenumber'],
-                'address' => $_POST['txtAddress'] ?? null,
-                'roleId' => (int)$_POST['ddlRoleId'],
-                'luong' => (float)$_POST['txtLuong']
-            ];
-            
-            $result = $this->employeeService->createEmployee($data);
-            
-            if ($result['success']) {
-                echo "<script>alert('Thêm nhân viên thành công!')</script>";
-                $this->view('AdminDashBoard/MasterLayout', [
-                    'page' => 'Employees_v',
-                    'section' => 'employees',
-                    'employees' => $this->employeeService->getAllEmployees()
-                ]);
-            } else {
-                echo "<script>alert('Thêm thất bại: " . $result['message'] . "')</script>";
+            try {
+                // Kiểm tra username có trùng không
+                if ($this->employeeService->checkUsernameExists($_POST['txtUsername'])) {
+                    echo "<script>alert('Username đã tồn tại!')</script>";
+                    $this->view('AdminDashBoard/MasterLayout', [
+                        'page' => 'Employees_v',
+                        'section' => 'employees',
+                        'employees' => $this->employeeService->getAllEmployees()
+                    ]);
+                    return;
+                }
+                
+                $data = [
+                    'username' => $_POST['txtUsername'],
+                    'password' => $_POST['txtPassword'],
+                    'fullname' => $_POST['txtFullname'],
+                    'email' => $_POST['txtEmail'] ?? null,
+                    'phonenumber' => $_POST['txtPhonenumber'],
+                    'address' => $_POST['txtAddress'] ?? null,
+                    'roleId' => (int)$_POST['ddlRoleId'],
+                    'luong' => (float)$_POST['txtLuong']
+                ];
+                
+                $result = $this->employeeService->createEmployee($data);
+                
+                if ($result['success']) {
+                    echo "<script>alert('Thêm nhân viên thành công!')</script>";
+                    $this->view('AdminDashBoard/MasterLayout', [
+                        'page' => 'Employees_v',
+                        'section' => 'employees',
+                        'employees' => $this->employeeService->getAllEmployees()
+                    ]);
+                } else {
+                    echo "<script>alert('Thêm thất bại: " . $result['message'] . "')</script>";
+                    $this->view('AdminDashBoard/MasterLayout', [
+                        'page' => 'Employees_v',
+                        'section' => 'employees',
+                        'employees' => $this->employeeService->getAllEmployees()
+                    ]);
+                }
+            } catch (Exception $e) {
+                echo "<script>alert('Lỗi: " . addslashes($e->getMessage()) . "')</script>";
                 $this->view('AdminDashBoard/MasterLayout', [
                     'page' => 'Employees_v',
                     'section' => 'employees',
@@ -93,33 +103,42 @@ class EmployeeController extends Controller {
      */
     function upd() {
         if (isset($_POST['btnCapnhat'])) {
-            $id = (int)$_POST['txtId'];
-            
-            $data = [
-                'fullname' => $_POST['txtFullname'],
-                'email' => $_POST['txtEmail'] ?? null,
-                'phonenumber' => $_POST['txtPhonenumber'],
-                'address' => $_POST['txtAddress'] ?? null,
-                'roleId' => (int)$_POST['ddlRoleId'],
-                'luong' => (float)$_POST['txtLuong']
-            ];
-            
-            // Nếu có password mới
-            if (!empty($_POST['txtPassword'])) {
-                $data['password'] = $_POST['txtPassword'];
-            }
-            
-            $result = $this->employeeService->updateEmployee($id, $data);
-            
-            if ($result['success']) {
-                echo "<script>alert('Cập nhật thành công!')</script>";
-                $this->view('AdminDashBoard/MasterLayout', [
-                    'page' => 'Employees_v',
-                    'section' => 'employees',
-                    'employees' => $this->employeeService->getAllEmployees()
-                ]);
-            } else {
-                echo "<script>alert('Cập nhật thất bại: " . $result['message'] . "')</script>";
+            try {
+                $id = (int)$_POST['txtId'];
+                
+                $data = [
+                    'fullname' => $_POST['txtFullname'],
+                    'email' => $_POST['txtEmail'] ?? null,
+                    'phonenumber' => $_POST['txtPhonenumber'],
+                    'address' => $_POST['txtAddress'] ?? null,
+                    'roleId' => (int)$_POST['ddlRoleId'],
+                    'luong' => (float)$_POST['txtLuong']
+                ];
+                
+                // Nếu có password mới
+                if (!empty($_POST['txtPassword'])) {
+                    $data['password'] = $_POST['txtPassword'];
+                }
+                
+                $result = $this->employeeService->updateEmployee($id, $data);
+                
+                if ($result['success']) {
+                    echo "<script>alert('Cập nhật thành công!')</script>";
+                    $this->view('AdminDashBoard/MasterLayout', [
+                        'page' => 'Employees_v',
+                        'section' => 'employees',
+                        'employees' => $this->employeeService->getAllEmployees()
+                    ]);
+                } else {
+                    echo "<script>alert('Cập nhật thất bại: " . $result['message'] . "')</script>";
+                    $this->view('AdminDashBoard/MasterLayout', [
+                        'page' => 'Employees_v',
+                        'section' => 'employees',
+                        'employees' => $this->employeeService->getAllEmployees()
+                    ]);
+                }
+            } catch (Exception $e) {
+                echo "<script>alert('Lỗi: " . addslashes($e->getMessage()) . "')</script>";
                 $this->view('AdminDashBoard/MasterLayout', [
                     'page' => 'Employees_v',
                     'section' => 'employees',
@@ -134,18 +153,27 @@ class EmployeeController extends Controller {
      */
     function del() {
         if (isset($_POST['btnXoa'])) {
-            $id = (int)$_POST['txtId'];
-            $result = $this->employeeService->deleteEmployee($id);
-            
-            if ($result['success']) {
-                echo "<script>alert('Xóa nhân viên thành công!')</script>";
-                $this->view('AdminDashBoard/MasterLayout', [
-                    'page' => 'Employees_v',
-                    'section' => 'employees',
-                    'employees' => $this->employeeService->getAllEmployees()
-                ]);
-            } else {
-                echo "<script>alert('Xóa thất bại: " . $result['message'] . "')</script>";
+            try {
+                $id = (int)$_POST['txtId'];
+                $result = $this->employeeService->deleteEmployee($id);
+                
+                if ($result['success']) {
+                    echo "<script>alert('Xóa nhân viên thành công!')</script>";
+                    $this->view('AdminDashBoard/MasterLayout', [
+                        'page' => 'Employees_v',
+                        'section' => 'employees',
+                        'employees' => $this->employeeService->getAllEmployees()
+                    ]);
+                } else {
+                    echo "<script>alert('Xóa thất bại: " . $result['message'] . "')</script>";
+                    $this->view('AdminDashBoard/MasterLayout', [
+                        'page' => 'Employees_v',
+                        'section' => 'employees',
+                        'employees' => $this->employeeService->getAllEmployees()
+                    ]);
+                }
+            } catch (Exception $e) {
+                echo "<script>alert('Lỗi: " . addslashes($e->getMessage()) . "')</script>";
                 $this->view('AdminDashBoard/MasterLayout', [
                     'page' => 'Employees_v',
                     'section' => 'employees',

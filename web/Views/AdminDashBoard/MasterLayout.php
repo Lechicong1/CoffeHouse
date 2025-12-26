@@ -70,6 +70,12 @@ $currentSection = $data['section'] ?? 'dashboard';
                             <span class="menu-text">ĐƠN HÀNG</span>
                         </a>
                     </li>
+                    <li class="menu-item <?= $currentSection === 'categories' ? 'active' : '' ?>" data-target="categories">
+                        <a href="?url=Category" class="menu-link">
+                            <span class="menu-icon">🏷️</span>
+                            <span class="menu-text">DANH MỤC</span>
+                        </a>
+                    </li>
                     <li class="menu-item <?= $currentSection === 'employees' ? 'active' : '' ?>" data-target="employees">
                         <a href="http://localhost/COFFEE_PHP/EmployeeController" class="menu-link">
                             <span class="menu-icon">👥</span>
@@ -211,3 +217,4 @@ $currentSection = $data['section'] ?? 'dashboard';
     </script>
 </body>
 </html>
+

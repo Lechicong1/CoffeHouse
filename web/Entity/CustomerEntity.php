@@ -5,7 +5,7 @@
  * TABLE: customers
  * AUTHOR: Coffee House System
  */
-
+namespace web\Entity;
 class CustomerEntity {
     // Properties từ bảng customers
     public $id;
@@ -14,7 +14,6 @@ class CustomerEntity {
     public $email;
     public $points;
     public $status;
-    public $created_at;
 
     /**
      * Constructor - Khởi tạo entity rỗng hoặc từ array
@@ -28,7 +27,6 @@ class CustomerEntity {
             $this->email = $data['email'] ?? null;
             $this->points = isset($data['points']) ? (int)$data['points'] : 0;
             $this->status = isset($data['status']) ? (bool)$data['status'] : true;
-            $this->created_at = $data['created_at'] ?? null;
         }
     }
 
@@ -44,7 +42,6 @@ class CustomerEntity {
             'email' => $this->email,
             'points' => $this->points,
             'status' => $this->status,
-            'created_at' => $this->created_at,
         ];
     }
 }

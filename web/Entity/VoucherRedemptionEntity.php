@@ -1,33 +1,34 @@
 <?php
 /**
- * FILE: ReviewEntity.php
- * DESCRIPTION: Entity Review - Chứa properties từ bảng reviews
- * TABLE: reviews
+ * FILE: VoucherRedemptionEntity.php
+ * DESCRIPTION: Entity VoucherRedemption - Chứa properties từ bảng voucher_redemptions
+ * TABLE: voucher_redemptions
  * AUTHOR: Coffee House System
  */
 namespace web\Entity;
-class ReviewEntity {
-    // Properties từ bảng reviews
+class VoucherRedemptionEntity{
+    // Properties từ bảng voucher_redemptions
     public $id;
     public $customer_id;
-    public $product_id;
+    public $voucher_id;
     public $order_id;
-    public $rating; // 1 to 5 stars
-    public $comment;
+    public $points_used;
+    public $discount_amount;
     public $created_at;
 
     /**
      * Constructor - Khởi tạo entity rỗng hoặc từ array
      * @param array $data - Dữ liệu từ database (optional)
      */
-    public function __construct($data = []) {
+    public function __construct($data = [])
+    {
         if (!empty($data)) {
             $this->id = $data['id'] ?? null;
             $this->customer_id = $data['customer_id'] ?? null;
-            $this->product_id = $data['product_id'] ?? null;
+            $this->voucher_id = $data['voucher_id'] ?? null;
             $this->order_id = $data['order_id'] ?? null;
-            $this->rating = $data['rating'] ?? 5;
-            $this->comment = $data['comment'] ?? null;
+            $this->points_used = $data['points_used'] ?? 0;
+            $this->discount_amount = $data['discount_amount'] ?? 0;
             $this->created_at = $data['created_at'] ?? null;
         }
     }

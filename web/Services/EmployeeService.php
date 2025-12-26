@@ -2,6 +2,9 @@
 /**
  * EmployeeService - Xử lý logic nghiệp vụ cho Employee
  */
+
+use web\Entity\EmployeeEntity;
+
 class EmployeeService extends Service {
 
     private $employeeRepo;
@@ -190,7 +193,7 @@ class EmployeeService extends Service {
         }
 
         // Validate fullname
-        if (empty($data['fullname']) || strlen(trim($data['fullna`me'])) < 3) {
+        if (empty($data['fullname']) || strlen(trim($data['fullname'])) < 3) {
             throw new Exception("Họ tên phải có ít nhất 3 ký tự");
         }
 

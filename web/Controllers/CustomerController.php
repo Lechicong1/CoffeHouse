@@ -13,10 +13,12 @@ class CustomerController extends Controller {
         
         // Truyền dữ liệu vào view
         $this->view('AdminDashBoard/MasterLayout', [
-            'page' => 'Customers_v',
-            'customers' => $customers,
-            'totalCustomers' => $service->countCustomers()
-        ]);
+        'section' => 'customers',
+        'page' => 'Customers_v',
+        'customers' => $customers,
+        'totalCustomers' => $service->countCustomers()
+]);
+
     }
 
     /**
@@ -38,6 +40,7 @@ class CustomerController extends Controller {
         
         // Truyền dữ liệu vào view
         $this->view('AdminDashBoard/MasterLayout', [
+            'section' => 'customers',
             'page' => 'Customers_v',
             'customers' => $customers,
             'keyword' => $keyword,
@@ -68,7 +71,7 @@ class CustomerController extends Controller {
             if ($result['success']) {
                 echo "<script>
                     alert('{$result['message']}');
-                    window.location.href = '/COFFEHOUSE/CustomerController/GetData';
+                    window.location.href = '/COFFEE_PHP/CustomerController/GetData';
                 </script>";
             } else {
                 echo "<script>
@@ -78,7 +81,7 @@ class CustomerController extends Controller {
             }
         } else {
             // Redirect về trang danh sách nếu không phải POST
-            header('Location: /COFFEHOUSE/CustomerController/GetData');
+            header('Location: /COFFEE_PHP/CustomerController/GetData');
         }
     }
 
@@ -116,7 +119,7 @@ class CustomerController extends Controller {
             if ($result['success']) {
                 echo "<script>
                     alert('{$result['message']}');
-                    window.location.href = '/COFFEHOUSE/CustomerController/GetData';
+                    window.location.href = '/COFFEE_PHP/CustomerController/GetData';
                 </script>";
             } else {
                 echo "<script>
@@ -126,7 +129,7 @@ class CustomerController extends Controller {
             }
         } else {
             // Redirect về trang danh sách nếu không phải POST
-            header('Location: /COFFEHOUSE/CustomerController/GetData');
+            header('Location: /COFFEE_PHP/CustomerController/GetData');
         }
     }
 
@@ -155,7 +158,7 @@ class CustomerController extends Controller {
             if ($result['success']) {
                 echo "<script>
                     alert('{$result['message']}');
-                    window.location.href = '/COFFEHOUSE/CustomerController/GetData';
+                    window.location.href = '/COFFEE_PHP/CustomerController/GetData';
                 </script>";
             } else {
                 echo "<script>
@@ -165,12 +168,12 @@ class CustomerController extends Controller {
             }
         } else {
             // Redirect về trang danh sách nếu không phải POST
-            header('Location: /COFFEHOUSE/CustomerController/GetData');
+            header('Location: /COFFEE_PHP/CustomerController/GetData');
         }
     }
 
     /**
-     * Lấy thông tin khách hàng theo ID (API)
+     * Lấy thông tin khách hàng theo ID
      */
     public function getById() {
         $service = $this->service('CustomerService');
@@ -178,22 +181,16 @@ class CustomerController extends Controller {
         $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
         
         if ($id <= 0) {
-            echo json_encode(['success' => false, 'message' => 'ID không hợp lệ']);
+            echo 'Lỗi: ID không hợp lệ';
             return;
         }
         
         $customer = $service->getCustomerById($id);
         
         if ($customer) {
-            echo json_encode([
-                'success' => true,
-                'data' => $customer->toArray()
-            ]);
+            echo 'Thành công: Tìm thấy khách hàng ' . $customer->full_name;
         } else {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Không tìm thấy khách hàng'
-            ]);
+            echo 'Lỗi: Không tìm thấy khách hàng';
         }
     }
 
@@ -208,12 +205,17 @@ class CustomerController extends Controller {
             $points = isset($_POST['points']) ? (int)$_POST['points'] : 0;
             
             if ($id <= 0) {
-                echo json_encode(['success' => false, 'message' => 'ID không hợp lệ']);
+                echo 'Lỗi: ID không hợp lệ';
                 return;
             }
             
             $result = $service->updateCustomerPoints($id, $points);
-            echo json_encode($result);
+            
+            if ($result['success']) {
+                echo 'Thành công: ' . $result['message'];
+            } else {
+                echo 'Lỗi: ' . $result['message'];
+            }
         }
     }
 }

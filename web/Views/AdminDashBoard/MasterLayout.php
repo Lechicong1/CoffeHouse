@@ -83,13 +83,13 @@ $currentSection = $data['section'] ?? 'dashboard';
                         </a>
                     </li>
                     <li class="menu-item <?= $currentSection === 'customers' ? 'active' : '' ?>" data-target="customers">
-                        <a href="/COFFEE_PHP/admin/customers" class="menu-link">
+                        <a href="/COFFEE_PHP/CustomerController/GetData" class="menu-link">
                             <span class="menu-icon">👤</span>
                             <span class="menu-text">KHÁCH HÀNG</span>
                         </a>
                     </li>
-                    <li class="menu-item <?= $currentSection === 'promotions' ? 'active' : '' ?>" data-target="promotions">
-                        <a href="/COFFEE_PHP/admin/promotions" class="menu-link">
+                    <li class="menu-item <?= $currentSection === 'vouchers' ? 'active' : '' ?>" data-target="vouchers">
+                        <a href="/COFFEE_PHP/VoucherController/GetData" class="menu-link">
                             <span class="menu-icon">🎁</span>
                             <span class="menu-text">KHUYẾN MÃI</span>
                         </a>

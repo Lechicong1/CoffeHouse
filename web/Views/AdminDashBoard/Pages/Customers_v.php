@@ -13,263 +13,8 @@ $keyword = $data['keyword'] ?? '';
 <!-- Import Font Awesome -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-<style>
-        .customer-management {
-            padding: 20px;
-        }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .page-header h2 {
-            color: #333;
-            font-size: 28px;
-        }
-
-        .stats-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            border-radius: 10px;
-            color: white;
-        }
-
-        .stat-card h3 {
-            font-size: 14px;
-            margin-bottom: 10px;
-            opacity: 0.9;
-        }
-
-        .stat-card .number {
-            font-size: 32px;
-            font-weight: bold;
-        }
-
-        .action-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            gap: 20px;
-        }
-
-        .search-box {
-            flex: 1;
-            max-width: 500px;
-        }
-
-        .search-box form {
-            display: flex;
-            gap: 10px;
-        }
-
-        .search-box input {
-            flex: 1;
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background: #5568d3;
-        }
-
-        .btn-success {
-            background: #48bb78;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #38a169;
-        }
-
-        .btn-warning {
-            background: #f6ad55;
-            color: white;
-        }
-
-        .btn-warning:hover {
-            background: #ed8936;
-        }
-
-        .btn-danger {
-            background: #f56565;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #e53e3e;
-        }
-
-        .btn-sm {
-            padding: 5px 10px;
-            font-size: 12px;
-        }
-
-        .table-container {
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        thead {
-            background: #f7fafc;
-        }
-
-        th {
-            padding: 15px;
-            text-align: left;
-            font-weight: 600;
-            color: #2d3748;
-            border-bottom: 2px solid #e2e8f0;
-        }
-
-        td {
-            padding: 15px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        tbody tr:hover {
-            background: #f7fafc;
-        }
-
-        .badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .badge-active {
-            background: #c6f6d5;
-            color: #22543d;
-        }
-
-        .badge-inactive {
-            background: #fed7d7;
-            color: #742a2a;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 5px;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-        }
-
-        .modal-content {
-            background: white;
-            margin: 50px auto;
-            padding: 30px;
-            border-radius: 10px;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-header h3 {
-            color: #333;
-            font-size: 24px;
-        }
-
-        .close {
-            font-size: 28px;
-            font-weight: bold;
-            color: #aaa;
-            cursor: pointer;
-        }
-
-        .close:hover {
-            color: #000;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 14px;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .form-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 30px;
-        }
-
-        .no-data {
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
-</style>
+<!-- Import Customer Page CSS -->
+<link rel="stylesheet" href="/COFFEE_PHP/public/CSS/customer-page.css">
 
 <section id="customers" class="content-section">
     <div class="customer-management">
@@ -292,7 +37,7 @@ $keyword = $data['keyword'] ?? '';
         <!-- Action Bar -->
         <div class="action-bar">
             <div class="search-box">
-                <form action="/COFFEHOUSE/CustomerController/timkiem" method="POST">
+                <form action="/COFFEE_PHP/CustomerController/timkiem" method="POST">
                     <input type="text" name="txtTimKiem" placeholder="Tìm kiếm theo tên, số điện thoại, email..." 
                            value="<?php echo isset($keyword) ? htmlspecialchars($keyword) : ''; ?>">
                     <button type="submit" class="btn btn-primary">
@@ -301,7 +46,7 @@ $keyword = $data['keyword'] ?? '';
                 </form>
             </div>
             <?php if (isset($keyword) && !empty($keyword)): ?>
-                <a href="/COFFEHOUSE/CustomerController/GetData" class="btn btn-warning">
+                <a href="/COFFEE_PHP/CustomerController/GetData" class="btn btn-warning">
                     <i class="fas fa-redo"></i> Xem tất cả
                 </a>
             <?php endif; ?>
@@ -417,7 +162,7 @@ $keyword = $data['keyword'] ?? '';
     </div>
 
     <!-- Form Xóa (ẩn) -->
-    <form id="deleteForm" action="/COFFEHOUSE/CustomerController/del" method="POST" style="display: none;">
+    <form id="deleteForm" action="/COFFEE_PHP/CustomerController/del" method="POST" style="display: none;">
         <input type="hidden" name="idDel" id="idDel">
     </form>
 
@@ -425,7 +170,7 @@ $keyword = $data['keyword'] ?? '';
         // Mở modal thêm khách hàng
         function openAddModal() {
             document.getElementById('modalTitle').textContent = 'Thêm Khách Hàng';
-            document.getElementById('customerForm').action = '/COFFEHOUSE/CustomerController/ins';
+            document.getElementById('customerForm').action = '/COFFEE_PHP/CustomerController/ins';
             document.getElementById('customerForm').reset();
             document.getElementById('txtId').value = '';
             document.getElementById('customerModal').style.display = 'block';
@@ -434,7 +179,7 @@ $keyword = $data['keyword'] ?? '';
         // Mở modal sửa khách hàng
         function openEditModal(customer) {
             document.getElementById('modalTitle').textContent = 'Sửa Khách Hàng';
-            document.getElementById('customerForm').action = '/COFFEHOUSE/CustomerController/upd';
+            document.getElementById('customerForm').action = '/COFFEE_PHP/CustomerController/upd';
             
             document.getElementById('txtId').value = customer.id;
             document.getElementById('txtFullName').value = customer.full_name;

@@ -5,13 +5,13 @@
  * TABLE: product_sizes
  * AUTHOR: Coffee House System
  */
-namespace web\Models;
+namespace web\Entity;
 class ProductSizeEntity {
     // Properties từ bảng product_sizes
     public $id;
     public $product_id;
     public $size_name;
-    public $price_adjustment;
+    public $price;
 
     /**
      * Constructor - Khởi tạo entity rỗng hoặc từ array
@@ -22,7 +22,7 @@ class ProductSizeEntity {
             $this->id = $data['id'] ?? null;
             $this->product_id = $data['product_id'] ?? null;
             $this->size_name = $data['size_name'] ?? null;
-            $this->price_adjustment = $data['price_adjustment'] ?? 0;
+            $this->price = $data['price'] ?? 0;
         }
     }
 }

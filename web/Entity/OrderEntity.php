@@ -5,15 +5,13 @@
  * TABLE: orders
  * AUTHOR: Coffee House System
  */
-namespace web\Models;
+namespace web\Entity;
 class OrderEntity {
     // Properties từ bảng orders
     public $id;
-    public $user_id;
     public $staff_id;
     public $shipper_id;
-    public $promotion_id;
-    public $order_type; // online, at_counter
+
     public $status; // pending, confirmed, preparing, ready_pickup, shipping, delivered, cancelled
     public $payment_status; // unpaid, paid, refunded
     public $total_amount;
@@ -29,11 +27,10 @@ class OrderEntity {
     public function __construct($data = []) {
         if (!empty($data)) {
             $this->id = $data['id'] ?? null;
-            $this->user_id = $data['user_id'] ?? null;
+           
             $this->staff_id = $data['staff_id'] ?? null;
             $this->shipper_id = $data['shipper_id'] ?? null;
-            $this->promotion_id = $data['promotion_id'] ?? null;
-            $this->order_type = $data['order_type'] ?? 'online';
+           
             $this->status = $data['status'] ?? 'pending';
             $this->payment_status = $data['payment_status'] ?? 'unpaid';
             $this->total_amount = $data['total_amount'] ?? null;

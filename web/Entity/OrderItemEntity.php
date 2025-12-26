@@ -5,13 +5,13 @@
  * TABLE: order_items
  * AUTHOR: Coffee House System
  */
-namespace web\Models;
+namespace web\Entity;
 class OrderItemEntity {
     // Properties từ bảng order_items
     public $id;
     public $order_id;
     public $product_id;
-    public $size_id;
+    public $product_size_id;
     public $quantity;
     public $price_at_purchase;
     public $note;
@@ -25,7 +25,7 @@ class OrderItemEntity {
             $this->id = $data['id'] ?? null;
             $this->order_id = $data['order_id'] ?? null;
             $this->product_id = $data['product_id'] ?? null;
-            $this->size_id = $data['size_id'] ?? null;
+            $this->product_size_id = $data['product_size_id'] ?? null;
             $this->quantity = $data['quantity'] ?? 1;
             $this->price_at_purchase = $data['price_at_purchase'] ?? null;
             $this->note = $data['note'] ?? null;

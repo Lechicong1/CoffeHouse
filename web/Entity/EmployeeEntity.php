@@ -3,6 +3,7 @@
  * EmployeeEntity - Đại diện cho bảng employee
  * TABLE: employee
  */
+namespace web\Entity;
 class EmployeeEntity {
 
     // Properties tương ứng với các cột trong bảng employee
@@ -15,7 +16,6 @@ class EmployeeEntity {
     public $address;
     public $roleId;
     public $luong;
-    public $created_at;
 
     /**
      * Constructor - Khởi tạo entity từ array
@@ -32,7 +32,6 @@ class EmployeeEntity {
             $this->address = $data['address'] ?? null;
             $this->roleId = $data['roleId'] ?? null;
             $this->luong = $data['luong'] ?? null;
-            $this->created_at = $data['created_at'] ?? null;
         }
     }
 
@@ -71,8 +70,7 @@ class EmployeeEntity {
             'roleId' => $this->roleId,
             'roleName' => $this->getRoleName(),
             'luong' => $this->luong,
-            'formattedSalary' => $this->getFormattedSalary(),
-            'created_at' => $this->created_at
+            'formattedSalary' => $this->getFormattedSalary()
         ];
     }
 }

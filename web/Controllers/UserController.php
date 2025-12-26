@@ -96,46 +96,46 @@ class UserController extends Controller {
      * Trang chi tiết sản phẩm
      */
     function productDetail() {
-        $productId = isset($_GET['id']) ? $_GET['id'] : null;
+        $productId = isset($_GET['id']) ? intval($_GET['id']) : null;
 
-        if ($productId) {
-            $product = $this->productService->getProductById($productId);
-
-            if ($product && $product->is_active == 1) {
-                $product->sizes = $this->productService->getProductSizes($product->id);
-                $category = $this->categoryService->getCategoryById($product->category_id);
-
-                // Lấy sản phẩm liên quan (cùng category)
-                $relatedProductsAll = $this->productService->getProductsByCategory($product->category_id);
-
-                // Loại bỏ sản phẩm hiện tại và chỉ lấy active
-                $relatedProducts = [];
-                if ($relatedProductsAll) {
-                    foreach ($relatedProductsAll as $p) {
-                        if ($p->id != $productId && $p->is_active == 1) {
-                            $p->sizes = $this->productService->getProductSizes($p->id);
-                            $relatedProducts[] = $p;
-
-                            // Giới hạn 4 sản phẩm
-                            if (count($relatedProducts) >= 4) break;
-                        }
-                    }
-                }
-
-                $this->view('UserDashBoard/product-detail', [
-                    'product' => $product,
-                    'category' => $category,
-                    'relatedProducts' => $relatedProducts
-                ]);
-            } else {
-                // Redirect về menu nếu không tìm thấy sản phẩm
-                echo "<script>window.location.href='User/menu';</script>";
-                exit;
-            }
-        } else {
-            echo "<script>window.location.href='User/menu';</script>";
+        if (!$productId) {
+            echo "<script>window.location.href='/COFFEE_PHP/User/menu';</script>";
             exit;
         }
+
+        $product = $this->productService->getProductById($productId);
+
+        if (!$product || $product->is_active != 1) {
+            echo "<script>window.location.href='/COFFEE_PHP/User/menu';</script>";
+            exit;
+        }
+
+        // Load sizes và category
+        $product->sizes = $this->productService->getProductSizes($product->id);
+        $category = $this->categoryService->getCategoryById($product->category_id);
+
+        // Lấy sản phẩm liên quan (cùng category)
+        $relatedProductsAll = $this->productService->getProductsByCategory($product->category_id);
+
+        // Loại bỏ sản phẩm hiện tại và chỉ lấy active
+        $relatedProducts = [];
+        if ($relatedProductsAll) {
+            foreach ($relatedProductsAll as $p) {
+                if ($p->id != $productId && $p->is_active == 1) {
+                    $p->sizes = $this->productService->getProductSizes($p->id);
+                    $relatedProducts[] = $p;
+
+                    // Giới hạn 4 sản phẩm
+                    if (count($relatedProducts) >= 4) break;
+                }
+            }
+        }
+
+        $this->view('UserDashBoard/product-detail', [
+            'product' => $product,
+            'category' => $category,
+            'relatedProducts' => $relatedProducts
+        ]);
     }
 
     /**

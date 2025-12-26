@@ -64,6 +64,9 @@ class Router {
             // Loại bỏ khoảng trắng đầu/cuối và dấu /
             $url = trim($_GET['url'], '/');
 
+            // Loại bỏ query string nếu có (giữ lại trong $_GET)
+            $url = strtok($url, '?');
+
             // Lọc URL để bảo mật (xóa các ký tự nguy hiểm)
             $url = filter_var($url, FILTER_SANITIZE_URL);
 

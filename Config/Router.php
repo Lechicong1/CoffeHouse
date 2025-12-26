@@ -5,7 +5,7 @@
  */
 class Router {
     protected $controller = "HomeController";  // Controller mặc định
-    protected $action = "index";                // Action mặc định
+    protected $action = "GetData";                // Action mặc định
     protected $params = [];                     // Mảng parameters
 
     /**

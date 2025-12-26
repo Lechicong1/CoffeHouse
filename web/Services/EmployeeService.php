@@ -2,13 +2,13 @@
 /**
  * EmployeeService - Xử lý logic nghiệp vụ cho Employee
  */
-class EmployeeService {
+class EmployeeService extends Service {
 
     private $employeeRepo;
 
     public function __construct() {
-        require_once __DIR__ . '/../Repositories/EmployeeRepository.php';
-        $this->employeeRepo = new EmployeeRepository();
+        // Khởi tạo Repository thông qua Service base
+        $this->employeeRepo = $this->repository('EmployeeRepository');
     }
 
     /**
@@ -256,4 +256,3 @@ class EmployeeService {
     }
 }
 ?>
-

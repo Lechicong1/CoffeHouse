@@ -4,23 +4,19 @@
  * Theo mô hình MVC chuẩn
  */
 
-require_once __DIR__ . '/../../Config/Controller.php';
-require_once __DIR__ . '/../Services/EmployeeService.php';
-
 class EmployeeController extends Controller {
     private $employeeService;
     
     function __construct() {
-        $this->employeeService = new EmployeeService();
+        // Khởi tạo Service thông qua Controller base
+        $this->employeeService = $this->service('EmployeeService');
 
-        // Tự động gọi view khi khởi tạo controller
-        $this->index();
     }
     
     /**
      * Hiển thị danh sách nhân viên (Method mặc định)
      */
-    function index() {
+    function GetData() {
         $keyword = $_GET['search'] ?? '';
         $roleFilter = $_GET['role'] ?? 'all';
 

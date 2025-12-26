@@ -1,26 +1,11 @@
 <?php
-/**
- * EmployeeRepository - Xử lý truy vấn database cho bảng employee
- */
-class EmployeeRepository {
+include_once './web/Entity/EmployeeEntity.php';
 
-    private $conn;
+class EmployeeRepository extends ConnectDatabase {
 
-    public function __construct() {
-        require_once __DIR__ . '/../../Config/Database.php';
-        require_once __DIR__ . '/../Models/EmployeeEntity.php';
-
-        $db = new Database();
-        $this->conn = $db->getConnection();
-    }
-
-    /**
-     * Lấy tất cả nhân viên
-     * @return array
-     */
     public function findAll() {
         $sql = "SELECT * FROM employee ORDER BY created_at DESC";
-        $result = mysqli_query($this->conn, $sql);
+        $result = mysqli_query($this->con, $sql);
 
         $employees = [];
         while ($row = mysqli_fetch_assoc($result)) {
@@ -30,14 +15,10 @@ class EmployeeRepository {
         return $employees;
     }
 
-    /**
-     * Lấy nhân viên theo ID
-     * @param int $id
-     * @return EmployeeEntity|null
-     */
+
     public function findById($id) {
         $sql = "SELECT * FROM employee WHERE id = ?";
-        $stmt = mysqli_prepare($this->conn, $sql);
+        $stmt = mysqli_prepare($this->con, $sql);
         mysqli_stmt_bind_param($stmt, "i", $id);
         mysqli_stmt_execute($stmt);
 
@@ -54,7 +35,7 @@ class EmployeeRepository {
      */
     public function findByUsername($username) {
         $sql = "SELECT * FROM employee WHERE username = ?";
-        $stmt = mysqli_prepare($this->conn, $sql);
+        $stmt = mysqli_prepare($this->con, $sql);
         mysqli_stmt_bind_param($stmt, "s", $username);
         mysqli_stmt_execute($stmt);
 
@@ -73,11 +54,11 @@ class EmployeeRepository {
     public function findByEmail($email, $excludeId = null) {
         if ($excludeId) {
             $sql = "SELECT * FROM employee WHERE email = ? AND id != ?";
-            $stmt = mysqli_prepare($this->conn, $sql);
+            $stmt = mysqli_prepare($this->con, $sql);
             mysqli_stmt_bind_param($stmt, "si", $email, $excludeId);
         } else {
             $sql = "SELECT * FROM employee WHERE email = ?";
-            $stmt = mysqli_prepare($this->conn, $sql);
+            $stmt = mysqli_prepare($this->con, $sql);
             mysqli_stmt_bind_param($stmt, "s", $email);
         }
         
@@ -95,7 +76,7 @@ class EmployeeRepository {
      */
     public function findByRole($roleId) {
         $sql = "SELECT * FROM employee WHERE roleId = ? ORDER BY fullname";
-        $stmt = mysqli_prepare($this->conn, $sql);
+        $stmt = mysqli_prepare($this->con, $sql);
         mysqli_stmt_bind_param($stmt, "i", $roleId);
         mysqli_stmt_execute($stmt);
 
@@ -122,7 +103,7 @@ class EmployeeRepository {
                 OR phonenumber LIKE ?
                 ORDER BY fullname";
 
-        $stmt = mysqli_prepare($this->conn, $sql);
+        $stmt = mysqli_prepare($this->con, $sql);
         $searchTerm = "%$keyword%";
         mysqli_stmt_bind_param($stmt, "ssss", $searchTerm, $searchTerm, $searchTerm, $searchTerm);
         mysqli_stmt_execute($stmt);
@@ -146,7 +127,7 @@ class EmployeeRepository {
         $sql = "INSERT INTO employee (username, password, fullname, email, phonenumber, address, roleId, luong) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
-        $stmt = mysqli_prepare($this->conn, $sql);
+        $stmt = mysqli_prepare($this->con, $sql);
         mysqli_stmt_bind_param($stmt, "ssssssii",
             $employee->username,
             $employee->password,
@@ -171,7 +152,7 @@ class EmployeeRepository {
                 SET fullname = ?, email = ?, phonenumber = ?, address = ?, roleId = ?, luong = ?
                 WHERE id = ?";
 
-        $stmt = mysqli_prepare($this->conn, $sql);
+        $stmt = mysqli_prepare($this->con, $sql);
         mysqli_stmt_bind_param($stmt, "ssssiis",
             $employee->fullname,
             $employee->email,
@@ -193,7 +174,7 @@ class EmployeeRepository {
      */
     public function updatePassword($id, $newPassword) {
         $sql = "UPDATE employee SET password = ? WHERE id = ?";
-        $stmt = mysqli_prepare($this->conn, $sql);
+        $stmt = mysqli_prepare($this->con, $sql);
         mysqli_stmt_bind_param($stmt, "si", $newPassword, $id);
 
         return mysqli_stmt_execute($stmt);
@@ -206,7 +187,7 @@ class EmployeeRepository {
      */
     public function delete($id) {
         $sql = "DELETE FROM employee WHERE id = ?";
-        $stmt = mysqli_prepare($this->conn, $sql);
+        $stmt = mysqli_prepare($this->con, $sql);
         mysqli_stmt_bind_param($stmt, "i", $id);
 
         return mysqli_stmt_execute($stmt);
@@ -218,7 +199,7 @@ class EmployeeRepository {
      */
     public function count() {
         $sql = "SELECT COUNT(*) as total FROM employee";
-        $result = mysqli_query($this->conn, $sql);
+        $result = mysqli_query($this->con, $sql);
         $row = mysqli_fetch_assoc($result);
 
         return $row['total'];
@@ -231,7 +212,7 @@ class EmployeeRepository {
      */
     public function countByRole($roleId) {
         $sql = "SELECT COUNT(*) as total FROM employee WHERE roleId = ?";
-        $stmt = mysqli_prepare($this->conn, $sql);
+        $stmt = mysqli_prepare($this->con, $sql);
         mysqli_stmt_bind_param($stmt, "i", $roleId);
         mysqli_stmt_execute($stmt);
 
@@ -242,4 +223,3 @@ class EmployeeRepository {
     }
 }
 ?>
-

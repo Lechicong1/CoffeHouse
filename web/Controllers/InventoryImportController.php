@@ -1,7 +1,5 @@
 <?php
 include_once './Config/Controller.php';
-include_once './web/Entity/InventoryImportEntity.php';
-use web\Entity\InventoryImportEntity;
 
 class InventoryImportController extends Controller {
     private $inventoryImportService;
@@ -12,7 +10,7 @@ class InventoryImportController extends Controller {
         $this->ingredientService = $this->service('IngredientService');
     }
 
-    public function GetData() {
+    public function GetData($message = null) {
         $imports = $this->inventoryImportService->getAllImports();
         $ingredients = $this->ingredientService->getAllIngredients();
 
@@ -21,7 +19,8 @@ class InventoryImportController extends Controller {
             'imports' => $imports,
             'ingredients' => $ingredients,
             'section' => 'inventory_imports',
-            'keyword' => ''
+            'keyword' => '',
+            'message' => $message
         ]);
     }
 
@@ -47,44 +46,23 @@ class InventoryImportController extends Controller {
 
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $data = [
-                'ingredient_id' => $_POST['ingredient_id'],
-                'import_quantity' => $_POST['import_quantity'],
-                'total_cost' => $_POST['total_cost'],
-                'import_date' => $_POST['import_date'],
-                'note' => $_POST['note']
-            ];
-
-            $import = new InventoryImportEntity($data);
-            $this->inventoryImportService->createImport($import);
-
-            header('Location: ?url=InventoryImportController');
+            $result = $this->inventoryImportService->createImport($_POST);
+            $this->GetData($result);
         }
     }
 
     public function update() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $data = [
-                'id' => $_POST['id'],
-                'ingredient_id' => $_POST['ingredient_id'],
-                'import_quantity' => $_POST['import_quantity'],
-                'total_cost' => $_POST['total_cost'],
-                'import_date' => $_POST['import_date'],
-                'note' => $_POST['note']
-            ];
-
-            $import = new InventoryImportEntity($data);
-            $this->inventoryImportService->updateImport($import);
-
-            header('Location: ?url=InventoryImportController');
+            $result = $this->inventoryImportService->updateImport($_POST);
+            $this->GetData($result);
         }
     }
 
     public function delete() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = $_POST['id'];
-            $this->inventoryImportService->deleteImport($id);
-            header('Location: ?url=InventoryImportController');
+            $result = $this->inventoryImportService->deleteImport($id);
+            $this->GetData($result);
         }
     }
 }

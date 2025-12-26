@@ -22,6 +22,28 @@ class EmployeeService extends Service {
     }
 
     /**
+     * Lấy danh sách roles (từ RolesRepository). Nếu DB lỗi, trả về fallback.
+     * @return array
+     */
+    public function getRoles() {
+        try {
+            $rolesRepo = $this->repository('RolesRepository');
+            $roles = $rolesRepo->findAll();
+            if (!empty($roles)) return $roles;
+        } catch (Exception $e) {
+            // ignore and fallback
+        }
+
+        return [
+            1 => 'Admin',
+            2 => 'Staff',
+            3 => 'Manager',
+            4 => 'Shipper',
+            5 => 'Customer'
+        ];
+    }
+
+    /**
      * Lấy nhân viên theo ID
      */
     public function getEmployeeById($id) {

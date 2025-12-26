@@ -200,4 +200,19 @@ function uploadFile($file, $targetDir = 'uploads/') {
 // Nếu bạn có các helper khác, include ở đây
 // include_once __DIR__ . '/Helpers/StringHelper.php';
 // include_once __DIR__ . '/Helpers/ValidationHelper.php';
-?>
+
+// ===== LOAD CONTROLLERS =====
+include_once __DIR__ . '/Controllers/AuthController.php';
+include_once __DIR__ . '/Controllers/CategoryController.php';
+include_once __DIR__ . '/Controllers/CustomerController.php';
+include_once __DIR__ . '/Controllers/EmployeeController.php';
+include_once __DIR__ . '/Controllers/IngredientController.php';
+include_once __DIR__ . '/Controllers/VoucherController.php';
+
+// ===== LOAD SERVICES =====
+include_once __DIR__ . '/Services/AuthService.php';
+include_once __DIR__ . '/Services/CategoryService.php';
+include_once __DIR__ . '/Services/CustomerService.php';
+include_once __DIR__ . '/Services/EmployeeService.php';
+include_once __DIR__ . '/Services/IngredientService.php';
+include_once __DIR__ . '/Services/VoucherService.php';

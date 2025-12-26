@@ -111,7 +111,7 @@ $currentSection = $data['section'] ?? 'dashboard';
 
             <!-- Logout -->
             <div class="sidebar-footer">
-                <a href="/COFFEE_PHP/logout" class="menu-link logout-link">
+                <a href="/COFFEE_PHP/Auth/logout" class="menu-link logout-link">
                     <span class="menu-icon">🚪</span>
                     <span class="menu-text">ĐĂNG XUẤT</span>
                 </a>

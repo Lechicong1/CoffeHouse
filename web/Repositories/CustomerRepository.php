@@ -86,6 +86,23 @@ class CustomerRepository extends ConnectDatabase {
     }
 
     /**
+     * Lấy khách hàng theo username
+     * @param string $username
+     * @return CustomerEntity|null
+     */
+    public function findByUsername($username) {
+        $sql = "SELECT * FROM customers WHERE username = ?";
+        $stmt = mysqli_prepare($this->con, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $username);
+        mysqli_stmt_execute($stmt);
+
+        $result = mysqli_stmt_get_result($stmt);
+        $data = mysqli_fetch_assoc($result);
+
+        return $data ? new CustomerEntity($data) : null;
+    }
+
+    /**
      * Tìm kiếm khách hàng
      * @param string $keyword
      * @return array
@@ -118,16 +135,19 @@ class CustomerRepository extends ConnectDatabase {
      * @return bool
      */
     public function create($customer) {
-        $sql = "INSERT INTO customers (full_name, phone, email, points, status) 
-                VALUES (?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO customers (username, password, full_name, phone, email, points, status, roleId) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "sssis",
+        mysqli_stmt_bind_param($stmt, "sssssiii",
+            $customer->username,
+            $customer->password,
             $customer->full_name,
             $customer->phone,
             $customer->email,
             $customer->points,
-            $customer->status
+            $customer->status,
+            $customer->roleId
         );
 
         return mysqli_stmt_execute($stmt);
@@ -144,14 +164,15 @@ class CustomerRepository extends ConnectDatabase {
                 WHERE id = ?";
 
         $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "sssisi",
-            $customer->full_name,
-            $customer->phone,
-            $customer->email,
-            $customer->points,
-            $customer->status,
-            $customer->id
-        );
+        mysqli_stmt_bind_param($stmt, "sssiii",
+        $customer->full_name,
+        $customer->phone,
+        $customer->email,
+        $customer->points,
+        $customer->status,
+        $customer->id
+    );
+
 
         return mysqli_stmt_execute($stmt);
     }

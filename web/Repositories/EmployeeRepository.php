@@ -1,7 +1,7 @@
 <?php
-include_once './web/Entity/EmployeeEntity.php';
-
+require_once __DIR__ . '/../Entity/EmployeeEntity.php';
 use web\Entity\EmployeeEntity;
+
 
 class EmployeeRepository extends ConnectDatabase {
 

@@ -86,3 +86,15 @@ function handleForgotPassword() {
 function handleRegister() {
   window.location.href = "/COFFEE_PHP/Auth/showSignup";
 }
+
+/**
+ * Submit form with selected user type (customer | employee)
+ * @param {string} type
+ */
+function loginAs(type) {
+  const form = document.getElementById("loginForm");
+  const userTypeInput = document.getElementById("userType");
+  if (userTypeInput) userTypeInput.value = type;
+  // trigger form submit
+  form.submit();
+}

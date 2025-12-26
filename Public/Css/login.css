@@ -38,8 +38,8 @@ body {
   background: var(--white);
   border-radius: 20px;
   box-shadow: 0 10px 40px var(--shadow);
-  padding: 60px 50px;
-  max-width: 450px;
+  padding: 45px 36px; /* giảm padding để bố cục cân đối hơn */
+  max-width: 420px; /* hơi thu gọn để nút và input nhìn đồng bộ */
   width: 100%;
   animation: fadeInUp 0.6s ease;
 }
@@ -159,37 +159,56 @@ body {
 }
 
 /* Button - Pill Shape */
-.btn-login {
-  padding: 16px 40px;
+.login-buttons {
+  display: flex;
+  gap: 12px;
+  width: 100%; /* đảm bảo vùng chứa rộng bằng input */
+  margin-top: 4px;
+}
+
+.login-buttons .btn-login,
+.login-buttons .btn-secondary {
+  padding: 14px 18px;
+  color: var(--white);
+  border: none;
+  border-radius: 50px;
+  font-size: 15px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  flex: 1; /* equal width */
+  min-width: 0; /* allow flex children to shrink properly */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-buttons .btn-login {
   background: linear-gradient(
     135deg,
     var(--primary-color),
     var(--primary-dark)
   );
-  color: var(--white);
-  border: none;
-  border-radius: 50px;
-  font-size: 16px;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(182, 218, 159, 0.3);
 }
 
-.btn-login:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(182, 218, 159, 0.4);
-  background: linear-gradient(
-    135deg,
-    var(--primary-dark),
-    var(--primary-color)
-  );
+.login-buttons .btn-login:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(182, 218, 159, 0.32);
 }
 
-.btn-login:active {
-  transform: translateY(-1px);
+.login-buttons .btn-secondary {
+  background: transparent;
+  color: var(--text-dark);
+  border: 2px solid #e5e7eb;
+}
+
+.login-buttons .btn-secondary:hover {
+  background: #f7f9f6;
+  transform: translateY(-2px);
+  border-color: var(--primary-dark);
 }
 
 /* Footer Links */
@@ -257,7 +276,7 @@ body {
 /* Responsive Design */
 @media (max-width: 576px) {
   .login-container {
-    padding: 40px 30px;
+    padding: 32px 22px;
   }
 
   .login-title {
@@ -268,5 +287,16 @@ body {
     width: 60px;
     height: 60px;
     font-size: 28px;
+  }
+}
+
+/* On very small screens, stack the two buttons vertically */
+@media (max-width: 480px) {
+  .login-buttons {
+    flex-direction: column;
+  }
+  .login-buttons .btn-login,
+  .login-buttons .btn-secondary {
+    width: 100%;
   }
 }

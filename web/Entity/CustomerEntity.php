@@ -5,7 +5,7 @@
  * TABLE: customers
  * AUTHOR: Coffee House System
  */
-
+namespace web\Entity;
 class CustomerEntity {
     // Properties từ bảng customers
     public $id;

@@ -254,6 +254,7 @@ nav {
     background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
     border-color: var(--primary-dark);
 }
+.user-logout  .logout-icon {
     display: flex;
     align-items: center;
     justify-content: center;

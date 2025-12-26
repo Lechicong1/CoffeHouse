@@ -14,7 +14,7 @@ $keyword = $data['keyword'] ?? '';
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <!-- Import Customer Page CSS -->
-<link rel="stylesheet" href="/COFFEE_PHP/public/CSS/customer-page.css">
+<link rel="stylesheet" href="/COFFEE_PHP/Public/Css/customer-page.css">
 
 <section id="customers" class="content-section">
     <div class="customer-management">

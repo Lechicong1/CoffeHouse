@@ -7,7 +7,7 @@
     <title>Đăng Ký - Coffee House</title>
 
     <!-- Link CSS -->
-    <link rel="stylesheet" href="/COFFEE_PHP/public/CSS/signup.css">
+    <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/signup.css">
 </head>
 <body>
     <!-- Container chính của form signup -->
@@ -128,6 +128,6 @@
     </div>
 
     <!-- Link JavaScript -->
-    <script src="/COFFEE_PHP/public/JS/signup.js"></script>
+    <script src="/COFFEE_PHP/Public/Js/signup.js"></script>
 </body>
 </html>

@@ -15,7 +15,7 @@ $keyword = $data['keyword'] ?? '';
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
 <!-- Import Voucher Page CSS -->
-<link rel="stylesheet" href="/COFFEE_PHP/public/CSS/voucher-page.css">
+<link rel="stylesheet" href="/COFFEE_PHP/Public/Css/voucher-page.css">
 
 <section id="vouchers" class="content-section">
     <div class="voucher-management">

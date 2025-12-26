@@ -12,37 +12,10 @@
     <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/user-style.css">
 </head>
 <body>
-    <!-- HEADER & NAVIGATION -->
-    <header>
-        <nav>
-            <a href="/COFFEE_PHP/User/index" class="logo">COFFEE HOUSE</a>
-
-            <ul class="nav-menu">
-                <li><a href="/COFFEE_PHP/User/index" class="active">Trang chủ</a></li>
-                <li><a href="/COFFEE_PHP/User/index#about">Giới thiệu</a></li>
-                <li><a href="/COFFEE_PHP/User/menu">Thực đơn</a></li>
-                <li><a href="/COFFEE_PHP/User/index#location">Địa chỉ</a></li>
-                <li><a href="/COFFEE_PHP/User/about">Về chúng tôi</a></li>
-            </ul>
-            
-            <div class="auth-buttons">
-                <a href="/COFFEE_PHP/Auth/login" class="btn-login">Đăng nhập</a>
-                <a href="/COFFEE_PHP/Auth/register" class="btn-register">Đăng ký</a>
-            </div>
-            
-            <div class="cart-icon">
-                🛒
-                <span class="cart-count">0</span>
-            </div>
-            
-            <!-- Mobile Menu Toggle -->
-            <div class="menu-toggle">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </nav>
-    </header>
+    <?php
+    $currentPage = 'index';
+    include __DIR__ . '/header.php';
+    ?>
 
     <!-- HERO SECTION WITH SLIDER -->
     <section class="hero" id="home">
@@ -229,48 +202,6 @@
         </div>
     </section>
 
-    <!-- FOOTER -->
-    <footer>
-        <div class="footer-content">
-            <div class="footer-grid">
-                <div class="footer-section">
-                    <h3>COFFEE HOUSE</h3>
-                    <p>Mang đến trải nghiệm cà phê tuyệt vời nhất với không gian hiện đại và dịch vụ tận tâm.</p>
-                    <div class="social-links">
-                        <a href="#" class="social-icon">f</a>
-                        <a href="#" class="social-icon">📷</a>
-                        <a href="#" class="social-icon">T</a>
-                    </div>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>LIÊN KẾT</h3>
-                    <a href="/COFFEE_PHP/User/index#about">Giới thiệu</a>
-                    <a href="/COFFEE_PHP/User/menu">Thực đơn</a>
-                    <a href="/COFFEE_PHP/User/index#location">Địa chỉ</a>
-                    <a href="/COFFEE_PHP/User/about">Về chúng tôi</a>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>CHÍNH SÁCH</h3>
-                    <a href="#">Chính sách bảo mật</a>
-                    <a href="#">Điều khoản sử dụng</a>
-                    <a href="#">Chính sách đổi trả</a>
-                    <a href="#">Hướng dẫn đặt hàng</a>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>LIÊN HỆ</h3>
-                    <p>📍 123 Nguyễn Huệ, Q.1, TP.HCM</p>
-                    <p>📞 1900 8888</p>
-                    <p>✉️ info@coffeehouse.vn</p>
-                </div>
-            </div>
-            
-            <div class="footer-bottom">
-                <p>&copy; 2024 Coffee House. All Rights Reserved. Made with ❤️ in Vietnam</p>
-            </div>
-        </div>
-    </footer>
+    <?php include __DIR__ . '/footer.php'; ?>
 </body>
 </html>

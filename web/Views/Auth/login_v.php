@@ -7,7 +7,7 @@
     <title>Đăng Nhập - Coffee House</title>
 
     <!-- Link CSS -->
-    <link rel="stylesheet" href="/COFFEE_PHP/public/CSS/login.css">
+    <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/login.css">
 </head>
 <body>
     <!-- Container chính của form login -->
@@ -87,6 +87,6 @@
     </div>
 
     <!-- Link JavaScript -->
-    <script src="/COFFEE_PHP/public/JS/login.js"></script>
+    <script src="/COFFEE_PHP/Public/Js/login.js"></script>
 </body>
 </html>

@@ -30,10 +30,14 @@ class EmployeeController extends Controller {
     function timkiem() {
         if (isset($_POST['btnTimkiem'])) {
             $keyword = $_POST['txtSearch'] ?? '';
-            $roleFilter = $_POST['ddlRole'] ?? 'all';
-
-            header("Location: ?url=Employee&search=" . urlencode($keyword) . "&role=" . $roleFilter);
-            exit;
+            $kq = $this->employeeService->searchEmployees($keyword);
+            
+            $this->view('AdminDashBoard/MasterLayout', [
+                'page' => 'Employees_v',
+                'section' => 'employees',
+                'employees' => $kq,
+                'keyword' => $keyword
+            ]);
         }
     }
 

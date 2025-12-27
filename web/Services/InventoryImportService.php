@@ -1,13 +1,16 @@
 <?php
 include_once './web/Repositories/InventoryImportRepository.php';
+include_once './web/Repositories/IngredientRepository.php';
 include_once './web/Entity/InventoryImportEntity.php';
 use web\Entity\InventoryImportEntity;
 
 class InventoryImportService {
     private $inventoryImportRepository;
+    private $ingredientRepository;
 
     public function __construct() {
         $this->inventoryImportRepository = new InventoryImportRepository();
+        $this->ingredientRepository = new IngredientRepository();
     }
 
     public function getAllImports() {
@@ -32,6 +35,13 @@ class InventoryImportService {
             $id = $this->inventoryImportRepository->create($import);
 
             if ($id) {
+                // Cập nhật số lượng tồn kho của nguyên liệu
+                $ingredient = $this->ingredientRepository->findById($data['ingredient_id']);
+                if ($ingredient) {
+                    $ingredient->stock_quantity += $data['import_quantity'];
+                    $this->ingredientRepository->update($ingredient);
+                }
+
                 return ['success' => true, 'message' => 'Thêm phiếu nhập thành công!'];
             }
             return ['success' => false, 'message' => 'Thêm phiếu nhập thất bại!'];
@@ -42,6 +52,12 @@ class InventoryImportService {
 
     public function updateImport($data) {
         try {
+            // Lấy thông tin phiếu nhập cũ để tính toán lại kho
+            $oldImport = $this->inventoryImportRepository->findById($data['id']);
+            if (!$oldImport) {
+                return ['success' => false, 'message' => 'Phiếu nhập không tồn tại!'];
+            }
+
             $importData = [
                 'id' => $data['id'],
                 'ingredient_id' => $data['ingredient_id'],
@@ -55,6 +71,34 @@ class InventoryImportService {
             $result = $this->inventoryImportRepository->update($import);
 
             if ($result) {
+                // Cập nhật kho
+                // Trường hợp 1: Nguyên liệu không đổi
+                if ($oldImport->ingredient_id == $data['ingredient_id']) {
+                    $ingredient = $this->ingredientRepository->findById($data['ingredient_id']);
+                    if ($ingredient) {
+                        // Logic: Điều chỉnh lại kho bằng cách trừ lượng cũ và cộng lượng mới
+                        // Ví dụ: Nhập 10 (kho 10), sửa thành 12 -> Kho = 10 - 10 + 12 = 12
+                        $ingredient->stock_quantity = $ingredient->stock_quantity - $oldImport->import_quantity + $data['import_quantity'];
+                        $this->ingredientRepository->update($ingredient);
+                    }
+                } 
+                // Trường hợp 2: Đổi nguyên liệu
+                else {
+                    // Trừ kho nguyên liệu cũ
+                    $oldIngredient = $this->ingredientRepository->findById($oldImport->ingredient_id);
+                    if ($oldIngredient) {
+                        $oldIngredient->stock_quantity -= $oldImport->import_quantity;
+                        $this->ingredientRepository->update($oldIngredient);
+                    }
+
+                    // Cộng kho nguyên liệu mới
+                    $newIngredient = $this->ingredientRepository->findById($data['ingredient_id']);
+                    if ($newIngredient) {
+                        $newIngredient->stock_quantity += $data['import_quantity'];
+                        $this->ingredientRepository->update($newIngredient);
+                    }
+                }
+
                 return ['success' => true, 'message' => 'Cập nhật phiếu nhập thành công!'];
             }
             return ['success' => false, 'message' => 'Cập nhật phiếu nhập thất bại!'];

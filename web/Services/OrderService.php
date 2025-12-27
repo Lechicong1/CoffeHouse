@@ -3,7 +3,10 @@ include_once './web/Repositories/OrderRepository.php';
 include_once './web/Repositories/OrderItemRepository.php';
 include_once './web/Entity/OrderEntity.php';
 include_once './web/Entity/OrderItemEntity.php';
-include_once './web/Services/VoucherRedemptionService.php';
+include_once './web/Services/VoucherService.php';
+include_once './web/Repositories/VoucherRepository.php';
+include_once './web/Repositories/CustomerRepository.php';
+// Note: VoucherRedemption components removed — redemption handled directly via repositories
 
 use web\Entity\OrderEntity;
 use web\Entity\OrderItemEntity;
@@ -76,23 +79,57 @@ class OrderService {
                 $this->orderItemRepo->create($item);
             }
 
-            // Nếu có thông tin voucher được gửi kèm, cố gắng redeem trong cùng transaction
+            // Nếu có thông tin voucher được gửi kèm, backend sẽ TÍNH và redeem trong cùng transaction
             $discountAmount = 0.0;
             if (!empty($data['voucher']) && !empty($order->customer_id)) {
-                $voucherData = $data['voucher'];
                 $custId = $order->customer_id;
-                $voucherId = isset($voucherData['voucher_id']) ? (int)$voucherData['voucher_id'] : null;
-                $pointsUsed = isset($voucherData['points_used']) ? (int)$voucherData['points_used'] : 0;
-                $discountAmount = isset($voucherData['discount_amount']) ? (float)$voucherData['discount_amount'] : 0;
+                $voucherId = isset($data['voucher']['voucher_id']) ? (int)$data['voucher']['voucher_id'] : null;
 
                 if ($voucherId) {
-                    $redService = new VoucherRedemptionService();
-                    // Truyền billTotal = sub_total (orders.total_amount được tính ở trên là sub_total)
-                    $redeem = $redService->redeemAtomic($custId, $voucherId, $orderId, $pointsUsed, $discountAmount, $order->total_amount, $con, false);
-                    if (empty($redeem['success'])) {
+                    $vService = new VoucherService();
+                    $v = $vService->getVoucherById($voucherId);
+                    if (!$v) {
                         mysqli_rollback($con);
-                        return ['success' => false, 'message' => 'Không thể redeem voucher: ' . ($redeem['message'] ?? 'Lỗi')];
+                        return ['success' => false, 'message' => 'Voucher không tồn tại'];
                     }
+
+                    // Server-side calculate discount and pointsUsed (FE does not send discount)
+                    $discountAmount = $vService->calculateDiscount($v, $order->total_amount);
+                    $pointsUsed = (int)$v->point_cost;
+
+                    // Apply redemption using repositories (user removed VoucherRedemptionService)
+                    $voucherRepo = new VoucherRepository();
+                    $voucherRepo->con = $con;
+                    $customerRepo = new CustomerRepository();
+                    $customerRepo->con = $con;
+
+                    // reload customer under same connection
+                    $cust = $customerRepo->findById($custId);
+                    if (!$cust) {
+                        mysqli_rollback($con);
+                        return ['success' => false, 'message' => 'Customer not found'];
+                    }
+
+                    if ($cust->points < $pointsUsed) {
+                        mysqli_rollback($con);
+                        return ['success' => false, 'message' => 'Không đủ điểm để đổi voucher'];
+                    }
+
+                    // increment used_count
+                    $v->used_count = (int)$v->used_count + 1;
+                    if (!$voucherRepo->update($v)) {
+                        mysqli_rollback($con);
+                        return ['success' => false, 'message' => 'Không thể cập nhật voucher.used_count'];
+                    }
+
+                    // deduct customer points
+                    $newPoints = max(0, (int)$cust->points - $pointsUsed);
+                    if (!$customerRepo->updatePoints($custId, $newPoints)) {
+                        mysqli_rollback($con);
+                        return ['success' => false, 'message' => 'Không thể cập nhật điểm khách hàng'];
+                    }
+
+                    // VoucherRedemption logging removed per user request
                 }
             }
 

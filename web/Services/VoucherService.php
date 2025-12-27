@@ -270,11 +270,6 @@ class VoucherService extends Service {
     }
 
     /**
-     * NOTE: chức năng redeem voucher đã được tách sang `VoucherRedemptionService::redeemAtomic()`
-     * Nếu cần thực hiện redeem, gọi trực tiếp `VoucherRedemptionService::redeemAtomic($customerId,$voucherId,$orderId,$pointsUsed,$discountAmount,$billTotal)`
-     */
-
-    /**
      * Validate dữ liệu voucher
      * @param array $data
      * @param int|null $id ID voucher (dùng khi update)

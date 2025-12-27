@@ -14,14 +14,17 @@ function parseVND(text) {
 
 function openVoucherModal() {
   // ✅ KIỂM TRA: Phải chọn khách hàng trước khi mở modal voucher
-  const hasCustomer = window.currentOrder 
-    && window.currentOrder.customer_id 
-    && window.currentOrder.customer_id !== null 
-    && window.currentOrder.customer_id !== undefined
-    && window.currentOrder.customer_id !== '';
-  
+  const hasCustomer =
+    window.currentOrder &&
+    window.currentOrder.customer_id &&
+    window.currentOrder.customer_id !== null &&
+    window.currentOrder.customer_id !== undefined &&
+    window.currentOrder.customer_id !== "";
+
   if (!hasCustomer) {
-    alert("⚠️ Vui lòng chọn khách hàng trước!\n\n📋 Flow đúng:\n1. Bấm 'Chọn / Tìm Khách'\n2. Nhập số điện thoại\n3. Sau đó mới chọn voucher");
+    alert(
+      "⚠️ Vui lòng chọn khách hàng trước!\n\n📋 Flow đúng:\n1. Bấm 'Chọn / Tìm Khách'\n2. Nhập số điện thoại\n3. Sau đó mới chọn voucher"
+    );
     return; // Dừng lại, không mở modal
   }
 
@@ -78,8 +81,8 @@ function openVoucherModal() {
   fd.append("customer_id", custId);
   fd.append("bill_total", subtotal);
 
-  // Fetch all vouchers (we will show all and mark eligibility)
-  fetch("/COFFEE_PHP/Staff/getAllVouchers", { method: "POST", body: fd })
+  // Fetch eligible vouchers from server (server filters by customer + bill_total)
+  fetch("/COFFEE_PHP/Staff/getEligibleVouchers", { method: "POST", body: fd })
     .then((r) => r.json())
     .then((data) => {
       // store for client-side search/filter
@@ -237,6 +240,12 @@ function renderVouchers(vouchers, isAll, fd) {
       el.classList.add("selected");
       window.__pos_selected_voucher = v;
       window.__pos_selected_voucher_el = el;
+      // Request server-side preview for this voucher to show exact discount/total
+      try {
+        previewVoucherServer(v);
+      } catch (e) {
+        console.warn("Preview voucher failed", e);
+      }
     };
     btn.addEventListener("click", doSelect);
     el.addEventListener("click", doSelect);
@@ -271,11 +280,19 @@ function applySelectedVoucher() {
 
   // set into currentOrder following project's customer flow style
   window.currentOrder = window.currentOrder || {};
+  // ensure server-facing key `voucher_id` exists (server expects data.voucher.voucher_id)
   window.currentOrder.voucher = v;
+  const vid = v.voucher_id || v.id || v.VoucherId || v.voucherId || null;
+  if (vid) window.currentOrder.voucher.voucher_id = vid;
   // store point_cost as numeric
   window.currentOrder.voucher.point_cost = Number(
     window.currentOrder.voucher.point_cost || 0
   );
+
+  // include last server preview if available (purely informational)
+  if (window.__pos_selected_voucher && window.__pos_selected_voucher.preview) {
+    window.currentOrder.voucher.preview = window.__pos_selected_voucher.preview;
+  }
 
   // update UI text
   const sel = document.getElementById("pos-selected-voucher");

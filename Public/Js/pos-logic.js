@@ -458,25 +458,11 @@ async function processPayment() {
         : null,
   };
 
-  // Include voucher info if applied
+  // Include voucher info if applied — FE sends only voucher_id; backend computes discount/points
   if (window.currentOrder && window.currentOrder.voucher) {
     const v = window.currentOrder.voucher;
-    const pointsUsed = v.point_cost ? Number(v.point_cost) : 0;
-    // compute discount amount again to send to server
-    let discountAmount = 0;
-    if (v.discount_type === "FIXED")
-      discountAmount = Number(v.discount_value) || 0;
-    else
-      discountAmount = totalAmount * ((Number(v.discount_value) || 0) / 100.0);
-    if (v.max_discount_value)
-      discountAmount = Math.min(discountAmount, Number(v.max_discount_value));
-    discountAmount = Math.min(discountAmount, totalAmount);
-    discountAmount = Math.round(discountAmount);
-
     orderData.voucher = {
       voucher_id: v.id,
-      points_used: pointsUsed,
-      discount_amount: discountAmount,
     };
   }
 

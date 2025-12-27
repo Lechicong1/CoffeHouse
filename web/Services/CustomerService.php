@@ -24,6 +24,16 @@ class CustomerService extends Service {
     }
 
     /**
+     * Lấy địa chỉ của khách hàng theo ID
+     * @param int $id
+     * @return string|null
+     */
+    public function getCustomerAddress($id) {
+        $repository = $this->repository('CustomerRepository');
+        return $repository->getAddressById($id);
+    }
+
+    /**
      * Tìm kiếm khách hàng
      * @param string $keyword
      * @return array
@@ -77,6 +87,7 @@ class CustomerService extends Service {
             'full_name' => $data['full_name'],
             'phone' => $data['phone'],
             'email' => $data['email'] ?? null,
+            'address' => $data['address'] ?? null,
             'points' => isset($data['points']) ? (int)$data['points'] : 0,
             'status' => isset($data['status']) ? (int)$data['status'] : 1
         ]);
@@ -148,6 +159,7 @@ class CustomerService extends Service {
         $customer->full_name = $data['full_name'];
         $customer->phone = $data['phone'];
         $customer->email = $data['email'] ?? null;
+        $customer->address = $data['address'] ?? null;
         $customer->points = isset($data['points']) ? (int)$data['points'] : 0;
         $customer->status = isset($data['status']) ? (int)$data['status'] : 1;
 

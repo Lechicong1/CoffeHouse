@@ -306,6 +306,7 @@ class AuthService extends Service {
             'full_name' => $data['fullname'],
             'phone' => $data['phone'],
             'email' => $data['email'] ?? '',
+            'address' => $data['address'] ?? '',
             'points' => 0,
             'status' => 1
         ]);

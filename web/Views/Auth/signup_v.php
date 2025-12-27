@@ -55,6 +55,19 @@
                 >
             </div>
 
+            <!-- Nhóm Address -->
+            <div class="form-group">
+                <label for="address" class="form-label">Địa chỉ</label>
+                <input
+                    type="text"
+                    id="address"
+                    name="address"
+                    class="form-input"
+                    placeholder="Nhập địa chỉ (tùy chọn)"
+                    autocomplete="street-address"
+                >
+            </div>
+
             <!-- Nhóm Email -->
             <div class="form-group">
                 <label for="email" class="form-label">Email (tùy chọn)</label>

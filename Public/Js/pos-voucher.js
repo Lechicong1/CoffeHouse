@@ -13,6 +13,18 @@ function parseVND(text) {
 }
 
 function openVoucherModal() {
+  // ✅ KIỂM TRA: Phải chọn khách hàng trước khi mở modal voucher
+  const hasCustomer = window.currentOrder 
+    && window.currentOrder.customer_id 
+    && window.currentOrder.customer_id !== null 
+    && window.currentOrder.customer_id !== undefined
+    && window.currentOrder.customer_id !== '';
+  
+  if (!hasCustomer) {
+    alert("⚠️ Vui lòng chọn khách hàng trước!\n\n📋 Flow đúng:\n1. Bấm 'Chọn / Tìm Khách'\n2. Nhập số điện thoại\n3. Sau đó mới chọn voucher");
+    return; // Dừng lại, không mở modal
+  }
+
   // build modal if not exists
   let modal = document.getElementById("voucherModal");
   if (!modal) {

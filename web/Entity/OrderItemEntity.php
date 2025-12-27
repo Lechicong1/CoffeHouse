@@ -27,7 +27,7 @@ class OrderItemEntity {
             $this->product_id = $data['product_id'] ?? null;
             $this->product_size_id = $data['product_size_id'] ?? null;
             $this->quantity = $data['quantity'] ?? 1;
-            $this->price_at_purchase = $data['price_at_purchase'] ?? null;
+            $this->price_at_purchase = $data['price_at_purchase'] ?? 0;
             $this->note = $data['note'] ?? null;
         }
     }

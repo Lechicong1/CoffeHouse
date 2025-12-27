@@ -11,6 +11,14 @@ class ProductController extends Controller {
     }
 
     public function GetData($message = null) {
+        if ($message) {
+            if ($message['success']) {
+                echo "<script>alert('" . addslashes($message['message']) . "')</script>";
+            } else {
+                echo "<script>alert('Lỗi: " . addslashes($message['message']) . "')</script>";
+            }
+        }
+
         $products = $this->productService->getAllProducts();
         
         // Lấy size cho từng sản phẩm để hiển thị (nếu cần) hoặc để edit

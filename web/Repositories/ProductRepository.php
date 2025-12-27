@@ -70,6 +70,30 @@ class ProductRepository extends ConnectDatabase {
     }
 
     /**
+     * Tìm sản phẩm theo tên
+     * @param string $name
+     * @param int|null $excludeId ID sản phẩm cần loại trừ (khi update)
+     * @return ProductEntity|null
+     */
+    public function findByName($name, $excludeId = null) {
+        if ($excludeId) {
+            $sql = "SELECT * FROM products WHERE name = ? AND id != ?";
+            $stmt = mysqli_prepare($this->con, $sql);
+            mysqli_stmt_bind_param($stmt, "si", $name, $excludeId);
+        } else {
+            $sql = "SELECT * FROM products WHERE name = ?";
+            $stmt = mysqli_prepare($this->con, $sql);
+            mysqli_stmt_bind_param($stmt, "s", $name);
+        }
+
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+        $data = mysqli_fetch_assoc($result);
+
+        return $data ? new ProductEntity($data) : null;
+    }
+
+    /**
      * Tìm sản phẩm theo danh mục
      * @param int $categoryId
      * @return array

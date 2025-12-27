@@ -23,6 +23,9 @@ class InventoryImportService {
 
     public function createImport($data) {
         try {
+            // Validate dữ liệu
+            $this->validateImportData($data);
+
             $importData = [
                 'ingredient_id' => $data['ingredient_id'],
                 'import_quantity' => $data['import_quantity'],
@@ -52,6 +55,9 @@ class InventoryImportService {
 
     public function updateImport($data) {
         try {
+            // Validate dữ liệu
+            $this->validateImportData($data);
+
             // Lấy thông tin phiếu nhập cũ để tính toán lại kho
             $oldImport = $this->inventoryImportRepository->findById($data['id']);
             if (!$oldImport) {
@@ -125,6 +131,24 @@ class InventoryImportService {
 
     public function getImportsByIngredient($ingredientId) {
         return $this->inventoryImportRepository->findByIngredientId($ingredientId);
+    }
+
+    /**
+     * Validate dữ liệu nhập kho
+     */
+    private function validateImportData($data) {
+        if (empty($data['ingredient_id'])) {
+            throw new Exception("Vui lòng chọn nguyên liệu");
+        }
+        if (empty($data['import_quantity']) || $data['import_quantity'] <= 0) {
+            throw new Exception("Số lượng nhập phải lớn hơn 0");
+        }
+        if (!isset($data['total_cost']) || $data['total_cost'] < 0) {
+            throw new Exception("Tổng tiền không hợp lệ");
+        }
+        if (empty($data['import_date'])) {
+            throw new Exception("Vui lòng chọn ngày nhập");
+        }
     }
 }
 ?>

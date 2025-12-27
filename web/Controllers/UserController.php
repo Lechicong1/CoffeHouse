@@ -144,5 +144,68 @@ class UserController extends Controller {
     function about() {
         $this->view('UserDashBoard/about', []);
     }
+
+    /**
+     * Trang giỏ hàng
+     */
+    function cart() {
+        // Kiểm tra đăng nhập
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
+        if (!isset($_SESSION['user']) || $_SESSION['user']['type'] !== 'customer') {
+            $_SESSION['error_message'] = 'Vui lòng đăng nhập để xem giỏ hàng';
+            header('Location: /COFFEE_PHP/Auth/login');
+            exit();
+        }
+
+        // Lấy giỏ hàng từ CartService
+        include_once './web/Services/CartService.php';
+        $cartService = new CartService();
+        $customerId = $_SESSION['user']['id'];
+        $cartData = $cartService->getCart($customerId);
+
+        $this->view('UserDashBoard/cart', [
+            'cartItems' => $cartData['items'] ?? [],
+            'total' => $cartData['total'] ?? 0,
+            'count' => $cartData['count'] ?? 0
+        ]);
+    }
+
+    /**
+     * Trang checkout
+     */
+    function checkout() {
+        // Kiểm tra đăng nhập
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
+        if (!isset($_SESSION['user']) || $_SESSION['user']['type'] !== 'customer') {
+            $_SESSION['error_message'] = 'Vui lòng đăng nhập để thanh toán';
+            header('Location: /COFFEE_PHP/Auth/login');
+            exit();
+        }
+
+        // Lấy giỏ hàng
+        include_once './web/Services/CartService.php';
+        $cartService = new CartService();
+        $customerId = $_SESSION['user']['id'];
+        $cartData = $cartService->getCart($customerId);
+
+        // Kiểm tra giỏ hàng có trống không
+        if (empty($cartData['items'])) {
+            $_SESSION['error_message'] = 'Giỏ hàng của bạn đang trống';
+            header('Location: /COFFEE_PHP/User/menu');
+            exit();
+        }
+
+        $this->view('UserDashBoard/checkout', [
+            'cartItems' => $cartData['items'],
+            'total' => $cartData['total'],
+            'count' => $cartData['count']
+        ]);
+    }
 }
 ?>

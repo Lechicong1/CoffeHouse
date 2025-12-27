@@ -108,6 +108,7 @@ class AuthController extends Controller {
                 'fullname' => isset($_POST['fullname']) ? trim($_POST['fullname']) : '',
                 'phone' => isset($_POST['phone']) ? trim($_POST['phone']) : '',
                 'email' => isset($_POST['email']) ? trim($_POST['email']) : '',
+                'address' => isset($_POST['address']) ? trim($_POST['address']) : '',
                 'username' => isset($_POST['username']) ? trim($_POST['username']) : '',
                 'password' => isset($_POST['password']) ? trim($_POST['password']) : '',
                 'confirmPassword' => isset($_POST['confirmPassword']) ? trim($_POST['confirmPassword']) : ''

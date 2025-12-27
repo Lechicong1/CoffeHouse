@@ -17,6 +17,9 @@ document.addEventListener("DOMContentLoaded", function () {
   signupForm.addEventListener("submit", function (e) {
     const fullname = document.getElementById("fullname").value.trim();
     const phone = document.getElementById("phone").value.trim();
+    const address = document.getElementById("address")
+      ? document.getElementById("address").value.trim()
+      : "";
     const username = document.getElementById("username").value.trim();
     const password = passwordInput.value.trim();
     const confirmPassword = confirmPasswordInput.value.trim();
@@ -39,6 +42,13 @@ document.addEventListener("DOMContentLoaded", function () {
     if (username.length < 3) {
       e.preventDefault();
       alert("Tên đăng nhập phải có ít nhất 3 ký tự!");
+      return false;
+    }
+
+    // Validate address length (optional)
+    if (address.length > 255) {
+      e.preventDefault();
+      alert("Địa chỉ quá dài (tối đa 255 ký tự)");
       return false;
     }
 

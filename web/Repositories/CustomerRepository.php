@@ -38,6 +38,23 @@ class CustomerRepository extends ConnectDatabase {
     }
 
     /**
+     * Lấy địa chỉ của khách hàng theo ID
+     * @param int $id
+     * @return string|null
+     */
+    public function getAddressById($id) {
+        $sql = "SELECT address FROM customers WHERE id = ?";
+        $stmt = mysqli_prepare($this->con, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        mysqli_stmt_execute($stmt);
+
+        $result = mysqli_stmt_get_result($stmt);
+        $row = mysqli_fetch_assoc($result);
+
+        return $row ? $row['address'] : null;
+    }
+
+    /**
      * Lấy khách hàng theo email
      * @param string $email
      * @param int|null $excludeId ID khách hàng cần loại trừ (khi update)
@@ -135,17 +152,18 @@ class CustomerRepository extends ConnectDatabase {
      * @return bool
      */
     public function create($customer) {
-        // customers table schema: username, password, full_name, phone, email, points, status
-        $sql = "INSERT INTO customers (username, password, full_name, phone, email, points, status) 
-                VALUES (?, ?, ?, ?, ?, ?, ?)";
+        // customers table schema: username, password, full_name, phone, email, address, points, status
+        $sql = "INSERT INTO customers (username, password, full_name, phone, email, address, points, status) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "sssssii",
+        mysqli_stmt_bind_param($stmt, "ssssssii",
             $customer->username,
             $customer->password,
             $customer->full_name,
             $customer->phone,
             $customer->email,
+            $customer->address,
             $customer->points,
             $customer->status
         );
@@ -160,18 +178,19 @@ class CustomerRepository extends ConnectDatabase {
      */
     public function update($customer) {
         $sql = "UPDATE customers 
-                SET full_name = ?, phone = ?, email = ?, points = ?, status = ?
-                WHERE id = ?";
+            SET full_name = ?, phone = ?, email = ?, address = ?, points = ?, status = ?
+            WHERE id = ?";
 
         $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "sssiii",
+        mysqli_stmt_bind_param($stmt, "ssssiii",
         $customer->full_name,
         $customer->phone,
         $customer->email,
+        $customer->address,
         $customer->points,
         $customer->status,
         $customer->id
-    );
+        );
 
 
         return mysqli_stmt_execute($stmt);

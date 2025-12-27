@@ -99,7 +99,7 @@ class VoucherRepository extends ConnectDatabase {
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "sisdddsssii",
+        mysqli_stmt_bind_param($stmt, "sisdddssiii",
             $voucher->name,
             $voucher->point_cost,
             $voucher->discount_type,
@@ -129,7 +129,7 @@ class VoucherRepository extends ConnectDatabase {
                 WHERE id = ?";
 
         $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "sisdddsssiii",
+        mysqli_stmt_bind_param($stmt, "sisdddssiiii",
             $voucher->name,
             $voucher->point_cost,
             $voucher->discount_type,

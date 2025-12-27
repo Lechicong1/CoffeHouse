@@ -152,18 +152,20 @@ class CustomerRepository extends ConnectDatabase {
      * @return bool
      */
     public function create($customer) {
-        // customers table schema: username, password, full_name, phone, email, address, points, status
-        $sql = "INSERT INTO customers (username, password, full_name, phone, email, address, points, status) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        // customers table schema: username, password, full_name, phone, email, address, account_type, points, status
+        $sql = "INSERT INTO customers (username, password, full_name, phone, email, address, account_type, points, status) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "ssssssii",
+        // types: username(s), password(s), full_name(s), phone(s), email(s), address(s), account_type(s), points(i), status(i)
+        mysqli_stmt_bind_param($stmt, "sssssssii",
             $customer->username,
             $customer->password,
             $customer->full_name,
             $customer->phone,
             $customer->email,
             $customer->address,
+            $customer->account_type,
             $customer->points,
             $customer->status
         );
@@ -178,21 +180,43 @@ class CustomerRepository extends ConnectDatabase {
      */
     public function update($customer) {
         $sql = "UPDATE customers 
-            SET full_name = ?, phone = ?, email = ?, address = ?, points = ?, status = ?
+            SET full_name = ?, phone = ?, email = ?, address = ?, account_type = ?, points = ?, status = ?
             WHERE id = ?";
 
         $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "ssssiii",
+        mysqli_stmt_bind_param($stmt, "sssssiii",
         $customer->full_name,
         $customer->phone,
         $customer->email,
         $customer->address,
+        $customer->account_type,
         $customer->points,
         $customer->status,
         $customer->id
         );
 
 
+        return mysqli_stmt_execute($stmt);
+    }
+
+    /**
+     * Cập nhật username/password/address/email/full_name và chuyển thành account_type = 'WEB'
+     * @param int $id
+     * @param string $username
+     * @param string $password
+     * @param string|null $address
+     * @param string|null $email
+     * @param string|null $full_name
+     * @return bool
+     */
+
+    // Chuyển khách hàng GUEST_POS thành tài khoản WEB
+    public function upgradeToWebAccount($id,$username,$password,$address = null,$email = null,$full_name = null) {
+        $sql = "UPDATE customers 
+            SET username = ?, password = ?, address = ?, email = ?, full_name = ?, account_type = 'WEB' 
+            WHERE id = ?";
+        $stmt = mysqli_prepare($this->con, $sql);
+        mysqli_stmt_bind_param($stmt, "sssssi", $username, $password, $address, $email, $full_name, $id);
         return mysqli_stmt_execute($stmt);
     }
 

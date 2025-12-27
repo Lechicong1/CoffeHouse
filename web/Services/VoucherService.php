@@ -216,6 +216,65 @@ class VoucherService extends Service {
     }
 
     /**
+     * Lấy voucher đủ điều kiện cho customer và bill total
+     * @param int|null $customerId
+     * @param float $billTotal
+     * @return array VoucherEntity[]
+     */
+    public function getEligibleVouchers($customerId = null, $billTotal = 0) {
+        $voucherRepo = $this->repository('VoucherRepository');
+        $vouchers = $voucherRepo->findActiveVouchers();
+
+        $customerPoints = 0;
+        if ($customerId) {
+            $custRepo = $this->repository('CustomerRepository');
+            $cust = $custRepo->findById($customerId);
+            if ($cust) $customerPoints = (int)$cust->points;
+        }
+
+        $eligible = [];
+        foreach ($vouchers as $v) {
+            if ($v->point_cost > $customerPoints) continue;
+            if ($billTotal < $v->min_bill_total) continue;
+            $eligible[] = $v;
+        }
+
+        return $eligible;
+    }
+
+    /**
+     * Tính discount amount theo voucher và bill total
+    * @param VoucherEntity $v
+    * @param float $billTotal
+    * @return int Số tiền giảm (đơn vị nhỏ nhất, VND)
+     */
+    public function calculateDiscount($v, $billTotal) {
+        // Kiểm tra bill total có đạt yêu cầu tối thiểu không
+        if ($billTotal < $v->min_bill_total) {
+            return 0;
+        }
+
+        $discount = 0;
+        if ($v->discount_type === 'FIXED') {
+            $discount = (float)$v->discount_value;
+        } else { // PERCENT
+            $discount = $billTotal * ((float)$v->discount_value / 100.0);
+        }
+
+        if (!empty($v->max_discount_value)) {
+            $discount = min($discount, (float)$v->max_discount_value);
+        }
+
+        $discount = min($discount, $billTotal);
+        return (int)round($discount);
+    }
+
+    /**
+     * NOTE: chức năng redeem voucher đã được tách sang `VoucherRedemptionService::redeemAtomic()`
+     * Nếu cần thực hiện redeem, gọi trực tiếp `VoucherRedemptionService::redeemAtomic($customerId,$voucherId,$orderId,$pointsUsed,$discountAmount,$billTotal)`
+     */
+
+    /**
      * Validate dữ liệu voucher
      * @param array $data
      * @param int|null $id ID voucher (dùng khi update)

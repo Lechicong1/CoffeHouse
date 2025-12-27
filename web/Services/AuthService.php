@@ -112,18 +112,25 @@ class AuthService extends Service {
      */
     public function getRedirectUrl($userType, $roleName) {
         if ($userType === 'employee') {
-            // Chỉ những role sau được coi là nhân viên phục vụ (đi vào giao diện nhân viên)
-            $staffRoles = ['ORDER', 'BARTENDER', 'SHIPPER'];
-            if (in_array(strtoupper($roleName), $staffRoles)) {
-                return '/COFFEE_PHP/EmployeeController/GetData';
+            $role = strtoupper(trim((string)$roleName));
+            // Map role => Staff pages. Nếu cần trang riêng cho BARTENDER/SHIPPER,
+            // ta có thể tạo route tương ứng; hiện tại dùng pages có sẵn.
+            switch ($role) {
+                case 'ORDER':
+                    return '/COFFEE_PHP/Staff/pos';
+                case 'BARTENDER':
+                    return '/COFFEE_PHP/Staff/orders';
+                case 'SHIPPER':
+                    return '/COFFEE_PHP/Staff/orders';
+                case 'ADMIN':
+                    return '/COFFEE_PHP/EmployeeController/GetData';
+                default:
+                    return '/COFFEE_PHP/EmployeeController/GetData';
             }
-
-            // Nếu là employee nhưng không thuộc nhóm phục vụ, mặc định chuyển sang trang quản trị nhân viên
-            return '/COFFEE_PHP/EmployeeController/GetData';
-        } else {
-            // Customer -> chuyển về trang User dashboard (index)
-            return '/COFFEE_PHP/User/index';
         }
+
+        // Customer -> chuyển về trang User dashboard (index)
+        return '/COFFEE_PHP/User/index';
     }
 
     /**
@@ -276,12 +283,61 @@ class AuthService extends Service {
         }
 
         // Kiểm tra phone đã tồn tại
-        $phoneCheck = $this->checkPhoneExists($data['phone']);
-        if ($phoneCheck['exists']) {
-            return [
-                'success' => false,
-                'message' => $phoneCheck['message']
-            ];
+        $custRepo = $this->repository('CustomerRepository');
+        $existingCustomer = $custRepo->findByPhone($data['phone']);
+        
+        if ($existingCustomer) {
+            // Nếu là tài khoản GUEST_POS, cho phép upgrade lên WEB
+            if ($existingCustomer->account_type === 'GUEST_POS') {
+                // Kiểm tra username mới có bị trùng không
+                $usernameCheckForUpgrade = $this->checkUsernameExists($data['username']);
+                if ($usernameCheckForUpgrade['exists']) {
+                    return [
+                        'success' => false,
+                        'message' => 'Tên đăng nhập đã tồn tại! Vui lòng chọn tên đăng nhập khác.'
+                    ];
+                }
+                
+                // Kiểm tra email mới có bị trùng không (nếu có), loại trừ customer hiện tại
+                if (!empty($data['email'])) {
+                    $emailExists = $custRepo->findByEmail($data['email'], $existingCustomer->id);
+                    if ($emailExists) {
+                        return [
+                            'success' => false,
+                            'message' => 'Email đã được sử dụng! Vui lòng sử dụng email khác.'
+                        ];
+                    }
+                }
+                
+                // Upgrade tài khoản GUEST_POS thành WEB
+                $plainPassword = $data['password'];
+                $result = $custRepo->upgradeToWebAccount(
+                    $existingCustomer->id,
+                    $data['username'],
+                    $plainPassword,
+                    $data['address'] ?? null,
+                    $data['email'] ?? null,
+                    $data['fullname'] ?? null
+                );
+                
+                if ($result) {
+                    return [
+                        'success' => true,
+                        'message' => 'Đăng ký thành công! Tài khoản của bạn đã được nâng cấp.'
+                    ];
+                } else {
+                    return [
+                        'success' => false,
+                        'message' => 'Có lỗi xảy ra khi nâng cấp tài khoản!'
+                    ];
+                }
+            } else {
+                // Nếu không phải GUEST_POS, báo lỗi trùng số điện thoại
+                return [
+                    'success' => false,
+                    'message' => 'Số điện thoại đã được sử dụng!'
+                ];
+            }
         }
 
         // Kiểm tra email đã tồn tại (nếu có)
@@ -295,9 +351,6 @@ class AuthService extends Service {
 
         // Lưu mật khẩu nguyên bản (plain-text) theo yêu cầu
         $plainPassword = $data['password'];
-
-        // Tạo customer mới (customers table không có roleId)
-        $custRepo = $this->repository('CustomerRepository');
         
         // Tạo entity
         $customer = new CustomerEntity([
@@ -307,6 +360,7 @@ class AuthService extends Service {
             'phone' => $data['phone'],
             'email' => $data['email'] ?? '',
             'address' => $data['address'] ?? '',
+            'account_type' => 'WEB',
             'points' => 0,
             'status' => 1
         ]);

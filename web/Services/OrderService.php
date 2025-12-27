@@ -3,6 +3,7 @@ include_once './web/Repositories/OrderRepository.php';
 include_once './web/Repositories/OrderItemRepository.php';
 include_once './web/Entity/OrderEntity.php';
 include_once './web/Entity/OrderItemEntity.php';
+include_once './web/Services/VoucherRedemptionService.php';
 
 use web\Entity\OrderEntity;
 use web\Entity\OrderItemEntity;
@@ -26,7 +27,21 @@ class OrderService {
         $order->status = 'COMPLETED'; // POS thanh toán xong là completed luôn
         $order->payment_status = 'PAID';
         $order->payment_method = $data['payment_method'] ?? 'CASH';
-        $order->total_amount = $data['total_amount'];
+
+        // Tính toán sub_total (tổng trước giảm) từ items để tránh nhầm lẫn
+        $sub_total = 0.0;
+        if (!empty($data['items']) && is_array($data['items'])) {
+            foreach ($data['items'] as $it) {
+                $price = isset($it['price']) ? (float)$it['price'] : 0.0;
+                $qty = isset($it['qty']) ? (int)$it['qty'] : 0;
+                $sub_total += $price * $qty;
+            }
+        } else {
+            $sub_total = isset($data['total_amount']) ? (float)$data['total_amount'] : 0.0;
+        }
+
+        // Quy ước: orders.total_amount lưu `sub_total` (trước khi trừ voucher/discount)
+        $order->total_amount = $sub_total;
         $order->note = $data['note'] ?? '';
         
         // Thông tin shipping nếu có (Mang về)
@@ -34,26 +49,71 @@ class OrderService {
              // Xử lý logic mang về nếu cần
         }
 
-        // 2. Lưu Order
-        $orderId = $this->orderRepo->create($order);
-        
-        if ($orderId) {
-            // 3. Lưu Order Items
+        // 2. Lưu Order trong transaction (bao gồm items và redeem)
+        $con = $this->orderRepo->con;
+        if (!mysqli_begin_transaction($con)) {
+            return ['success' => false, 'message' => 'Không thể bắt đầu transaction DB'];
+        }
+
+        try {
+            $orderId = $this->orderRepo->create($order);
+            if (!$orderId) {
+                mysqli_rollback($con);
+                return ['success' => false, 'message' => 'Lỗi khi tạo đơn hàng'];
+            }
+
+            // 3. Lưu Order Items (reuse cùng connection)
+            $this->orderItemRepo->con = $con;
             foreach ($data['items'] as $itemData) {
                 $item = new OrderItemEntity();
                 $item->order_id = $orderId;
-                $item->product_id = $itemData['id']; // Product ID
-                $item->product_size_id = $itemData['size_id']; // Size ID
+                $item->product_id = $itemData['id']; // ID sản phẩm
+                $item->product_size_id = $itemData['size_id']; // ID kích thước/size
                 $item->quantity = $itemData['qty'];
                 $item->price_at_purchase = $itemData['price'];
                 $item->note = $itemData['notes'] ?? '';
-                
+
                 $this->orderItemRepo->create($item);
             }
-            return ['success' => true, 'order_id' => $orderId, 'message' => 'Tạo đơn hàng thành công'];
-        }
 
-        return ['success' => false, 'message' => 'Lỗi khi tạo đơn hàng'];
+            // Nếu có thông tin voucher được gửi kèm, cố gắng redeem trong cùng transaction
+            $discountAmount = 0.0;
+            if (!empty($data['voucher']) && !empty($order->customer_id)) {
+                $voucherData = $data['voucher'];
+                $custId = $order->customer_id;
+                $voucherId = isset($voucherData['voucher_id']) ? (int)$voucherData['voucher_id'] : null;
+                $pointsUsed = isset($voucherData['points_used']) ? (int)$voucherData['points_used'] : 0;
+                $discountAmount = isset($voucherData['discount_amount']) ? (float)$voucherData['discount_amount'] : 0;
+
+                if ($voucherId) {
+                    $redService = new VoucherRedemptionService();
+                    // Truyền billTotal = sub_total (orders.total_amount được tính ở trên là sub_total)
+                    $redeem = $redService->redeemAtomic($custId, $voucherId, $orderId, $pointsUsed, $discountAmount, $order->total_amount, $con, false);
+                    if (empty($redeem['success'])) {
+                        mysqli_rollback($con);
+                        return ['success' => false, 'message' => 'Không thể redeem voucher: ' . ($redeem['message'] ?? 'Lỗi')];
+                    }
+                }
+            }
+
+            mysqli_commit($con);
+
+            // Tính final total (không lưu vào DB ở bước này)
+            $final_total = $order->total_amount - (float)$discountAmount;
+            if ($final_total < 0) $final_total = 0.0;
+
+            return [
+                'success' => true,
+                'order_id' => $orderId,
+                'message' => 'Tạo đơn hàng thành công',
+                'sub_total' => $order->total_amount,
+                'discount_amount' => (float)$discountAmount,
+                'final_total' => $final_total
+            ];
+        } catch (Exception $e) {
+            mysqli_rollback($con);
+            return ['success' => false, 'message' => 'Lỗi khi tạo đơn hàng: ' . $e->getMessage()];
+        }
     }
 }
 ?>

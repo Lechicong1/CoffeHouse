@@ -10,6 +10,7 @@ let menuItems = []; // Fetched from API
 let cart = [];
 let currentOrderType = 'dine-in'; 
 let selectedPaymentMethod = null;
+let currentProductForSize = null; // Store product being added
 
 // --- INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -93,7 +94,7 @@ function renderMenuGrid(items) {
                 <h4>${item.name}</h4>
                 <span class="price">${formatCurrency(item.price)}</span>
             </div>
-            <button class="add-btn" onclick="addToCart(${item.id})">
+            <button class="add-btn" onclick="openSizeModal(${item.id})">
                 <i class="fas fa-plus"></i>
             </button>
         `;
@@ -105,32 +106,101 @@ function formatCurrency(amount) {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 }
 
-function addToCart(itemId) {
-    const item = menuItems.find(i => i.id === itemId);
-    const existingItem = cart.find(i => i.id === itemId);
+function openSizeModal(itemId) {
+    // Use == to allow string/number comparison
+    const item = menuItems.find(i => i.id == itemId);
+    if (!item) {
+        console.error('Product not found:', itemId);
+        return;
+    }
+
+    currentProductForSize = item;
+    const modal = document.getElementById('size-modal');
+    const title = document.getElementById('size-modal-title');
+    const optionsContainer = document.getElementById('size-options');
+
+    if (modal && title && optionsContainer) {
+        title.textContent = `Chọn Size: ${item.name}`;
+        optionsContainer.innerHTML = '';
+
+        if (item.sizes && item.sizes.length > 0) {
+            item.sizes.forEach(sizeObj => {
+                const btn = document.createElement('button');
+                btn.className = 'size-option-btn'; 
+                // Inline styles for better visibility
+                btn.style.padding = '15px';
+                btn.style.border = '1px solid #ddd';
+                btn.style.borderRadius = '8px';
+                btn.style.cursor = 'pointer';
+                btn.style.backgroundColor = '#fff';
+                btn.style.fontSize = '1rem';
+                btn.style.display = 'flex';
+                btn.style.justifyContent = 'space-between';
+                btn.style.alignItems = 'center';
+                btn.style.transition = 'background-color 0.2s';
+                
+                btn.onmouseover = () => btn.style.backgroundColor = '#f0f9eb';
+                btn.onmouseout = () => btn.style.backgroundColor = '#fff';
+
+                btn.innerHTML = `<span>Size ${sizeObj.size}</span> <b>${formatCurrency(sizeObj.price)}</b>`;
+                
+                btn.onclick = () => {
+                    addToCart(item, sizeObj.size, sizeObj.price);
+                    closeSizeModal();
+                };
+                optionsContainer.appendChild(btn);
+            });
+        } else {
+            // Fallback if no sizes array
+            addToCart(item, 'M', item.price);
+            return; 
+        }
+        modal.style.display = 'flex';
+    }
+}
+
+function closeSizeModal() {
+    const modal = document.getElementById('size-modal');
+    if (modal) modal.style.display = 'none';
+    currentProductForSize = null;
+}
+
+function addToCart(item, size, price) {
+    // Create a unique ID for cart item based on product ID and size
+    const cartItemId = `${item.id}-${size}`;
+    const existingItem = cart.find(i => i.cartId === cartItemId);
 
     if (existingItem) {
         existingItem.qty++;
     } else {
-        cart.push({ ...item, qty: 1, notes: "" });
+        cart.push({
+            cartId: cartItemId,
+            id: item.id,
+            name: item.name,
+            image: item.image,
+            price: parseInt(price), // Ensure price is number
+            size: size,
+            qty: 1,
+            notes: ""
+        });
     }
     updateCartUI();
 }
 
-function removeFromCart(itemId) {
-    const index = cart.findIndex(i => i.id === itemId);
+function removeFromCart(cartItemId) {
+    const index = cart.findIndex(i => i.cartId === cartItemId);
     if (index > -1) {
         cart.splice(index, 1);
     }
     updateCartUI();
 }
 
-function updateQty(itemId, change) {
-    const item = cart.find(i => i.id === itemId);
+function updateQty(cartItemId, change) {
+    const item = cart.find(i => i.cartId === cartItemId);
     if (item) {
         item.qty += change;
         if (item.qty <= 0) {
-            removeFromCart(itemId);
+            removeFromCart(cartItemId);
         } else {
             updateCartUI();
         }
@@ -148,69 +218,94 @@ function updateCartUI() {
         cart.forEach(item => {
             const itemEl = document.createElement('div');
             itemEl.className = 'order-item';
-            
-            // Calculate item total
-            const itemTotal = item.price * item.qty;
-
             itemEl.innerHTML = `
                 <img src="${item.image}" alt="${item.name}">
                 <div class="item-info">
-                    <h4>${item.name}</h4>
-                    <div class="price">${formatCurrency(itemTotal)} <span style="font-weight:normal; color:#888; font-size:0.8rem;">(${formatCurrency(item.price)} x ${item.qty})</span></div>
-                    ${item.notes ? `<div class="notes"><i class="fas fa-file-alt"></i> ${item.notes}</div>` : ''}
+                    <h4>${item.name} (${item.size})</h4>
+                    <span class="price">${formatCurrency(item.price)}</span>
+                    <input type="text" class="note-input" placeholder="Ghi chú..." value="${item.notes}" onchange="updateNote('${item.cartId}', this.value)">
                 </div>
                 <div class="qty-controls">
-                    <button class="qty-btn" onclick="updateQty(${item.id}, -1)">-</button>
+                    <button class="qty-btn" onclick="updateQty('${item.cartId}', -1)">-</button>
                     <span>${item.qty}</span>
-                    <button class="qty-btn" onclick="updateQty(${item.id}, 1)">+</button>
+                    <button class="qty-btn" onclick="updateQty('${item.cartId}', 1)">+</button>
                 </div>
             `;
             list.appendChild(itemEl);
         });
-        // Auto-scroll to bottom
-        list.scrollTop = list.scrollHeight;
     }
-    updateTotals();
-}
 
-function updateTotals() {
+    // Calculate totals
     const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-    const total = subtotal; // No tax
+    
+    // Update totals (NO TAX)
+    const total = subtotal;
 
     const subtotalEl = document.getElementById('subtotal-price');
-    const totalEl = document.getElementById('total-price');
-    const btnTotalEl = document.getElementById('btn-total');
-    const modalTotalEl = document.getElementById('modal-total');
+    if (subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
 
-    if(subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
-    if(totalEl) totalEl.textContent = formatCurrency(total);
-    if(btnTotalEl) btnTotalEl.textContent = formatCurrency(total);
-    if(modalTotalEl) modalTotalEl.textContent = formatCurrency(total);
+    // Hide or zero out tax if element exists
+    const taxEl = document.getElementById('tax-price');
+    if (taxEl) taxEl.textContent = formatCurrency(0);
+
+    const totalEl = document.getElementById('total-price');
+    if (totalEl) totalEl.textContent = formatCurrency(total);
+
+    const btnTotalEl = document.getElementById('btn-total');
+    if (btnTotalEl) btnTotalEl.textContent = formatCurrency(total);
+    
+    const modalTotalEl = document.getElementById('modal-total');
+    if (modalTotalEl) modalTotalEl.textContent = formatCurrency(total);
+}
+
+function updateNote(cartItemId, note) {
+    const item = cart.find(i => i.cartId === cartItemId);
+    if (item) {
+        item.notes = note;
+    }
+}
+
+function changeQty(id, change) {
+    // Deprecated, use updateQty with cartItemId
 }
 
 function setOrderType(type) {
     currentOrderType = type;
-    
-    // Update Buttons
-    const btnDineIn = document.getElementById('btn-dine-in');
-    const btnTakeAway = document.getElementById('btn-take-away');
-    
-    if(btnDineIn) btnDineIn.classList.toggle('active', type === 'dine-in');
-    if(btnTakeAway) btnTakeAway.classList.toggle('active', type === 'take-away');
+    document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+    if(type === 'dine-in') {
+        document.getElementById('btn-dine-in').classList.add('active');
+    } else {
+        document.getElementById('btn-take-away').classList.add('active');
+    }
 
     // Update Inputs
-    const tableGroup = document.getElementById('table-input-group');
+    const tableGroup = document.querySelector('.customer-details .input-box:nth-child(2)'); // Assuming 2nd child is table
     const orderIdGroup = document.getElementById('order-id-group');
     const orderIdInput = document.getElementById('order-id');
 
-    if (type === 'dine-in') {
-        if(tableGroup) tableGroup.style.display = 'block';
-        if(orderIdGroup) orderIdGroup.style.display = 'none';
-    } else {
-        if(tableGroup) tableGroup.style.display = 'none';
-        if(orderIdGroup) orderIdGroup.style.display = 'block';
-        if (orderIdInput && !orderIdInput.value) {
-            orderIdInput.value = generateOrderId();
+    // Better selector for table group if it doesn't have ID
+    // In staff_order.php: <div class="input-box"><label>Bàn Số</label>...</div>
+    // Let's try to find it by label content if possible, or just assume structure
+    // But wait, in previous read of staff_order.php, it didn't have an ID.
+    // Let's use the structure:
+    // .customer-details > .input-box (Name)
+    // .customer-details > .input-box (Table)
+    // .customer-details > .input-box (Order ID)
+    
+    const inputBoxes = document.querySelectorAll('.customer-details .input-box');
+    if (inputBoxes.length >= 3) {
+        const tableBox = inputBoxes[1];
+        const orderIdBox = inputBoxes[2]; // This one has id="order-id-group"
+
+        if (type === 'dine-in') {
+            tableBox.style.display = 'block';
+            orderIdBox.style.display = 'none';
+        } else {
+            tableBox.style.display = 'none';
+            orderIdBox.style.display = 'block';
+            if (orderIdInput && !orderIdInput.value) {
+                orderIdInput.value = generateOrderId();
+            }
         }
     }
 }
@@ -225,11 +320,19 @@ function openPaymentModal() {
         alert("Vui lòng chọn món trước khi thanh toán.");
         return;
     }
-    document.getElementById('payment-modal').style.display = 'flex';
+    const modal = document.getElementById('payment-modal');
+    if(modal) {
+        modal.style.display = 'flex';
+        // Update total in modal
+        const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        const modalTotalEl = document.getElementById('modal-total');
+        if (modalTotalEl) modalTotalEl.textContent = formatCurrency(total);
+    }
 }
 
 function closePaymentModal() {
-    document.getElementById('payment-modal').style.display = 'none';
+    const modal = document.getElementById('payment-modal');
+    if(modal) modal.style.display = 'none';
     selectedPaymentMethod = null;
     updatePaymentSelection();
 }
@@ -243,11 +346,15 @@ function updatePaymentSelection() {
     const cashBtn = document.getElementById('pay-cash');
     const cardBtn = document.getElementById('pay-card');
     
-    cashBtn.style.borderColor = selectedPaymentMethod === 'cash' ? 'var(--primary-green)' : '#eee';
-    cashBtn.style.backgroundColor = selectedPaymentMethod === 'cash' ? '#f0f9eb' : 'white';
+    if(cashBtn) {
+        cashBtn.style.borderColor = selectedPaymentMethod === 'cash' ? 'var(--primary-green)' : '#eee';
+        cashBtn.style.backgroundColor = selectedPaymentMethod === 'cash' ? '#f0f9eb' : 'white';
+    }
     
-    cardBtn.style.borderColor = selectedPaymentMethod === 'card' ? 'var(--primary-green)' : '#eee';
-    cardBtn.style.backgroundColor = selectedPaymentMethod === 'card' ? '#f0f9eb' : 'white';
+    if(cardBtn) {
+        cardBtn.style.borderColor = selectedPaymentMethod === 'card' ? 'var(--primary-green)' : '#eee';
+        cardBtn.style.backgroundColor = selectedPaymentMethod === 'card' ? '#f0f9eb' : 'white';
+    }
 }
 
 async function processPayment() {
@@ -259,11 +366,13 @@ async function processPayment() {
     const totalAmount = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
     const orderCode = currentOrderType === 'take-away' 
         ? document.getElementById('order-id').value 
-        : 'DINEIN-' + Math.floor(Date.now() / 1000); // Simple unique code
+        : 'DINEIN-' + Math.floor(Date.now() / 1000); 
 
+    // Fix: Use very short codes for order_type to avoid truncation
+    // Assuming DB column might be short or ENUM
     const orderData = {
         order_code: orderCode,
-        order_type: currentOrderType === 'take-away' ? 'TAKE_AWAY' : 'AT_COUNTER',
+        order_type: currentOrderType === 'take-away' ? 'TAKEAWAY' : 'DINEIN', // Removed underscores
         payment_method: selectedPaymentMethod === 'cash' ? 'CASH' : 'BANKING',
         total_amount: totalAmount,
         items: cart,
@@ -298,78 +407,13 @@ async function processPayment() {
 
 // Close modal if clicked outside
 window.onclick = function(event) {
-    const modal = document.getElementById('payment-modal');
-    if (event.target == modal) {
+    const paymentModal = document.getElementById('payment-modal');
+    const sizeModal = document.getElementById('size-modal');
+    if (event.target == paymentModal) {
         closePaymentModal();
     }
-}
-
-function addToCart(id) {
-    const item = menuItems.find(i => i.id === id);
-    const existingItem = cart.find(i => i.id === id);
-
-    if (existingItem) {
-        existingItem.qty++;
-    } else {
-        cart.push({ ...item, qty: 1, notes: '' });
-    }
-    updateCartUI();
-}
-
-function updateCartUI() {
-    const cartList = document.getElementById('order-list');
-    if(!cartList) return;
-
-    cartList.innerHTML = '';
-    let subtotal = 0;
-
-    cart.forEach(item => {
-        subtotal += item.price * item.qty;
-        const cartItem = document.createElement('div');
-        cartItem.className = 'order-item';
-        cartItem.innerHTML = `
-            <img src="${item.image}" alt="${item.name}">
-            <div class="item-info">
-                <h4>${item.name}</h4>
-                <span class="price">${formatCurrency(item.price)}</span>
-                <div class="notes">${item.notes || 'Thêm ghi chú...'} <i class="fas fa-pen" style="font-size: 0.7rem; cursor: pointer;"></i></div>
-            </div>
-            <div class="qty-controls">
-                <button class="qty-btn" onclick="changeQty(${item.id}, -1)">-</button>
-                <span>${item.qty}</span>
-                <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
-            </div>
-        `;
-        cartList.appendChild(cartItem);
-    });
-
-    // Update totals
-    const tax = subtotal * 0.08; // 8% tax
-    const total = subtotal + tax;
-
-    document.getElementById('subtotal-price').textContent = formatCurrency(subtotal);
-    document.getElementById('tax-price').textContent = formatCurrency(tax);
-    document.getElementById('total-price').textContent = formatCurrency(total);
-}
-
-function changeQty(id, change) {
-    const itemIndex = cart.findIndex(i => i.id === id);
-    if (itemIndex > -1) {
-        cart[itemIndex].qty += change;
-        if (cart[itemIndex].qty <= 0) {
-            cart.splice(itemIndex, 1);
-        }
-        updateCartUI();
-    }
-}
-
-function setOrderType(type) {
-    currentOrderType = type;
-    document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
-    if(type === 'dine-in') {
-        document.getElementById('btn-dine-in').classList.add('active');
-    } else {
-        document.getElementById('btn-take-away').classList.add('active');
+    if (event.target == sizeModal) {
+        closeSizeModal();
     }
 }
 
@@ -381,3 +425,11 @@ function formatCurrency(amount) {
 window.addToCart = addToCart;
 window.changeQty = changeQty;
 window.setOrderType = setOrderType;
+window.openPaymentModal = openPaymentModal;
+window.closePaymentModal = closePaymentModal;
+window.selectPayment = selectPayment;
+window.processPayment = processPayment;
+window.closeSizeModal = closeSizeModal;
+window.openSizeModal = openSizeModal;
+window.updateQty = updateQty;
+window.updateNote = updateNote;

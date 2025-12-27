@@ -1,5 +1,6 @@
 <?php
 include_once './web/Repositories/ProductRepository.php';
+include_once './web/Repositories/CategoryRepository.php';
 include_once './web/Entity/ProductEntity.php';
 include_once './web/Entity/ProductSizeEntity.php';
 use web\Entity\ProductEntity;
@@ -7,9 +8,74 @@ use web\Entity\ProductSizeEntity;
 
 class ProductService {
     private $productRepository;
+    private $categoryRepository;
 
     public function __construct() {
         $this->productRepository = new ProductRepository();
+        $this->categoryRepository = new CategoryRepository();
+    }
+    // ĐỨC THÊM CODE Ở ĐÂY NÈ
+    public function getMenuForPOS() {
+        $products = $this->productRepository->findAll();
+        $menu = [];
+        
+        // Helper to map category names to keys used in POS
+        $categoryMap = [
+            'Cà Phê' => 'coffee',
+            'Trà' => 'tea',
+            'Bánh' => 'snack',
+            'Bánh Ngọt' => 'snack',
+            'Coffee' => 'coffee',
+            'Tea' => 'tea',
+            'Snack' => 'snack'
+        ];
+
+        foreach ($products as $product) {
+            if (!$product->is_active) continue;
+
+            $category = $this->categoryRepository->findById($product->category_id);
+            $categoryKey = 'other';
+            if ($category) {
+                $catName = $category->name;
+                foreach ($categoryMap as $key => $val) {
+                    if (stripos($catName, $key) !== false) {
+                        $categoryKey = $val;
+                        break;
+                    }
+                }
+            }
+
+            $sizes = $this->productRepository->getSizesByProductId($product->id);
+            $sizeList = [];
+            foreach ($sizes as $size) {
+                $sizeList[] = [
+                    'size' => $size->size_name,
+                    'price' => (int)$size->price
+                ];
+            }
+
+            // Default price (prefer M)
+            $price = 0;
+            foreach ($sizes as $size) {
+                if ($size->size_name === 'M') {
+                    $price = $size->price;
+                    break;
+                }
+            }
+            if ($price == 0 && count($sizes) > 0) {
+                $price = $sizes[0]->price;
+            }
+
+            $menu[] = [
+                'id' => $product->id,
+                'name' => $product->name,
+                'image' => $product->image_url ? $product->image_url : 'Public/Assets/default-coffee.png',
+                'price' => (int)$price,
+                'sizes' => $sizeList,
+                'category' => $categoryKey
+            ];
+        }
+        return $menu;
     }
 
     public function getAllProducts() {

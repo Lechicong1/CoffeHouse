@@ -95,6 +95,10 @@ body {
     display: none;
 }
 
+.sidebar.collapsed .menu-text {
+    display: none;
+}
+
 /* Menu */
 .sidebar-nav {
     flex: 1;

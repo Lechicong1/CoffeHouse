@@ -16,8 +16,10 @@ class Router {
 
         // ===== XỬ LÝ CONTROLLER =====
         if ($arr != null) {
-            // Tự động thêm "Controller" vào tên nếu chưa có
             $controllerName = $arr[0];
+
+            // Nếu đã có đuôi "Controller", giữ nguyên
+            // Nếu chưa có, thêm "Controller" vào
             if (!str_ends_with($controllerName, 'Controller')) {
                 $controllerName .= 'Controller';
             }
@@ -61,6 +63,9 @@ class Router {
         if (isset($_GET['url'])) {
             // Loại bỏ khoảng trắng đầu/cuối và dấu /
             $url = trim($_GET['url'], '/');
+
+            // Loại bỏ query string nếu có (giữ lại trong $_GET)
+            $url = strtok($url, '?');
 
             // Lọc URL để bảo mật (xóa các ký tự nguy hiểm)
             $url = filter_var($url, FILTER_SANITIZE_URL);

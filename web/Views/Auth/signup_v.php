@@ -7,7 +7,7 @@
     <title>Đăng Ký - Coffee House</title>
 
     <!-- Link CSS -->
-    <link rel="stylesheet" href="signup.css">
+    <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/signup.css">
 </head>
 <body>
     <!-- Container chính của form signup -->
@@ -24,7 +24,7 @@
         <div id="alertBox" class="alert"></div>
 
         <!-- Form đăng ký -->
-        <form id="signupForm" class="signup-form">
+        <form id="signupForm" class="signup-form" action="/COFFEE_PHP/Auth/register" method="POST">
 
             <!-- Nhóm Full Name -->
             <div class="form-group">
@@ -32,6 +32,7 @@
                 <input
                     type="text"
                     id="fullname"
+                    name="fullname"
                     class="form-input"
                     placeholder="Nhập họ và tên"
                     autocomplete="name"
@@ -39,16 +40,44 @@
                 >
             </div>
 
+            <!-- Nhóm Phone -->
+            <div class="form-group">
+                <label for="phone" class="form-label">Số điện thoại</label>
+                <input
+                    type="text"
+                    id="phone"
+                    name="phone"
+                    class="form-input"
+                    placeholder="Nhập số điện thoại"
+                    autocomplete="tel"
+                    pattern="[0-9]{10,11}"
+                    required
+                >
+            </div>
+
+            <!-- Nhóm Address -->
+            <div class="form-group">
+                <label for="address" class="form-label">Địa chỉ</label>
+                <input
+                    type="text"
+                    id="address"
+                    name="address"
+                    class="form-input"
+                    placeholder="Nhập địa chỉ (tùy chọn)"
+                    autocomplete="street-address"
+                >
+            </div>
+
             <!-- Nhóm Email -->
             <div class="form-group">
-                <label for="email" class="form-label">Email</label>
+                <label for="email" class="form-label">Email (tùy chọn)</label>
                 <input
                     type="email"
                     id="email"
+                    name="email"
                     class="form-input"
                     placeholder="example@email.com"
                     autocomplete="email"
-                    required
                 >
             </div>
 
@@ -58,6 +87,7 @@
                 <input
                     type="text"
                     id="username"
+                    name="username"
                     class="form-input"
                     placeholder="Nhập tên đăng nhập"
                     autocomplete="username"
@@ -71,6 +101,7 @@
                 <input
                     type="password"
                     id="password"
+                    name="password"
                     class="form-input"
                     placeholder="Nhập mật khẩu (tối thiểu 6 ký tự)"
                     autocomplete="new-password"
@@ -84,6 +115,7 @@
                 <input
                     type="password"
                     id="confirmPassword"
+                    name="confirmPassword"
                     class="form-input"
                     placeholder="Nhập lại mật khẩu"
                     autocomplete="new-password"
@@ -101,7 +133,7 @@
         <!-- Footer - Links -->
         <div class="signup-footer">
             <span class="footer-text">Đã có tài khoản?</span>
-            <a href="../Login/login.html" class="footer-link">
+            <a href="/COFFEE_PHP/Auth/showLogin" class="footer-link">
                 Đăng nhập ngay
             </a>
         </div>
@@ -109,6 +141,6 @@
     </div>
 
     <!-- Link JavaScript -->
-    <script src="signup.js"></script>
+    <script src="/COFFEE_PHP/Public/Js/signup.js"></script>
 </body>
 </html>

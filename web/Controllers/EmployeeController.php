@@ -10,7 +10,15 @@ class EmployeeController extends Controller {
     function __construct() {
         // Khởi tạo Service thông qua Controller base
         $this->employeeService = $this->service('EmployeeService');
-
+    }
+    
+    /**
+     * Lấy danh sách roles cho dropdown
+     * @return array
+     */
+    private function getRoles() {
+        // Ủy quyền cho Service lấy roles (giữ flow Controller -> Service -> Repository)
+        return $this->employeeService->getRoles();
     }
     
     /**
@@ -21,7 +29,8 @@ class EmployeeController extends Controller {
             'page' => 'Employees_v',
             'section' => 'employees',
             'employees' => $this->employeeService->getAllEmployees(),
-            'keyword' => ''
+            'keyword' => '',
+            'roles' => $this->getRoles()
         ]);
     }
 
@@ -37,7 +46,8 @@ class EmployeeController extends Controller {
                 'page' => 'Employees_v',
                 'section' => 'employees',
                 'employees' => $employees,
-                'keyword' => $keyword
+                'keyword' => $keyword,
+                'roles' => $this->getRoles()
             ]);
         }
     }
@@ -54,7 +64,8 @@ class EmployeeController extends Controller {
                     $this->view('AdminDashBoard/MasterLayout', [
                         'page' => 'Employees_v',
                         'section' => 'employees',
-                        'employees' => $this->employeeService->getAllEmployees()
+                        'employees' => $this->employeeService->getAllEmployees(),
+                        'roles' => $this->getRoles()
                     ]);
                     return;
                 }
@@ -66,7 +77,7 @@ class EmployeeController extends Controller {
                     'email' => $_POST['txtEmail'] ?? null,
                     'phonenumber' => $_POST['txtPhonenumber'],
                     'address' => $_POST['txtAddress'] ?? null,
-                    'roleId' => (int)$_POST['ddlRoleId'],
+                    'roleName' => $_POST['ddlRoleName'],
                     'luong' => (float)$_POST['txtLuong']
                 ];
                 
@@ -77,14 +88,16 @@ class EmployeeController extends Controller {
                     $this->view('AdminDashBoard/MasterLayout', [
                         'page' => 'Employees_v',
                         'section' => 'employees',
-                        'employees' => $this->employeeService->getAllEmployees()
+                        'employees' => $this->employeeService->getAllEmployees(),
+                        'roles' => $this->getRoles()
                     ]);
                 } else {
                     echo "<script>alert('Thêm thất bại: " . $result['message'] . "')</script>";
                     $this->view('AdminDashBoard/MasterLayout', [
                         'page' => 'Employees_v',
                         'section' => 'employees',
-                        'employees' => $this->employeeService->getAllEmployees()
+                        'employees' => $this->employeeService->getAllEmployees(),
+                        'roles' => $this->getRoles()
                     ]);
                 }
             } catch (Exception $e) {
@@ -92,7 +105,8 @@ class EmployeeController extends Controller {
                 $this->view('AdminDashBoard/MasterLayout', [
                     'page' => 'Employees_v',
                     'section' => 'employees',
-                    'employees' => $this->employeeService->getAllEmployees()
+                    'employees' => $this->employeeService->getAllEmployees(),
+                    'roles' => $this->getRoles()
                 ]);
             }
         }
@@ -111,7 +125,7 @@ class EmployeeController extends Controller {
                     'email' => $_POST['txtEmail'] ?? null,
                     'phonenumber' => $_POST['txtPhonenumber'],
                     'address' => $_POST['txtAddress'] ?? null,
-                    'roleId' => (int)$_POST['ddlRoleId'],
+                    'roleName' => $_POST['ddlRoleName'],
                     'luong' => (float)$_POST['txtLuong']
                 ];
                 
@@ -127,14 +141,16 @@ class EmployeeController extends Controller {
                     $this->view('AdminDashBoard/MasterLayout', [
                         'page' => 'Employees_v',
                         'section' => 'employees',
-                        'employees' => $this->employeeService->getAllEmployees()
+                        'employees' => $this->employeeService->getAllEmployees(),
+                        'roles' => $this->getRoles()
                     ]);
                 } else {
                     echo "<script>alert('Cập nhật thất bại: " . $result['message'] . "')</script>";
                     $this->view('AdminDashBoard/MasterLayout', [
                         'page' => 'Employees_v',
                         'section' => 'employees',
-                        'employees' => $this->employeeService->getAllEmployees()
+                        'employees' => $this->employeeService->getAllEmployees(),
+                        'roles' => $this->getRoles()
                     ]);
                 }
             } catch (Exception $e) {
@@ -142,7 +158,8 @@ class EmployeeController extends Controller {
                 $this->view('AdminDashBoard/MasterLayout', [
                     'page' => 'Employees_v',
                     'section' => 'employees',
-                    'employees' => $this->employeeService->getAllEmployees()
+                    'employees' => $this->employeeService->getAllEmployees(),
+                    'roles' => $this->getRoles()
                 ]);
             }
         }
@@ -162,14 +179,16 @@ class EmployeeController extends Controller {
                     $this->view('AdminDashBoard/MasterLayout', [
                         'page' => 'Employees_v',
                         'section' => 'employees',
-                        'employees' => $this->employeeService->getAllEmployees()
+                        'employees' => $this->employeeService->getAllEmployees(),
+                        'roles' => $this->getRoles()
                     ]);
                 } else {
                     echo "<script>alert('Xóa thất bại: " . $result['message'] . "')</script>";
                     $this->view('AdminDashBoard/MasterLayout', [
                         'page' => 'Employees_v',
                         'section' => 'employees',
-                        'employees' => $this->employeeService->getAllEmployees()
+                        'employees' => $this->employeeService->getAllEmployees(),
+                        'roles' => $this->getRoles()
                     ]);
                 }
             } catch (Exception $e) {
@@ -177,7 +196,8 @@ class EmployeeController extends Controller {
                 $this->view('AdminDashBoard/MasterLayout', [
                     'page' => 'Employees_v',
                     'section' => 'employees',
-                    'employees' => $this->employeeService->getAllEmployees()
+                    'employees' => $this->employeeService->getAllEmployees(),
+                    'roles' => $this->getRoles()
                 ]);
             }
         }

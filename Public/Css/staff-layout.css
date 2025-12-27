@@ -1,0 +1,330 @@
+/* ===================================
+   FILE: staff-layout.css
+   DESCRIPTION: Layout styles for Staff Dashboard (Sage Green & Cream Theme)
+   =================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+:root {
+    /* Color Palette from staff.css */
+    --bg-outer: #6B7C6B;             /* Sage Green */
+    --bg-app: #F3F3E9;               /* Cream/Beige */
+    --primary-green: #064528;        /* Deep Forest Green */
+    --primary-light: #1a5c3d;        /* Lighter Green for hover */
+    --text-dark: #1A1A1A;
+    --text-light: #666666;
+    --white: #FFFFFF;
+    --accent-red: #FF6B6B;
+    
+    /* Layout Variables */
+    --sidebar-width: 260px;
+    --sidebar-collapsed-width: 80px;
+    --header-height: 70px;
+    --border-radius: 20px;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    --transition: 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--bg-outer); /* Outer background like staff.php */
+    color: var(--text-dark);
+    height: 100vh;
+    overflow: hidden; /* Prevent body scroll, handle in content */
+    padding: 15px; /* Small padding around the "App" */
+}
+
+/* Main Container - Acts like the "App Card" in staff.php */
+.staff-container {
+    display: flex;
+    background-color: var(--bg-app);
+    width: 100%;
+    height: 100%;
+    border-radius: 30px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    position: relative;
+}
+
+/* ========== SIDEBAR ========== */
+.sidebar {
+    width: var(--sidebar-width);
+    background-color: var(--white);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid rgba(6, 69, 40, 0.1);
+    transition: width var(--transition);
+    z-index: 100;
+}
+
+.sidebar.collapsed {
+    width: var(--sidebar-collapsed-width);
+}
+
+.sidebar-header {
+    height: 80px;
+    display: flex;
+    align-items: center;
+    padding: 0 25px;
+    color: var(--primary-green);
+}
+
+.brand-icon {
+    font-size: 1.8rem;
+    margin-right: 12px;
+}
+
+.brand-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity var(--transition);
+}
+
+.sidebar.collapsed .brand-name {
+    opacity: 0;
+    display: none;
+}
+
+.sidebar.collapsed .menu-text {
+    display: none;
+}
+
+/* Menu */
+.sidebar-nav {
+    flex: 1;
+    padding: 20px 15px;
+    overflow-y: auto;
+}
+
+.menu-list {
+    list-style: none;
+}
+
+.menu-item {
+    margin-bottom: 8px;
+}
+
+.menu-link {
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    text-decoration: none;
+    color: var(--text-light);
+    border-radius: 15px;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.menu-icon {
+    font-size: 1.2rem;
+    width: 30px;
+    display: flex;
+    justify-content: center;
+}
+
+.menu-text {
+    margin-left: 10px;
+    white-space: nowrap;
+}
+
+/* Active & Hover States */
+.menu-link:hover {
+    background-color: rgba(6, 69, 40, 0.05);
+    color: var(--primary-green);
+}
+
+.menu-item.active .menu-link {
+    background-color: var(--primary-green);
+    color: var(--white);
+    box-shadow: 0 4px 10px rgba(6, 69, 40, 0.2);
+}
+
+.sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid rgba(0,0,0,0.05);
+}
+
+.logout-link {
+    color: var(--accent-red) !important;
+}
+
+.logout-link:hover {
+    background-color: rgba(255, 107, 107, 0.1) !important;
+}
+
+/* ========== MAIN CONTENT ========== */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Header */
+.header {
+    height: var(--header-height);
+    background-color: transparent; /* Transparent to blend with bg-app */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
+    border-bottom: 1px solid rgba(6, 69, 40, 0.05);
+}
+
+.page-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary-green);
+}
+
+.sidebar-toggle {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    color: var(--primary-green);
+    cursor: pointer;
+    margin-right: 20px;
+}
+
+/* User Profile */
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 12px;
+    background: var(--white);
+    border-radius: 50px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+
+.user-avatar {
+    width: 35px;
+    height: 35px;
+    background-color: var(--primary-green);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    padding-right: 10px;
+}
+
+.user-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.user-role {
+    font-size: 0.75rem;
+    color: var(--text-light);
+}
+
+/* Content Wrapper */
+.content-wrapper {
+    flex: 1;
+    padding: 10px 30px 30px 30px; /* Reduced top padding to 10px */
+    overflow-y: auto;
+}
+
+/* ========== MODAL ========== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-container {
+    background: var(--white);
+    width: 500px;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transform: translateY(20px);
+    transition: transform 0.3s;
+}
+
+.modal-overlay.active .modal-container {
+    transform: translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-title {
+    color: var(--primary-green);
+    font-weight: 700;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: var(--text-light);
+}
+
+/* Buttons */
+.btn {
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-primary {
+    background-color: var(--primary-green);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-light);
+}
+
+.btn-secondary {
+    background-color: #e0e0e0;
+    color: var(--text-dark);
+}
+
+.hidden {
+    display: none !important;
+}

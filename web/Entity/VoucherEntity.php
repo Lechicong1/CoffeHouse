@@ -45,5 +45,27 @@ class VoucherEntity
             $this->created_at = $data['created_at'] ?? null;
         }
     }
+
+    /**
+     * Chuyển entity thành mảng
+     * @return array
+     */
+    public function toArray() {
+        return [
+            'id' => $this->id,
+            'name' => $this->name,
+            'point_cost' => $this->point_cost,
+            'discount_type' => $this->discount_type,
+            'discount_value' => $this->discount_value,
+            'max_discount_value' => $this->max_discount_value,
+            'min_bill_total' => $this->min_bill_total,
+            'start_date' => $this->start_date,
+            'end_date' => $this->end_date,
+            'quantity' => $this->quantity,
+            'used_count' => $this->used_count,
+            'is_active' => $this->is_active,
+            'created_at' => $this->created_at
+        ];
+    }
 }
 ?>

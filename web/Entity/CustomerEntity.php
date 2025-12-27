@@ -9,11 +9,15 @@ namespace web\Entity;
 class CustomerEntity {
     // Properties từ bảng customers
     public $id;
+    public $username;
+    public $password;
     public $full_name;
     public $phone;
     public $email;
+    public $address;
     public $points;
     public $status;
+
 
     /**
      * Constructor - Khởi tạo entity rỗng hoặc từ array
@@ -22,11 +26,14 @@ class CustomerEntity {
     public function __construct($data = []) {
         if (!empty($data)) {
             $this->id = $data['id'] ?? null;
+            $this->username = $data['username'] ?? null;
+            $this->password = $data['password'] ?? null;
             $this->full_name = $data['full_name'] ?? null;
             $this->phone = $data['phone'] ?? null;
             $this->email = $data['email'] ?? null;
+            $this->address = $data['address'] ?? null;
             $this->points = isset($data['points']) ? (int)$data['points'] : 0;
-            $this->status = isset($data['status']) ? (bool)$data['status'] : true;
+            $this->status = isset($data['status']) ? (int)$data['status'] : 1;
         }
     }
 
@@ -37,11 +44,13 @@ class CustomerEntity {
     public function toArray() {
         return [
             'id' => $this->id,
+            'username' => $this->username,
             'full_name' => $this->full_name,
             'phone' => $this->phone,
             'email' => $this->email,
+            'address' => $this->address,
             'points' => $this->points,
-            'status' => $this->status,
+            'status' => $this->status
         ];
     }
 }

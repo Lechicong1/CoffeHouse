@@ -1,6 +1,8 @@
 <?php
 include_once './web/Entity/ProductEntity.php';
+include_once './web/Entity/ProductSizeEntity.php';
 use web\Entity\ProductEntity;
+use web\Entity\ProductSizeEntity;
 
 class ProductRepository extends ConnectDatabase {
 
@@ -156,7 +158,7 @@ class ProductRepository extends ConnectDatabase {
         $result = mysqli_stmt_get_result($stmt);
         $sizes = [];
         while ($row = mysqli_fetch_assoc($result)) {
-            $sizes[] = new \web\Entity\ProductSizeEntity($row);
+            $sizes[] = new ProductSizeEntity($row);
         }
         return $sizes;
     }

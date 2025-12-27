@@ -26,7 +26,7 @@ function openEmployeeModal(action, employeeData = null) {
     if (action === 'add') {
         // Chế độ thêm mới
         title.textContent = '➕ Thêm nhân viên mới';
-        form.action = '?url=Employee/ins';
+        form.action = 'EmployeeController/ins';
         passwordGroup.style.display = 'block';
         usernameField.readOnly = false;
         document.getElementById('password').required = true;
@@ -36,7 +36,7 @@ function openEmployeeModal(action, employeeData = null) {
     } else {
         // Chế độ sửa
         title.textContent = '✏️ Sửa thông tin nhân viên';
-        form.action = '?url=Employee/upd';
+        form.action = 'EmployeeController/upd';
 
         // Điền dữ liệu vào form
         document.getElementById('employeeId').value = employeeData.id;
@@ -45,7 +45,7 @@ function openEmployeeModal(action, employeeData = null) {
         document.getElementById('email').value = employeeData.email || '';
         document.getElementById('phonenumber').value = employeeData.phonenumber;
         document.getElementById('address').value = employeeData.address || '';
-        document.getElementById('roleId').value = employeeData.roleId;
+        document.getElementById('roleId').value = employeeData.roleName;
         document.getElementById('luong').value = employeeData.luong;
 
         passwordGroup.style.display = 'none';

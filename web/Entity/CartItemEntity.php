@@ -10,8 +10,7 @@ class CartItemEntity {
     // Properties từ bảng cart_items
     public $id;
     public $customer_id;
-    public $product_id;
-    public $size_id;
+    public $product_size_id;
     public $quantity;
 
     /**
@@ -22,8 +21,8 @@ class CartItemEntity {
         if (!empty($data)) {
             $this->id = $data['id'] ?? null;
             $this->customer_id = $data['customer_id'] ?? null;
-            $this->product_id = $data['product_id'] ?? null;
-            $this->size_id = $data['size_id'] ?? null;
+            $this->product_size_id = $data['product_size_id'] ?? null;
+
             $this->quantity = $data['quantity'] ?? 1;
         }
     }

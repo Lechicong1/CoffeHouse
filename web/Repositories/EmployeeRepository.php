@@ -1,7 +1,7 @@
 <?php
-include_once './web/Entity/EmployeeEntity.php';
-
+require_once __DIR__ . '/../Entity/EmployeeEntity.php';
 use web\Entity\EmployeeEntity;
+
 
 class EmployeeRepository extends ConnectDatabase {
 
@@ -73,13 +73,13 @@ class EmployeeRepository extends ConnectDatabase {
 
     /**
      * Lấy nhân viên theo vai trò
-     * @param int $roleId
+     * @param string $roleName
      * @return array
      */
-    public function findByRole($roleId) {
-        $sql = "SELECT * FROM employee WHERE roleId = ? ORDER BY fullname";
+    public function findByRole($roleName) {
+        $sql = "SELECT * FROM employee WHERE roleName = ? ORDER BY fullname";
         $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "i", $roleId);
+        mysqli_stmt_bind_param($stmt, "s", $roleName);
         mysqli_stmt_execute($stmt);
 
         $result = mysqli_stmt_get_result($stmt);
@@ -126,18 +126,18 @@ class EmployeeRepository extends ConnectDatabase {
      * @return bool
      */
     public function create($employee) {
-        $sql = "INSERT INTO employee (username, password, fullname, email, phonenumber, address, roleId, luong) 
+        $sql = "INSERT INTO employee (username, password, fullname, email, phonenumber, address, roleName, luong) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "ssssssii",
+        mysqli_stmt_bind_param($stmt, "sssssssi",
             $employee->username,
             $employee->password,
             $employee->fullname,
             $employee->email,
             $employee->phonenumber,
             $employee->address,
-            $employee->roleId,
+            $employee->roleName,
             $employee->luong
         );
 
@@ -151,16 +151,16 @@ class EmployeeRepository extends ConnectDatabase {
      */
     public function update($employee) {
         $sql = "UPDATE employee 
-                SET fullname = ?, email = ?, phonenumber = ?, address = ?, roleId = ?, luong = ?
+                SET fullname = ?, email = ?, phonenumber = ?, address = ?, roleName = ?, luong = ?
                 WHERE id = ?";
 
         $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "ssssiis",
+        mysqli_stmt_bind_param($stmt, "sssssis",
             $employee->fullname,
             $employee->email,
             $employee->phonenumber,
             $employee->address,
-            $employee->roleId,
+            $employee->roleName,
             $employee->luong,
             $employee->id
         );
@@ -209,13 +209,13 @@ class EmployeeRepository extends ConnectDatabase {
 
     /**
      * Đếm nhân viên theo vai trò
-     * @param int $roleId
+     * @param string $roleName
      * @return int
      */
-    public function countByRole($roleId) {
-        $sql = "SELECT COUNT(*) as total FROM employee WHERE roleId = ?";
+    public function countByRole($roleName) {
+        $sql = "SELECT COUNT(*) as total FROM employee WHERE roleName = ?";
         $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "i", $roleId);
+        mysqli_stmt_bind_param($stmt, "s", $roleName);
         mysqli_stmt_execute($stmt);
 
         $result = mysqli_stmt_get_result($stmt);

@@ -1,0 +1,807 @@
+/* ===================================
+   FILE: pos-style.css
+   DESCRIPTION: Stylesheet for POS Interface (Embedded in MasterLayout)
+   =================================== */
+
+/* Scoped Variables to avoid conflicts */
+.pos-wrapper {
+    --bg-outer: #6B7C6B;
+    --bg-app: #F3F3E9;
+    --primary-green: #064528;
+    --primary-text: #1A1A1A;
+    --secondary-text: #888888;
+    --card-bg: #FFFFFF;
+    --border-color: #064528;
+    --accent-red: #FF6B6B;
+    --border-radius-lg: 30px;
+    --border-radius-md: 20px;
+    --border-radius-sm: 12px;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    
+    height: calc(100vh - 120px); /* Adjusted to account for MasterLayout header */
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1.8fr 1.2fr; /* Menu takes less space, Order takes more */
+    gap: 30px;
+    overflow: hidden; /* Prevent outer scroll */
+    padding-bottom: 10px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Better font */
+}
+
+/* ================= LEFT SIDE: MENU SECTION ================= */
+.pos-wrapper .menu-section {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Header inside POS (Optional, since MasterLayout has header) */
+/* We might hide the MasterLayout header or keep this one as sub-header */
+.pos-wrapper .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pos-wrapper .brand h1 {
+    font-size: 1.5rem;
+    line-height: 1.2;
+    color: var(--primary-green);
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.pos-wrapper .date-info {
+    font-size: 0.9rem;
+    color: var(--primary-text);
+    font-weight: 600;
+}
+
+/* Search Bar */
+.pos-wrapper .search-container {
+    position: relative;
+}
+
+.pos-wrapper .search-bar {
+    width: 100%;
+    padding: 15px 20px;
+    border-radius: 15px;
+    border: 1px solid #ddd;
+    background: white;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pos-wrapper .search-bar input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 1rem;
+    font-family: inherit;
+}
+
+.pos-wrapper .filter-icon {
+    color: var(--primary-green);
+    cursor: pointer;
+}
+
+/* Categories */
+.pos-wrapper .categories {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.pos-wrapper .category-card {
+    background: white;
+    border-radius: var(--border-radius-md);
+    padding: 20px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+}
+
+.pos-wrapper .category-card.active {
+    background-color: var(--primary-green);
+    color: white;
+}
+
+.pos-wrapper .category-card.active h3, 
+.pos-wrapper .category-card.active span {
+    color: white;
+}
+
+.pos-wrapper .category-status {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    border: 1px solid #ddd;
+    width: fit-content;
+}
+
+.pos-wrapper .category-card.active .category-status {
+    border-color: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+}
+
+.pos-wrapper .category-card.warning .category-status {
+    background: var(--accent-red);
+    color: white;
+    border: none;
+}
+
+.pos-wrapper .category-content {
+    z-index: 2;
+}
+
+.pos-wrapper .category-content h3 {
+    font-size: 1.4rem;
+    margin-bottom: 5px;
+}
+
+.pos-wrapper .category-content span {
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+}
+
+.pos-wrapper .category-img {
+    position: absolute;
+    right: -10px;
+    bottom: -10px;
+    width: 100px;
+    opacity: 0.8;
+    transform: rotate(-10deg);
+}
+
+/* Menu Grid */
+.pos-wrapper .menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    overflow-y: auto;
+    padding-right: 5px;
+    padding-bottom: 20px;
+}
+
+.pos-wrapper .menu-item {
+    background: white;
+    border: 1px solid var(--primary-green);
+    border-radius: var(--border-radius-md);
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    transition: transform 0.2s;
+}
+
+.pos-wrapper .menu-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.pos-wrapper .menu-item img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 15px;
+    margin-bottom: 15px;
+}
+
+.pos-wrapper .menu-item-info {
+    width: 100%;
+    text-align: left;
+}
+
+.pos-wrapper .menu-item h4 {
+    font-size: 1rem;
+    margin-bottom: 5px;
+    color: var(--primary-text);
+}
+
+.pos-wrapper .menu-item .price {
+    font-weight: 700;
+    color: var(--secondary-text);
+    font-size: 0.95rem;
+}
+
+.pos-wrapper .add-btn {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 1px solid var(--primary-text);
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.pos-wrapper .add-btn:hover {
+    background: var(--primary-text);
+    color: white;
+}
+
+/* ================= RIGHT SIDE: ORDER SECTION ================= */
+.pos-wrapper .order-section {
+    background: white;
+    border-radius: var(--border-radius-lg);
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden; /* Ensure content stays within container */
+}
+
+.pos-wrapper .order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.pos-wrapper .order-header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.pos-wrapper .back-btn {
+    background: var(--primary-green);
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    cursor: pointer;
+}
+
+.pos-wrapper .receipt-info h3 {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.pos-wrapper .receipt-info span {
+    font-size: 0.8rem;
+    color: var(--secondary-text);
+}
+
+.pos-wrapper .menu-dots {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;
+    cursor: pointer;
+}
+
+/* Order Type Toggle */
+.pos-wrapper .order-toggle {
+    display: flex;
+    border: 1px solid #ddd;
+    border-radius: 30px;
+    padding: 4px;
+    margin-bottom: 20px;
+}
+
+.pos-wrapper .toggle-btn {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 10px;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.pos-wrapper .toggle-btn.active {
+    background: var(--primary-green);
+    color: white;
+}
+
+/* Customer Details */
+.pos-wrapper .customer-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.pos-wrapper .input-box {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.pos-wrapper .input-box label {
+    font-size: 0.8rem;
+    color: var(--secondary-text);
+}
+
+.pos-wrapper .input-box input, 
+.pos-wrapper .input-box select {
+    padding: 6px 10px; /* Reduced padding */
+    border: 1px solid #ddd;
+    border-radius: 8px; /* Slightly smaller radius */
+    outline: none;
+    font-family: inherit;
+    font-size: 0.9rem; /* Smaller font size */
+}
+
+/* Order List */
+.pos-wrapper .order-list {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 10px;
+    padding-right: 5px;
+    min-height: 150px; /* Smaller min-height */
+    max-height: 250px; /* Limit height to show about 2-3 items */
+}
+
+.pos-wrapper .order-item {
+    display: flex;
+    align-items: flex-start; /* Align top */
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.pos-wrapper .order-item img {
+    width: 40px; /* Smaller image */
+    height: 40px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.pos-wrapper .item-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.pos-wrapper .item-info h4 {
+    font-size: 0.85rem;
+    margin: 0;
+    font-weight: 600;
+}
+
+.pos-wrapper .item-info .price {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--primary-green);
+}
+
+.pos-wrapper .item-info .notes {
+    font-size: 0.75rem;
+    color: #666;
+    font-style: italic;
+    margin-top: 2px;
+}
+
+.pos-wrapper .qty-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #eee;
+    padding: 2px 5px;
+    border-radius: 15px;
+}
+
+.pos-wrapper .qty-controls span {
+    color: #d32f2f; /* Red color for quantity */
+    font-weight: bold;
+    font-size: 1rem;
+    min-width: 20px;
+    text-align: center;
+}
+
+.pos-wrapper .qty-btn {
+    border: none;
+    background: #f5f5f5;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.8rem;
+    color: #333;
+}
+
+.pos-wrapper .qty-btn:hover {
+    background: #e0e0e0;
+}
+
+/* Customer Details - Compact */
+.pos-wrapper .customer-details {
+    background: #f9f9f9;
+    padding: 8px; /* Reduced padding */
+    border-radius: var(--border-radius-sm);
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: row;
+    gap: 8px; /* Reduced gap */
+    align-items: center; /* Center vertically */
+}
+
+.pos-wrapper .input-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0; /* No gap needed without label */
+    flex: 1;
+}
+
+/* Removed label styles as labels are removed from HTML */
+
+.pos-wrapper .input-box input,
+.pos-wrapper .input-box select {
+    padding: 5px 8px; /* Smaller padding */
+    border: 1px solid #ddd;
+    border-radius: 6px; /* Smaller radius */
+    font-size: 0.8rem; /* Smaller font */
+    outline: none;
+    width: 100%;
+    background: #fff;
+    color: var(--primary-text);
+}
+
+.pos-wrapper .input-box input::placeholder {
+    color: rgba(0, 0, 0, 0.3); /* Faint text */
+    font-style: italic;
+}
+
+.pos-wrapper .input-box input:read-only,
+.pos-wrapper .input-box input:disabled {
+    background-color: #f0f0f0;
+    color: rgba(0, 0, 0, 0.4); /* Faint text for readonly/disabled */
+}
+
+/* Note Input Style */
+.pos-wrapper .note-input {
+    width: 100%;
+    margin-top: 5px;
+    padding: 4px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: #d32f2f; /* Red text */
+}
+
+.pos-wrapper .note-input::placeholder {
+    color: #999;
+}
+
+/* Payment Modal Fix */
+#payment-modal {
+    position: fixed;
+    z-index: 9999; /* High z-index */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Prevent body scroll */
+    background-color: rgba(0,0,0,0.5);
+    display: none; /* Hidden by default */
+    align-items: center;
+    justify-content: center;
+}
+
+#payment-modal .modal-content {
+    background-color: #fff;
+    margin: auto;
+    padding: 25px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 400px; /* Limit width */
+    max-height: 90vh; /* Limit height */
+    overflow-y: auto; /* Scroll if content is too long */
+    box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+    position: relative;
+    animation: modalFadeIn 0.3s;
+}
+
+@keyframes modalFadeIn {
+    from {opacity: 0; transform: translateY(-20px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+
+/* Payment Summary */
+.pos-wrapper .payment-summary {
+    border-top: 2px dashed #ddd;
+    padding-top: 20px;
+    margin-bottom: 20px;
+}
+
+.pos-wrapper .summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+}
+
+.pos-wrapper .summary-row.total {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--primary-text);
+    margin-top: 10px;
+}
+
+.pos-wrapper .place-order-btn {
+    background: var(--primary-green);
+    color: white;
+    border: none;
+    padding: 15px 25px;
+    border-radius: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: transform 0.2s;
+}
+
+.pos-wrapper .place-order-btn:hover {
+    transform: translateY(-2px);
+}
+
+.pos-wrapper .btn-icon {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* ================= MODAL STYLES ================= */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 30px;
+    border: 1px solid #888;
+    width: 400px;
+    border-radius: 20px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    text-align: center;
+    position: relative;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from { transform: translateY(-50px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.close-modal {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    right: 20px;
+    top: 15px;
+}
+
+.close-modal:hover,
+.close-modal:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.payment-option {
+    transition: all 0.2s;
+}
+
+.payment-option:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.pos-wrapper .toggle-btn {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: transparent;
+    border-radius: 25px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--secondary-text);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.pos-wrapper .toggle-btn.active {
+    background: var(--primary-green);
+    color: white;
+}
+
+/* Customer Inputs */
+.pos-wrapper .customer-details {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.pos-wrapper .input-box {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    padding: 10px 15px;
+    position: relative;
+}
+
+.pos-wrapper .input-box label {
+    display: block;
+    font-size: 0.7rem;
+    color: var(--secondary-text);
+    margin-bottom: 2px;
+}
+
+.pos-wrapper .input-box input, 
+.pos-wrapper .input-box select {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    background: transparent;
+}
+
+/* Order List */
+.pos-wrapper .order-list {
+    flex: 1;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.pos-wrapper .order-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.pos-wrapper .order-item:last-child {
+    border-bottom: none;
+}
+
+.pos-wrapper .order-item img {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    object-fit: cover;
+    margin-right: 15px;
+}
+
+.pos-wrapper .item-info {
+    flex: 1;
+}
+
+.pos-wrapper .item-info h4 {
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+.pos-wrapper .item-info .price {
+    font-weight: 600;
+    color: var(--primary-text);
+}
+
+.pos-wrapper .item-info .notes {
+    font-size: 0.75rem;
+    color: var(--secondary-text);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.pos-wrapper .qty-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f5f5f5;
+    padding: 5px 10px;
+    border-radius: 20px;
+}
+
+.pos-wrapper .qty-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 1rem;
+    width: 20px;
+    display: flex;
+    justify-content: center;
+}
+
+/* Payment Summary */
+.pos-wrapper .payment-summary {
+    margin-bottom: 20px;
+}
+
+.pos-wrapper .summary-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: var(--secondary-text);
+    font-weight: 500;
+}
+
+.pos-wrapper .summary-row.total {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary-text);
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px dashed #ddd;
+}
+
+/* Place Order Button */
+.pos-wrapper .place-order-btn {
+    background: var(--primary-green);
+    color: white;
+    border: none;
+    width: 100%;
+    padding: 18px 25px;
+    border-radius: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background 0.3s;
+}
+
+.pos-wrapper .place-order-btn:hover {
+    background: #0a5c36;
+}
+
+.pos-wrapper .btn-icon {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}

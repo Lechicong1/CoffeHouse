@@ -12,306 +12,181 @@ function parseVND(text) {
   return Number(n) || 0;
 }
 
-function openVoucherModal() {
-  // ✅ KIỂM TRA: Phải chọn khách hàng trước khi mở modal voucher
-  const hasCustomer =
-    window.currentOrder &&
-    window.currentOrder.customer_id &&
-    window.currentOrder.customer_id !== null &&
-    window.currentOrder.customer_id !== undefined &&
-    window.currentOrder.customer_id !== "";
+// POS voucher MVP (clean, single definition)
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("open-voucher-modal");
+  if (btn) btn.addEventListener("click", openVoucherModal);
+});
 
-  if (!hasCustomer) {
-    alert(
-      "⚠️ Vui lòng chọn khách hàng trước!\n\n📋 Flow đúng:\n1. Bấm 'Chọn / Tìm Khách'\n2. Nhập số điện thoại\n3. Sau đó mới chọn voucher"
-    );
-    return; // Dừng lại, không mở modal
+function openVoucherModal() {
+  if (!window.currentOrder || !window.currentOrder.customer_id) {
+    alert("Vui lòng chọn khách hàng trước.");
+    return;
   }
 
-  // build modal if not exists
   let modal = document.getElementById("voucherModal");
   if (!modal) {
     modal = document.createElement("div");
     modal.id = "voucherModal";
-    modal.className = "modal";
-    // use flex centering so modal-content appears centered and larger
-    modal.style.display = "flex";
-    modal.style.alignItems = "center";
-    modal.style.justifyContent = "center";
-    modal.style.padding = "24px";
     modal.style.position = "fixed";
-    modal.style.zIndex = 1300;
     modal.style.left = 0;
     modal.style.top = 0;
     modal.style.width = "100%";
     modal.style.height = "100%";
-    modal.style.background = "rgba(0,0,0,0.4)";
-    modal.innerHTML = `
-      <div class="modal-content" style="width: min(880px, 92%); margin: 0; background: #fff; border-radius:8px; overflow:hidden;">
-        <div style="padding:12px 16px; border-bottom:1px solid #eee; display:flex; align-items:center; gap:12px;">
-          <h3 style="margin:0; font-size:1.1rem; flex:0 0 auto;">Chọn Voucher / Đổi Điểm</h3>
-          <input id="voucherSearch" type="text" placeholder="Tìm voucher..." style="flex:1 1 auto; padding:8px 12px; border-radius:8px; border:1px solid #e6e6e6;">
-          <button style="background:none;border:none;font-size:1.4rem;cursor:pointer;" onclick="closeVoucherModal()">&times;</button>
-        </div>
-        <div style="padding:12px;">
-          <div id="voucherList" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;max-height:520px;overflow:auto;padding-right:6px;"></div>
-          <div style="display:flex; gap:8px; margin-top:12px; justify-content:flex-end;">
-            <button class="btn" onclick="clearSelectedVoucher()">Bỏ chọn</button>
-            <button id="voucherApplyBtn" class="btn btn-success" onclick="applySelectedVoucher()">Áp voucher</button>
-          </div>
-          <div id="voucherMessage" style="margin-top:12px;color:#c00;"></div>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-  } else {
     modal.style.display = "flex";
     modal.style.alignItems = "center";
     modal.style.justifyContent = "center";
+    modal.style.background = "rgba(0,0,0,0.4)";
+    modal.innerHTML = `
+      <div style="background:#fff;padding:20px;border-radius:16px;min-width:600px;max-width:600px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <strong style="font-size:20px;color:#333;">Chọn Voucher</strong>
+          <button id="closeVoucherBtn" type="button" style="background:none;border:none;font-size:28px;cursor:pointer;color:#999;line-height:1;">×</button>
+        </div>
+        <div id="voucherList" style="max-height:520px;overflow:auto;"></div>
+        <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:16px;">
+          <button id="clearVoucherBtn" class="btn" style="padding:10px 20px;border-radius:8px;border:1px solid #ddd;background:#fff;cursor:pointer;">Bỏ chọn</button>
+          <button id="applyVoucherBtn" class="btn btn-success" style="padding:10px 20px;border-radius:8px;border:none;background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:white;cursor:pointer;font-weight:600;">Áp voucher</button>
+        </div>
+        <div id="voucherMsg" style="color:#c00;margin-top:8px;"></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    document
+      .getElementById("closeVoucherBtn")
+      .addEventListener("click", closeVoucherModal);
+    document
+      .getElementById("clearVoucherBtn")
+      .addEventListener("click", clearSelectedVoucher);
+    document
+      .getElementById("applyVoucherBtn")
+      .addEventListener("click", applySelectedVoucher);
+  } else {
+    modal.style.display = "flex";
   }
 
-  // fetch eligible vouchers using FormData POST (match project pattern)
   const fd = new FormData();
-  const custId =
-    window.currentOrder && window.currentOrder.customer_id
-      ? window.currentOrder.customer_id
-      : "";
-  const subtotal = (window.cart || []).reduce((s, i) => s + i.price * i.qty, 0);
-  const applyBtn = document.getElementById("voucherApplyBtn");
-  fd.append("customer_id", custId);
+  fd.append("customer_id", window.currentOrder.customer_id);
+  let subtotal = 0;
+  const subtotalEl = document.getElementById("subtotal-price");
+  if (subtotalEl && subtotalEl.textContent) {
+    subtotal =
+      Number(String(subtotalEl.textContent).replace(/[^0-9\-]+/g, "")) || 0;
+  } else {
+    subtotal = (window.cart || []).reduce(
+      (s, i) => s + Number(i.price || 0) * Number(i.qty || 0),
+      0
+    );
+  }
   fd.append("bill_total", subtotal);
 
-  // Fetch eligible vouchers from server (server filters by customer + bill_total)
   fetch("/COFFEE_PHP/Staff/getEligibleVouchers", { method: "POST", body: fd })
-    .then((r) => r.json())
-    .then((data) => {
-      // store for client-side search/filter
-      window.__pos_all_vouchers = Array.isArray(data.vouchers)
-        ? data.vouchers
-        : [];
-      renderVouchers(window.__pos_all_vouchers, true, fd);
+    .then((r) => r.text())
+    .then((html) => {
+      const list = document.getElementById("voucherList");
+      const msg = document.getElementById("voucherMsg");
+      if (!list) return;
 
-      // wire search input to filter displayed vouchers
-      const searchInput = document.getElementById("voucherSearch");
-      if (searchInput) {
-        searchInput.addEventListener("input", function (e) {
-          const q = String(e.target.value || "")
-            .toLowerCase()
-            .trim();
-          if (!q) return renderVouchers(window.__pos_all_vouchers, true, fd);
-          const filtered = window.__pos_all_vouchers.filter(
-            (v) =>
-              (v.name || "").toLowerCase().includes(q) ||
-              (v.discount_type || "").toLowerCase().includes(q)
-          );
-          renderVouchers(filtered, true, fd);
-        });
-      }
+      // Backend trả về HTML, không phải JSON
+      // Chèn trực tiếp HTML vào list
+      list.innerHTML = html || '<div style="color:#333">Không có voucher phù hợp</div>';
+      
+      // Clear message
+      if (msg) msg.textContent = "";
+      
+      // Wire up click events cho các voucher cards
+      wireVoucherCardClicks();
     })
     .catch((err) => {
       console.error(err);
-      const msg = document.getElementById("voucherMessage");
+      const msg = document.getElementById("voucherMsg");
       if (msg) msg.textContent = "Lỗi khi lấy voucher";
     });
-
-  // no show-all button anymore; modal already displays all vouchers and search is provided
 }
 
-function renderVouchers(vouchers, isAll, fd) {
+function wireVoucherCardClicks() {
   const list = document.getElementById("voucherList");
-  const msg = document.getElementById("voucherMessage");
-  list.innerHTML = "";
-  msg.textContent = "";
-  if (!Array.isArray(vouchers) || vouchers.length === 0) {
-    msg.style.color = "#333";
-    msg.textContent = "Không có voucher phù hợp";
-    return;
-  }
-
-  const customerPoints =
-    window.currentOrder && window.currentOrder.customer_points
-      ? Number(window.currentOrder.customer_points)
-      : 0;
-  // Prefer the displayed subtotal (from #subtotal-price) which reflects current UI state;
-  // fallback to computing from window.cart.
-  const subtotalEl = document.getElementById("subtotal-price");
-  const subtotalNow = subtotalEl
-    ? parseVND(subtotalEl.textContent)
-    : (window.cart || []).reduce((s, i) => s + i.price * i.qty, 0);
-
-  vouchers.forEach((v) => {
-    const el = document.createElement("div");
-    el.className = "voucher-card";
-    el.dataset.voucher = JSON.stringify(v);
-
-    // determine eligibility (client-side hint)
-    let eligible = true;
-    let reason = "";
-    if (!v.is_active || Number(v.is_active) !== 1) {
-      eligible = false;
-      reason = "Không hoạt động";
-    }
-    const today = new Date().toISOString().slice(0, 10);
-    if (eligible && v.end_date && v.end_date < today) {
-      eligible = false;
-      reason = "Hết hạn";
-    }
-    if (
-      eligible &&
-      v.quantity !== null &&
-      Number(v.quantity) <= Number(v.used_count)
-    ) {
-      eligible = false;
-      reason = "Hết lượt";
-    }
-    if (eligible && subtotalNow < Number(v.min_bill_total || 0)) {
-      eligible = false;
-      reason = "Hóa đơn chưa đạt ngưỡng";
-    }
-    if (eligible && Number(v.point_cost || 0) > customerPoints) {
-      eligible = false;
-      reason = "Không đủ điểm";
-    }
-
-    // compute a human readable discount summary
-    let discountSummary = "";
-    if (v.discount_type === "FIXED") {
-      discountSummary = formatCurrency(Number(v.discount_value || 0));
-    } else {
-      discountSummary = Number(v.discount_value || 0) + "%";
-    }
-    const maxDisc = v.max_discount_value
-      ? formatCurrency(Number(v.max_discount_value))
-      : null;
-    const minBill = v.min_bill_total
-      ? formatCurrency(Number(v.min_bill_total))
-      : null;
-    // estimate discount amount for current subtotal
-    let estDiscount = 0;
-    if (v.discount_type === "FIXED")
-      estDiscount = Number(v.discount_value || 0);
-    else
-      estDiscount = Math.round(
-        (Number(v.discount_value || 0) / 100) * subtotalNow
+  if (!list) return;
+  const cards = list.querySelectorAll(".voucher-card");
+  cards.forEach((card) => {
+    card.style.cursor = "pointer";
+    card.addEventListener("click", () => {
+      const id =
+        card.getAttribute("data-id") ||
+        card.getAttribute("data-voucher-id") ||
+        card.dataset.id ||
+        null;
+      const name =
+        card.getAttribute("data-name") ||
+        card.dataset.name ||
+        (card.textContent || "").trim();
+      const point_cost = Number(
+        card.getAttribute("data-point-cost") || card.dataset.pointCost || 0
       );
-    if (v.max_discount_value)
-      estDiscount = Math.min(estDiscount, Number(v.max_discount_value));
-    estDiscount = Math.min(estDiscount, subtotalNow);
-
-    el.innerHTML = `
-      <div class="v-left">
-        <div class="v-name">${v.name}</div>
-        <div class="v-meta">Giảm: <strong>${discountSummary}${
-      maxDisc ? " (tối đa " + maxDisc + ")" : ""
-    }</strong> — Ngưỡng: ${minBill || "Không có"}</div>
-        <div class="v-note">Ước tính giảm hiện tại: <strong>${formatCurrency(
-          estDiscount
-        )}</strong> — Điểm: ${v.point_cost}</div>
-      </div>
-      <div class="v-actions">
-        <button class="btn" ${eligible ? "" : "disabled"}>${
-      eligible ? "Chọn" : "Không thể chọn"
-    }</button>
-      </div>
-    `;
-
-    if (!eligible) el.classList.add("disabled");
-    if (!eligible) {
-      const note = document.createElement("div");
-      note.style.fontSize = "0.85rem";
-      note.style.color = "#a33";
-      note.style.marginTop = "6px";
-      note.textContent = reason;
-      el.querySelector("div").appendChild(note);
-    }
-
-    const btn = el.querySelector("button");
-    const doSelect = (ev) => {
-      if (ev) ev.stopPropagation();
-      if (!eligible) {
-        if (msg) {
-          msg.style.color = "#c00";
-          msg.textContent = "Voucher này không thể áp dụng: " + reason;
-        }
-        return;
-      }
-      if (window.__pos_selected_voucher_el)
-        window.__pos_selected_voucher_el.classList.remove("selected");
-      el.classList.add("selected");
+      const discount_type =
+        card.getAttribute("data-discount-type") ||
+        card.dataset.discountType ||
+        "";
+      const discount_value =
+        card.getAttribute("data-discount-value") ||
+        card.dataset.discountValue ||
+        "";
+      const v = {
+        id: id,
+        voucher_id: id,
+        name: name,
+        point_cost: point_cost,
+        discount_type: discount_type,
+        discount_value: discount_value,
+      };
       window.__pos_selected_voucher = v;
-      window.__pos_selected_voucher_el = el;
-      // Request server-side preview for this voucher to show exact discount/total
-      try {
-        previewVoucherServer(v);
-      } catch (e) {
-        console.warn("Preview voucher failed", e);
-      }
-    };
-    btn.addEventListener("click", doSelect);
-    el.addEventListener("click", doSelect);
-
-    list.appendChild(el);
+      cards.forEach((c) => c.classList.remove("selected"));
+      card.classList.add("selected");
+    });
   });
 }
 
-function closeVoucherModal() {
-  const modal = document.getElementById("voucherModal");
-  if (modal) modal.style.display = "none";
+function selectCardFromObject(v, el) {
+  window.__pos_selected_voucher = v;
+  const siblings = el.parentElement
+    ? el.parentElement.querySelectorAll(".voucher-card")
+    : [];
+  siblings.forEach((s) => s.classList.remove("selected"));
+  el.classList.add("selected");
 }
 
-function selectVoucher(id, points, voucherObj) {
-  // store provisional selection in DOM attribute
-  window.__pos_selected_voucher = voucherObj;
-  const list = document.querySelectorAll("#voucherList .voucher-card");
-  list.forEach((n) => (n.style.background = ""));
-  // highlight isn't trivial without reference; rely on apply button to commit
+function closeVoucherModal() {
+  const m = document.getElementById("voucherModal");
+  if (m) m.style.display = "none";
 }
 
 function applySelectedVoucher() {
   const v = window.__pos_selected_voucher;
-  const msg = document.getElementById("voucherMessage");
+  const msg = document.getElementById("voucherMsg");
   if (!v) {
-    if (msg) {
-      msg.style.color = "#c00";
-      msg.textContent = "Vui lòng chọn voucher trước khi áp.";
-    }
+    if (msg) msg.textContent = "Vui lòng chọn voucher";
     return;
   }
-
-  // set into currentOrder following project's customer flow style
   window.currentOrder = window.currentOrder || {};
-  // ensure server-facing key `voucher_id` exists (server expects data.voucher.voucher_id)
   window.currentOrder.voucher = v;
   const vid = v.voucher_id || v.id || v.VoucherId || v.voucherId || null;
   if (vid) window.currentOrder.voucher.voucher_id = vid;
-  // store point_cost as numeric
   window.currentOrder.voucher.point_cost = Number(
     window.currentOrder.voucher.point_cost || 0
   );
-
-  // include last server preview if available (purely informational)
-  if (window.__pos_selected_voucher && window.__pos_selected_voucher.preview) {
-    window.currentOrder.voucher.preview = window.__pos_selected_voucher.preview;
-  }
-
-  // update UI text
   const sel = document.getElementById("pos-selected-voucher");
   if (sel)
-    sel.textContent = `${v.name} — Giảm ${
+    sel.textContent = `${v.name || ""} — ${
       v.discount_type === "FIXED"
-        ? v.discount_value + "₫"
-        : v.discount_value + "%"
-    } — ${v.point_cost} điểm`;
-
-  // re-render totals
+        ? (v.discount_value || 0) + "₫"
+        : (v.discount_value || 0) + "%"
+    } — ${v.point_cost || 0} điểm`;
   if (typeof updateCartUI === "function") updateCartUI();
-
   closeVoucherModal();
 }
 
 function clearSelectedVoucher() {
-  window.currentOrder = window.currentOrder || {};
-  delete window.currentOrder.voucher;
+  if (window.currentOrder) delete window.currentOrder.voucher;
   const sel = document.getElementById("pos-selected-voucher");
   if (sel) sel.textContent = "Không có voucher";
   if (typeof updateCartUI === "function") updateCartUI();

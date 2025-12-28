@@ -29,6 +29,17 @@
                         <!-- Hidden field để truyền total amount -->
                         <input type="hidden" name="txtTotalAmount" value="<?php echo $data['total']; ?>">
 
+                        <!-- Voucher (optional) -->
+                        <div class="form-group">
+                            <label for="customerVoucher">Mã Voucher (nếu có)</label>
+                            <div style="display:flex;gap:8px;align-items:center;">
+                                <input type="text" id="customerVoucher" name="txtVoucherCode" placeholder="Nhập mã voucher hoặc chọn" style="flex:1;padding:8px;">
+                                <button type="button" id="openVoucherListBtn" class="btn">Chọn voucher</button>
+                            </div>
+                            <input type="hidden" id="appliedVoucherId" name="applied_voucher_id" value="">
+                            <div id="checkoutVoucherMsg" style="margin-top:8px;color:#0a6; font-size:0.95rem"></div>
+                        </div>
+
                         <div class="form-group">
                             <label for="customerName">Họ và tên <span class="required">*</span></label>
                             <input type="text"
@@ -207,6 +218,7 @@
         // Dữ liệu PHP truyền sang JavaScript
         const TOTAL_AMOUNT = <?php echo $data['total']; ?>;
         const ORDER_CODE = 'ORD' + Date.now();
+        const CUSTOMER_ID = <?php echo isset($data['customer']->id) ? (int)$data['customer']->id : 'null'; ?>;
 
         document.getElementById('checkoutForm').addEventListener('submit', function() {
             // Hiển thị loading khi submit
@@ -252,6 +264,9 @@
                 }
             });
         });
+
+        
     </script>
+    <script src="/COFFEE_PHP/Public/Js/voucher-web.js"></script>
 </body>
 </html>

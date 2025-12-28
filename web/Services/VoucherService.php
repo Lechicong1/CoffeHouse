@@ -166,10 +166,15 @@ class VoucherService extends Service {
     $customerRepo = $this->repository('CustomerRepository');
     $voucherRepo  = $this->repository('VoucherRepository');
 
-    $customer = $customerRepo->findById($customerId);
-    if (!$customer) {
-        return ['success'=>false, 'message'=>'Customer not found'];
+    // Support guest preview: if no customerId provided, allow preview for vouchers
+    // that don't require customer points. For customers, load points.
+    $customer = null;
+    $customerPoints = 0;
+    if (!empty($customerId)) {
+        $customer = $customerRepo->findById($customerId);
+        if ($customer) $customerPoints = (int)$customer->points;
     }
+
 
     $voucher = $voucherRepo->findById($voucherId);
     if (!$voucher) {
@@ -197,7 +202,7 @@ class VoucherService extends Service {
         return ['success'=>false, 'message'=>'Bill total below minimum'];
     }
 
-    if ((int)$customer->points < (int)$voucher->point_cost) {
+    if ((int)$voucher->point_cost > 0 && $customerPoints < (int)$voucher->point_cost) {
         return ['success'=>false, 'message'=>'Not enough points'];
     }
 
@@ -216,6 +221,13 @@ class VoucherService extends Service {
         ]
     ];
 }
+
+    /**
+     * Backwards-compatible wrapper: controller expects previewVoucher()
+     */
+    public function previewVoucher($customerId, $voucherId, $totalAmount) {
+        return $this->previewApplyVoucher($customerId, $voucherId, $totalAmount);
+    }
 
     /**
      * Xóa voucher

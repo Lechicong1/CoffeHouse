@@ -2,6 +2,7 @@
 /**
  * FILE: CartController.php
  * DESCRIPTION: Controller xử lý các request liên quan đến giỏ hàng
+ * CHUẨN MVC: Controller chỉ nhận request, gọi Service, trả response
  * AUTHOR: Coffee House System
  */
 
@@ -33,16 +34,16 @@ class CartController extends Controller {
     }
 
     /**
-     * Hiển thị trang giỏ hàng (Method mặc định - giống GetData của Employee)
+     * Hiển thị trang giỏ hàng (Method mặc định)
      */
     public function GetData() {
         $customerId = $this->checkAuth();
 
         try {
-            // Lấy dữ liệu giỏ hàng từ Service
+            // Gọi Service để lấy dữ liệu - KHÔNG có logic ở đây
             $cartData = $this->cartService->getCart($customerId);
 
-            // Render view giỏ hàng
+            // Chỉ render view với data từ Service
             $this->view('UserDashBoard/Pages/CartPage', [
                 'title' => 'Giỏ Hàng - Coffee House',
                 'cartItems' => $cartData['items'] ?? [],
@@ -59,10 +60,10 @@ class CartController extends Controller {
 
     /**
      * Thêm sản phẩm vào giỏ hàng (POST)
-     * Giống Employee/ins
      */
     public function ins() {
-        if (!isset($_POST['btnThemGioHang'])) {
+        // Kiểm tra method POST
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['btnThemGioHang'])) {
             header('Location: /COFFEE_PHP/User/menu');
             exit();
         }
@@ -70,36 +71,23 @@ class CartController extends Controller {
         $customerId = $this->checkAuth();
 
         try {
-            // Lấy dữ liệu từ form
+            // Lấy dữ liệu từ request - KHÔNG validate ở đây
             $productSizeId = $_POST['txtProductSizeId'] ?? null;
             $quantity = (int)($_POST['txtQuantity'] ?? 1);
             $buyNow = $_POST['buy_now'] ?? '0';
 
-            // Validate
-            if (!$productSizeId) {
-                $_SESSION['error_message'] = 'Vui lòng chọn size sản phẩm';
-                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/COFFEE_PHP/User/menu'));
-                exit();
-            }
-
-            if ($quantity < 1) {
-                $_SESSION['error_message'] = 'Số lượng phải lớn hơn 0';
-                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/COFFEE_PHP/User/menu'));
-                exit();
-            }
-
-            // Thêm vào giỏ hàng
+            // Gọi Service xử lý - Service sẽ validate và xử lý logic
             $result = $this->cartService->addToCart($customerId, $productSizeId, $quantity);
 
+            // Xử lý kết quả từ Service
             if ($result['success']) {
                 $_SESSION['success_message'] = $result['message'];
 
-                // Nếu là "Mua ngay" thì chuyển đến trang checkout
+                // Redirect theo hành động
                 if ($buyNow === '1') {
                     header('Location: /COFFEE_PHP/Checkout/GetData');
                 } else {
-                    // Nếu là "Thêm vào giỏ" thì quay lại trang trước
-                    header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/COFFEE_PHP/User/cart'));
+                    header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/COFFEE_PHP/Cart/GetData'));
                 }
             } else {
                 $_SESSION['error_message'] = $result['message'];
@@ -114,86 +102,72 @@ class CartController extends Controller {
 
     /**
      * Cập nhật số lượng sản phẩm trong giỏ (POST)
-     * Giống Employee/upd
      */
     public function upd() {
-        if (!isset($_POST['btnCapnhat'])) {
-            header('Location: /COFFEE_PHP/User/cart');
+        // Kiểm tra method POST
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['btnCapnhat'])) {
+            header('Location: /COFFEE_PHP/Cart/GetData');
             exit();
         }
 
         $customerId = $this->checkAuth();
 
         try {
+            // Lấy dữ liệu từ request
             $cartItemId = $_POST['txtCartItemId'] ?? null;
             $quantity = (int)($_POST['txtQuantity'] ?? 0);
 
-            // Validate
-            if (!$cartItemId) {
-                $_SESSION['error_message'] = 'Thiếu thông tin sản phẩm';
-                header('Location: /COFFEE_PHP/User/cart');
-                exit();
-            }
+            // Gọi Service xử lý - Service sẽ validate
+            $result = $this->cartService->updateQuantity($customerId, $cartItemId, $quantity);
 
-            if ($quantity < 1) {
-                $_SESSION['error_message'] = 'Số lượng phải lớn hơn 0';
-                header('Location: /COFFEE_PHP/User/cart');
-                exit();
-            }
-
-            // Cập nhật số lượng
-            $result = $this->cartService->updateQuantity($cartItemId, $quantity);
-
+            // Set message từ Service
             if ($result['success']) {
                 $_SESSION['success_message'] = $result['message'];
             } else {
                 $_SESSION['error_message'] = $result['message'];
             }
 
-            header('Location: /COFFEE_PHP/User/cart');
         } catch (Exception $e) {
             $_SESSION['error_message'] = 'Có lỗi xảy ra: ' . $e->getMessage();
-            header('Location: /COFFEE_PHP/User/cart');
         }
+
+        // Luôn redirect về giỏ hàng (URL đúng)
+        header('Location: /COFFEE_PHP/Cart/GetData');
         exit();
     }
 
     /**
      * Xóa sản phẩm khỏi giỏ hàng (POST)
-     * Giống Employee/del
      */
     public function del() {
-        if (!isset($_POST['btnXoa'])) {
-            header('Location: /COFFEE_PHP/User/cart');
+        // Kiểm tra method POST
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['btnXoa'])) {
+            header('Location: /COFFEE_PHP/Cart/GetData');
             exit();
         }
 
         $customerId = $this->checkAuth();
 
         try {
+            // Lấy dữ liệu từ request
             $cartItemId = $_POST['txtCartItemId'] ?? null;
 
-            // Validate
-            if (!$cartItemId) {
-                $_SESSION['error_message'] = 'Thiếu thông tin sản phẩm';
-                header('Location: /COFFEE_PHP/User/cart');
-                exit();
-            }
+            // Gọi Service xử lý
+            $result = $this->cartService->removeItem($customerId, $cartItemId);
 
-            // Xóa sản phẩm
-            $result = $this->cartService->removeItem($cartItemId);
-
+            // Set message từ Service
             if ($result['success']) {
                 $_SESSION['success_message'] = $result['message'];
             } else {
                 $_SESSION['error_message'] = $result['message'];
             }
 
-            header('Location: /COFFEE_PHP/User/cart');
         } catch (Exception $e) {
             $_SESSION['error_message'] = 'Có lỗi xảy ra: ' . $e->getMessage();
-            header('Location: /COFFEE_PHP/User/cart');
         }
+
+        // Redirect về giỏ hàng (URL đúng)
+        header('Location: /COFFEE_PHP/Cart/GetData');
         exit();
     }
 
@@ -201,27 +175,31 @@ class CartController extends Controller {
      * Xóa toàn bộ giỏ hàng (POST)
      */
     public function clear() {
-        if (!isset($_POST['btnXoaTatCa'])) {
-            header('Location: /COFFEE_PHP/User/cart');
+        // Kiểm tra method POST
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['btnXoaTatCa'])) {
+            header('Location: /COFFEE_PHP/Cart/GetData');
             exit();
         }
 
         $customerId = $this->checkAuth();
 
         try {
+            // Gọi Service xử lý
             $result = $this->cartService->clearCart($customerId);
 
+            // Set message từ Service
             if ($result['success']) {
-                $_SESSION['success_message'] = 'Đã xóa toàn bộ giỏ hàng';
+                $_SESSION['success_message'] = $result['message'];
             } else {
                 $_SESSION['error_message'] = $result['message'];
             }
 
-            header('Location: /COFFEE_PHP/User/cart');
         } catch (Exception $e) {
             $_SESSION['error_message'] = 'Có lỗi xảy ra: ' . $e->getMessage();
-            header('Location: /COFFEE_PHP/User/cart');
         }
+
+        // Redirect về giỏ hàng (URL đúng)
+        header('Location: /COFFEE_PHP/Cart/GetData');
         exit();
     }
 }

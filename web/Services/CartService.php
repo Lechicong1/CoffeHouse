@@ -5,8 +5,8 @@
  * AUTHOR: Coffee House System
  */
 
-include_once './web/Repositories/CartRepository.php';
-include_once './web/Entity/CartItemEntity.php';
+require_once './web/Repositories/CartRepository.php';
+require_once './web/Entity/CartItemEntity.php';
 
 use web\Entity\CartItemEntity;
 

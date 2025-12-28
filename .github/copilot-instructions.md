@@ -20,7 +20,7 @@
 1. **Kiến trúc (Architecture)**:
    - Tách biệt hoàn toàn mã nguồn thành 3 file riêng biệt: `index.html`, `style.css`, `script.js`.
    - Không sử dụng thư viện ngoài. Code thuần (Vanilla) để tối ưu hiệu năng.
-
+   - Tuân thủ kiến trúc MVC , PHP server thuần túy không sử dụng giao tiếp API Json 
 2. **Hệ thống thiết kế (Design System - Based on "White Basic" style)**:
    - **Nền (Background)**: Sử dụng màu trắng làm chủ đạo, kết hợp ánh xanh nhẹ hiện đại.
    - **Typography**: Sử dụng font không chân (Sans-serif). Tiêu đề (Headings) phải viết IN HOA (Uppercase) và đậm (Bold), tạo cảm giác hiện đại, mạnh mẽ.

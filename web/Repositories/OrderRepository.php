@@ -38,5 +38,20 @@ class OrderRepository extends ConnectDatabase {
         }
         return false;
     }
+
+    /**
+     * Lấy đơn hàng theo ID
+     */
+    public function findById($id) {
+        $sql = "SELECT * FROM orders WHERE id = ?";
+        $stmt = mysqli_prepare($this->con, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        mysqli_stmt_execute($stmt);
+
+        $result = mysqli_stmt_get_result($stmt);
+        $data = mysqli_fetch_assoc($result);
+
+        return $data ? new OrderEntity($data) : null;
+    }
 }
 ?>

@@ -1,0 +1,294 @@
+/* ============================================
+   ORDER SUCCESS PAGE STYLES
+   Phong cách Minimalist White cho trang đặt hàng thành công
+   ============================================ */
+
+:root {
+    --primary-color: #B6DA9F;
+    --success-color: #27ae60;
+    --text-dark: #2c3e50;
+    --text-light: #7f8c8d;
+    --border-color: #e0e0e0;
+    --bg-light: #f9f9f9;
+    --white: #ffffff;
+    --shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: var(--bg-light);
+    color: var(--text-dark);
+}
+
+/* ============================================
+   SUCCESS CONTAINER
+   ============================================ */
+.success-container {
+    min-height: calc(100vh - 200px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 150px 20px 50px;
+}
+
+.success-wrapper {
+    max-width: 600px;
+    width: 100%;
+    background: var(--white);
+    border-radius: 20px;
+    padding: 50px 40px;
+    box-shadow: var(--shadow);
+    text-align: center;
+    animation: fadeInUp 0.5s ease;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ============================================
+   SUCCESS ICON
+   ============================================ */
+.success-icon {
+    margin-bottom: 30px;
+    animation: scaleIn 0.5s ease 0.2s both;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.success-icon i {
+    font-size: 5rem;
+    color: var(--success-color);
+}
+
+/* ============================================
+   SUCCESS TEXT
+   ============================================ */
+.success-title {
+    font-size: 2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-dark);
+    margin-bottom: 15px;
+}
+
+.success-message {
+    font-size: 1.1rem;
+    color: var(--text-light);
+    margin-bottom: 40px;
+}
+
+/* ============================================
+   ORDER INFO
+   ============================================ */
+.order-info {
+    background: var(--bg-light);
+    border-radius: 15px;
+    padding: 30px;
+    margin-bottom: 30px;
+    text-align: left;
+}
+
+.order-info h2 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 25px;
+    text-align: center;
+    color: var(--text-dark);
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.info-row:last-of-type {
+    border-bottom: none;
+}
+
+.info-row .label {
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.info-row .value {
+    font-weight: 700;
+    color: var(--text-light);
+}
+
+.info-row .order-code {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+.info-row .amount {
+    color: var(--success-color);
+    font-size: 1.2rem;
+}
+
+.info-row .status {
+    background: var(--primary-color);
+    color: var(--text-dark);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+}
+
+/* ============================================
+   PAYMENT NOTICE
+   ============================================ */
+.payment-notice {
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+    display: flex;
+    align-items: start;
+    gap: 10px;
+}
+
+.payment-notice i {
+    color: #ffc107;
+    font-size: 1.2rem;
+    margin-top: 3px;
+}
+
+.payment-notice p {
+    color: #856404;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* ============================================
+   ACTION BUTTONS
+   ============================================ */
+.action-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px 25px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: var(--text-dark);
+}
+
+.btn-primary:hover {
+    background: #a5c98f;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(182, 218, 159, 0.3);
+}
+
+.btn-secondary {
+    background: var(--white);
+    color: var(--text-dark);
+    border: 2px solid var(--border-color);
+}
+
+.btn-secondary:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+/* ============================================
+   THANK YOU NOTE
+   ============================================ */
+.thank-you-note {
+    border-top: 2px solid var(--border-color);
+    padding-top: 30px;
+}
+
+.thank-you-note p {
+    color: var(--text-light);
+    font-size: 0.95rem;
+    line-height: 1.8;
+    margin-bottom: 10px;
+}
+
+.thank-you-note strong {
+    color: var(--primary-color);
+    font-size: 1.1rem;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 768px) {
+    .success-container {
+        padding: 100px 15px 30px;
+    }
+
+    .success-wrapper {
+        padding: 40px 25px;
+    }
+
+    .success-title {
+        font-size: 1.5rem;
+    }
+
+    .success-icon i {
+        font-size: 4rem;
+    }
+
+    .action-buttons {
+        grid-template-columns: 1fr;
+    }
+
+    .order-info {
+        padding: 20px;
+    }
+
+    .info-row {
+        flex-direction: column;
+        align-items: start;
+        gap: 8px;
+    }
+}
+

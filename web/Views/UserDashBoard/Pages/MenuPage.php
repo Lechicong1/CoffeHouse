@@ -8,14 +8,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Thực đơn Coffee House - Cà phê, Trà sữa, Đồ ăn vặt">
-    <title>Thực đơn - Coffee House</title>
+    <title><?php echo $data['title'] ?? 'Thực đơn - Coffee House'; ?></title>
     <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/user-style.css">
     <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/user-menu-style.css">
 </head>
 <body>
     <?php
     $currentPage = 'menu';
-    include __DIR__ . '/header.php';
+    include __DIR__ . '/../header.php';
     ?>
 
     <!-- MENU HERO -->

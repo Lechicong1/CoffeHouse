@@ -8,14 +8,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Giới thiệu về Coffee House - Câu chuyện, sứ mệnh và giá trị của chúng tôi">
-    <title>Về Coffee House - Câu chuyện của chúng tôi</title>
+    <title><?php echo $data['title'] ?? 'Về Coffee House - Câu chuyện của chúng tôi'; ?></title>
     <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/user-style.css">
     <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/user-about.css">
 </head>
 <body>
     <?php
     $currentPage = 'about';
-    include __DIR__ . '/header.php';
+    include __DIR__ . '/../header.php';
     ?>
 
     <!-- PAGE HERO -->

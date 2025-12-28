@@ -17,7 +17,7 @@ class CartRepository extends ConnectDatabase {
      * @return array
      */
     public function findCartByCustomerId($customerId) {
-        $sql = "SELECT ci.*, p.name as product_name, p.image_url, ps.size_name, ps.price
+        $sql = "SELECT ci.*, p.id as product_id, p.name as product_name, p.image_url, ps.size_name, ps.price
                 FROM cart_items ci
                 JOIN product_sizes ps ON ci.product_size_id = ps.id
                 JOIN products p ON ps.product_id = p.id
@@ -32,10 +32,6 @@ class CartRepository extends ConnectDatabase {
         
         while ($row = mysqli_fetch_assoc($result)) {
             $item = new CartItemEntity($row);
-            $item->product_name = $row['product_name'];
-            $item->image_url = $row['image_url'];
-            $item->size_name = $row['size_name'];
-            $item->price = $row['price'];
             $cartItems[] = $item;
         }
         

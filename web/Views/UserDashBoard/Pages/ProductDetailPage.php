@@ -7,15 +7,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="<?= isset($product) ? htmlspecialchars($product->description) : 'Chi tiết sản phẩm' ?>">
-    <title><?= isset($product) ? htmlspecialchars($product->name) : 'Chi tiết sản phẩm' ?> - Coffee House</title>
+    <meta name="description" content="<?= isset($data['product']) ? htmlspecialchars($data['product']->description) : 'Chi tiết sản phẩm' ?>">
+    <title><?= isset($data['product']) ? htmlspecialchars($data['product']->name) . ' - Coffee House' : ($data['title'] ?? 'Chi tiết sản phẩm - Coffee House') ?></title>
     <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/user-style.css">
     <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/user-product-detail.css">
 </head>
 <body>
     <?php
     $currentPage = 'menu';
-    include __DIR__ . '/header.php';
+    include __DIR__ . '/../header.php';
+    $product = $data['product'] ?? null;
+    $category = $data['category'] ?? null;
+    $relatedProducts = $data['relatedProducts'] ?? [];
     ?>
 
     <?php if (isset($product)): ?>

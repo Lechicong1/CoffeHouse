@@ -43,15 +43,15 @@ class CustomerRepository extends ConnectDatabase {
      * @return string|null
      */
     public function getAddressById($id) {
-        $sql = "SELECT address FROM customers WHERE id = ?";
-        $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "i", $id);
-        mysqli_stmt_execute($stmt);
+        // Thử lấy toàn bộ thông tin customer trước
+        $customer = $this->findById($id);
 
-        $result = mysqli_stmt_get_result($stmt);
-        $row = mysqli_fetch_assoc($result);
+        if ($customer) {
+            // Trả về address nếu có, nếu không có thì trả về null
+            return $customer->address ?? null;
+        }
 
-        return $row ? $row['address'] : null;
+        return null;
     }
 
     /**

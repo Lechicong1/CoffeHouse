@@ -43,7 +43,8 @@ class UserController extends Controller {
         }
 
         // Render view
-        $this->view('UserDashBoard/index', [
+        $this->view('UserDashBoard/Pages/HomePage', [
+            'title' => 'Trang Chủ - Coffee House',
             'products' => $products,
             'categories' => $categories
         ]);
@@ -55,7 +56,8 @@ class UserController extends Controller {
     function menu() {
         $categories = $this->categoryService->getAllCategories();
 
-        $this->view('UserDashBoard/menu', [
+        $this->view('UserDashBoard/Pages/MenuPage', [
+            'title' => 'Thực Đơn - Coffee House',
             'categories' => $categories
         ]);
     }
@@ -81,13 +83,14 @@ class UserController extends Controller {
                 }
             }
 
-            $this->view('UserDashBoard/category-products', [
+            $this->view('UserDashBoard/Pages/CategoryProductsPage', [
+                'title' => $category->name . ' - Coffee House',
                 'category' => $category,
                 'products' => $products
             ]);
         } else {
             // Redirect về trang menu nếu không có category
-            echo "<script>window.location.href='User/menu';</script>";
+            header('Location: /COFFEE_PHP/User/menu');
             exit;
         }
     }
@@ -99,14 +102,14 @@ class UserController extends Controller {
         $productId = isset($_GET['id']) ? intval($_GET['id']) : null;
 
         if (!$productId) {
-            echo "<script>window.location.href='/COFFEE_PHP/User/menu';</script>";
+            header('Location: /COFFEE_PHP/User/menu');
             exit;
         }
 
         $product = $this->productService->getProductById($productId);
 
         if (!$product || $product->is_active != 1) {
-            echo "<script>window.location.href='/COFFEE_PHP/User/menu';</script>";
+            header('Location: /COFFEE_PHP/User/menu');
             exit;
         }
 
@@ -131,7 +134,8 @@ class UserController extends Controller {
             }
         }
 
-        $this->view('UserDashBoard/product-detail', [
+        $this->view('UserDashBoard/Pages/ProductDetailPage', [
+            'title' => $product->name . ' - Coffee House',
             'product' => $product,
             'category' => $category,
             'relatedProducts' => $relatedProducts
@@ -142,69 +146,8 @@ class UserController extends Controller {
      * Trang about
      */
     function about() {
-        $this->view('UserDashBoard/about', []);
-    }
-
-    /**
-     * Trang giỏ hàng
-     */
-    function cart() {
-        // Kiểm tra đăng nhập
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-
-        if (!isset($_SESSION['user']) || $_SESSION['user']['type'] !== 'customer') {
-            $_SESSION['error_message'] = 'Vui lòng đăng nhập để xem giỏ hàng';
-            header('Location: /COFFEE_PHP/Auth/login');
-            exit();
-        }
-
-        // Lấy giỏ hàng từ CartService
-        include_once './web/Services/CartService.php';
-        $cartService = new CartService();
-        $customerId = $_SESSION['user']['id'];
-        $cartData = $cartService->getCart($customerId);
-
-        $this->view('UserDashBoard/cart', [
-            'cartItems' => $cartData['items'] ?? [],
-            'total' => $cartData['total'] ?? 0,
-            'count' => $cartData['count'] ?? 0
-        ]);
-    }
-
-    /**
-     * Trang checkout
-     */
-    function checkout() {
-        // Kiểm tra đăng nhập
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-
-        if (!isset($_SESSION['user']) || $_SESSION['user']['type'] !== 'customer') {
-            $_SESSION['error_message'] = 'Vui lòng đăng nhập để thanh toán';
-            header('Location: /COFFEE_PHP/Auth/login');
-            exit();
-        }
-
-        // Lấy giỏ hàng
-        include_once './web/Services/CartService.php';
-        $cartService = new CartService();
-        $customerId = $_SESSION['user']['id'];
-        $cartData = $cartService->getCart($customerId);
-
-        // Kiểm tra giỏ hàng có trống không
-        if (empty($cartData['items'])) {
-            $_SESSION['error_message'] = 'Giỏ hàng của bạn đang trống';
-            header('Location: /COFFEE_PHP/User/menu');
-            exit();
-        }
-
-        $this->view('UserDashBoard/checkout', [
-            'cartItems' => $cartData['items'],
-            'total' => $cartData['total'],
-            'count' => $cartData['count']
+        $this->view('UserDashBoard/Pages/AboutPage', [
+            'title' => 'Về Chúng Tôi - Coffee House'
         ]);
     }
 }

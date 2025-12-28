@@ -49,6 +49,8 @@ class OrderEntity {
             $this->note = $data['note'] ?? null;
             $this->created_at = $data['created_at'] ?? null;
             $this->updated_at = $data['updated_at'] ?? null;
+            $this->customer_name = $data['customer_name'] ?? null;
+            $this->customer_phone = $data['customer_phone'] ?? null;
         }
     }
 }

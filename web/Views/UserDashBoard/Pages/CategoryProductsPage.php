@@ -8,14 +8,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Danh sách sản phẩm - Coffee House">
-    <title><?= isset($category) ? htmlspecialchars($category->name) : 'Sản phẩm' ?> - Coffee House</title>
+    <title><?= isset($data['category']) ? htmlspecialchars($data['category']->name) . ' - Coffee House' : ($data['title'] ?? 'Sản phẩm - Coffee House') ?></title>
     <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/user-style.css">
     <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/user-category-products.css">
 </head>
 <body>
     <?php
     $currentPage = 'menu';
-    include __DIR__ . '/header.php';
+    include __DIR__ . '/../header.php';
+    $category = $data['category'] ?? null;
+    $products = $data['products'] ?? [];
     ?>
 
     <!-- CATEGORY HERO -->

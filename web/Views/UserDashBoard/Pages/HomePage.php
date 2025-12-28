@@ -8,13 +8,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Coffee House - Quán cà phê phong cách tối giản, hiện đại">
-    <title>Coffee House - Trải nghiệm cà phê đặc biệt</title>
+    <title><?php echo $data['title'] ?? 'Coffee House - Trải nghiệm cà phê đặc biệt'; ?></title>
     <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/user-style.css">
 </head>
 <body>
     <?php
     $currentPage = 'index';
-    include __DIR__ . '/header.php';
+    include __DIR__ . '/../header.php';
     ?>
 
     <!-- HERO SECTION WITH SLIDER -->

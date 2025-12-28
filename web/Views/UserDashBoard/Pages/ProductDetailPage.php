@@ -7,15 +7,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="<?= isset($product) ? htmlspecialchars($product->description) : 'Chi tiết sản phẩm' ?>">
-    <title><?= isset($product) ? htmlspecialchars($product->name) : 'Chi tiết sản phẩm' ?> - Coffee House</title>
+    <meta name="description" content="<?= isset($data['product']) ? htmlspecialchars($data['product']->description) : 'Chi tiết sản phẩm' ?>">
+    <title><?= isset($data['product']) ? htmlspecialchars($data['product']->name) . ' - Coffee House' : ($data['title'] ?? 'Chi tiết sản phẩm - Coffee House') ?></title>
     <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/user-style.css">
     <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/user-product-detail.css">
 </head>
 <body>
     <?php
     $currentPage = 'menu';
-    include __DIR__ . '/header.php';
+    include __DIR__ . '/../header.php';
+    $product = $data['product'] ?? null;
+    $category = $data['category'] ?? null;
+    $relatedProducts = $data['relatedProducts'] ?? [];
     ?>
 
     <?php if (isset($product)): ?>
@@ -76,43 +79,51 @@
                 </div>
 
                 <!-- Product Options -->
-                <div class="product-options">
-                    <?php if (!empty($product->sizes)): ?>
-                    <!-- Size -->
-                    <div class="option-group">
-                        <label>Kích thước</label>
-                        <div class="size-options">
-                            <?php foreach ($product->sizes as $index => $size): ?>
-                                <button class="size-btn <?= $index === 0 ? 'active' : '' ?>"
-                                        data-size="<?= htmlspecialchars($size->size_name) ?>"
-                                        data-price="<?= $size->price ?>">
-                                    Size <?= htmlspecialchars($size->size_name) ?> - <?= number_format($size->price, 0, ',', '.') ?>đ
-                                </button>
-                            <?php endforeach; ?>
+                <form method="POST" action="/COFFEE_PHP/CartController/addToCartForm" id="add-to-cart-form">
+                    <input type="hidden" name="product_id" value="<?= $product->id ?>">
+                    <input type="hidden" name="product_size_id" id="selected-product-size-id" value="<?= !empty($product->sizes) ? $product->sizes[0]->id : '' ?>">
+                    <input type="hidden" name="quantity" id="selected-quantity" value="1">
+                    <input type="hidden" name="buy_now" id="buy-now-flag" value="0">
+
+                    <div class="product-options">
+                        <?php if (!empty($product->sizes)): ?>
+                        <!-- Size -->
+                        <div class="option-group">
+                            <label>Kích thước <span style="color: red;">*</span></label>
+                            <div class="size-options">
+                                <?php foreach ($product->sizes as $index => $size): ?>
+                                    <button type="button" class="size-btn <?= $index === 0 ? 'active' : '' ?>"
+                                            data-product-size-id="<?= $size->id ?>"
+                                            data-size="<?= htmlspecialchars($size->size_name) ?>"
+                                            data-price="<?= $size->price ?>">
+                                        Size <?= htmlspecialchars($size->size_name) ?> - <?= number_format($size->price, 0, ',', '.') ?>đ
+                                    </button>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Quantity -->
+                    <div class="quantity-selector">
+                        <label>Số lượng</label>
+                        <div class="quantity-controls">
+                            <button type="button" class="quantity-btn" id="decrease-qty">-</button>
+                            <span class="quantity-value" id="quantity">1</span>
+                            <button type="button" class="quantity-btn" id="increase-qty">+</button>
                         </div>
                     </div>
-                    <?php endif; ?>
-                </div>
 
-                <!-- Quantity -->
-                <div class="quantity-selector">
-                    <label>Số lượng</label>
-                    <div class="quantity-controls">
-                        <button class="quantity-btn" id="decrease-qty">-</button>
-                        <span class="quantity-value" id="quantity">1</span>
-                        <button class="quantity-btn" id="increase-qty">+</button>
+                    <!-- Actions -->
+                    <div class="product-actions">
+                        <button type="submit" class="btn-add-cart" id="add-to-cart">
+                            🛒 Thêm vào giỏ hàng
+                        </button>
+                        <button type="button" class="btn-buy-now" id="buy-now">
+                            ⚡ Đặt hàng ngay
+                        </button>
                     </div>
-                </div>
-
-                <!-- Actions -->
-                <div class="product-actions">
-                    <button class="btn-add-cart" id="add-to-cart">
-                        🛒 Thêm vào giỏ hàng
-                    </button>
-                    <button class="btn-buy-now" id="buy-now">
-                        ⚡ Đặt hàng ngay
-                    </button>
-                </div>
+                </form>
 
                 <!-- Product Meta -->
                 <div class="product-meta">
@@ -221,5 +232,8 @@
     <?php endif; ?>
 
     <?php include __DIR__ . '/footer.php'; ?>
+
+    <!-- JavaScript -->
+    <script src="/COFFEE_PHP/Public/Js/user-product-detail.js"></script>
 </body>
 </html>

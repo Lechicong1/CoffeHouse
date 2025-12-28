@@ -79,11 +79,14 @@
                 </div>
 
                 <!-- Product Options -->
-                <form method="POST" action="/COFFEE_PHP/CartController/addToCartForm" id="add-to-cart-form">
+                <form method="POST" action="/COFFEE_PHP/Cart/ins" id="add-to-cart-form">
                     <input type="hidden" name="product_id" value="<?= $product->id ?>">
-                    <input type="hidden" name="product_size_id" id="selected-product-size-id" value="<?= !empty($product->sizes) ? $product->sizes[0]->id : '' ?>">
-                    <input type="hidden" name="quantity" id="selected-quantity" value="1">
+                    <!-- Tên trường phải khớp với CartController::ins -> txtProductSizeId, txtQuantity -->
+                    <input type="hidden" name="txtProductSizeId" id="selected-product-size-id" value="<?= !empty($product->sizes) ? $product->sizes[0]->id : '' ?>">
+                    <input type="hidden" name="txtQuantity" id="selected-quantity" value="1">
                     <input type="hidden" name="buy_now" id="buy-now-flag" value="0">
+                    <!-- Hidden button flag để controller kiểm tra (btnThemGioHang) - cần thiết khi JS gọi form.submit() -->
+                    <input type="hidden" name="btnThemGioHang" id="btn-them-gio-hang-hidden" value="1">
 
                     <div class="product-options">
                         <?php if (!empty($product->sizes)): ?>
@@ -116,7 +119,7 @@
 
                     <!-- Actions -->
                     <div class="product-actions">
-                        <button type="submit" class="btn-add-cart" id="add-to-cart">
+                        <button type="submit" name="btnThemGioHang" class="btn-add-cart" id="add-to-cart">
                             🛒 Thêm vào giỏ hàng
                         </button>
                         <button type="button" class="btn-buy-now" id="buy-now">

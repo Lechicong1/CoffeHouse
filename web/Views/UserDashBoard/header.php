@@ -35,7 +35,7 @@
         <?php endif; ?>
 
         <div class="cart-icon">
-            <a href="/COFFEE_PHP/User/cart" style="text-decoration: none; color: inherit;">
+            <a href="/COFFEE_PHP/CartController" style="text-decoration: none; color: inherit;">
                 🛒
                 <span class="cart-count" id="cart-count">0</span>
             </a>

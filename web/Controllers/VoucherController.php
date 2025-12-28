@@ -219,5 +219,43 @@ class VoucherController extends Controller {
             echo 'Không có voucher nào đang hoạt động';
         }
     }
+
+    // Lấy voucher đủ điều kiện áp dụng cho khách hàng và tổng hóa đơn
+    function getEligibleVouchers() {
+        header('Content-Type: text/html; charset=UTF-8');
+
+        $customerId = isset($_POST['customer_id']) ? (int)$_POST['customer_id'] : null;
+        $billTotal  = isset($_POST['bill_total']) ? (float)$_POST['bill_total'] : 0;
+
+        $voucherService = $this->service('VoucherService');
+        $vouchers = $voucherService->getEligibleVouchers($customerId, $billTotal);
+
+        // Render view with vouchers
+        $this->view('EmployeeDashBoard/Pages/voucher_list', [
+            'vouchers' => $vouchers
+        ]);
+        exit;
+}
+
+    // Preview áp dụng voucher
+    function previewVoucher() {
+        header('Content-Type: text/html; charset=UTF-8');
+        $customerId = (int)($_POST['customer_id'] ?? 0);
+        $voucherId  = (int)($_POST['voucher_id'] ?? 0);
+        $total      = (float)($_POST['total_amount'] ?? 0);
+
+        $service = $this->service('VoucherService');
+        $res = $service->previewVoucher($customerId, $voucherId, $total);
+
+        if (!$res['success']) {
+            // trả 1 marker lỗi để FE biết
+            echo '<span id="pv" data-ok="0" data-msg="'.htmlspecialchars($res['message'], ENT_QUOTES).'"></span>';
+            exit;
+        }
+
+        echo '<span id="pv" data-ok="1" data-discount="'.$res['discount_amount'].'" data-total-after="'.$res['total_after'].'"></span>';
+        exit;
+    }
+
 }
 ?>

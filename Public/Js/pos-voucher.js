@@ -80,25 +80,28 @@ function openVoucherModal() {
   }
   fd.append("bill_total", subtotal);
 
-  fetch("/COFFEE_PHP/Staff/getEligibleVouchers", { method: "POST", body: fd })
+  fetch("/COFFEE_PHP/Voucher/getEligibleVouchers", { method: "POST", body: fd })
     .then((r) => r.text())
     .then((html) => {
+      console.log("Voucher HTML response:", html); // DEBUG
       const list = document.getElementById("voucherList");
       const msg = document.getElementById("voucherMsg");
+      console.log("voucherList element:", list); // DEBUG
       if (!list) return;
 
       // Backend trả về HTML, không phải JSON
       // Chèn trực tiếp HTML vào list
-      list.innerHTML = html || '<div style="color:#333">Không có voucher phù hợp</div>';
-      
+      list.innerHTML =
+        html || '<div style="color:#333">Không có voucher phù hợp</div>';
+
       // Clear message
       if (msg) msg.textContent = "";
-      
+
       // Wire up click events cho các voucher cards
       wireVoucherCardClicks();
     })
     .catch((err) => {
-      console.error(err);
+      console.error("Fetch error:", err); // DEBUG
       const msg = document.getElementById("voucherMsg");
       if (msg) msg.textContent = "Lỗi khi lấy voucher";
     });
@@ -195,9 +198,9 @@ function clearSelectedVoucher() {
 
 // Helper function to format currency
 function formatCurrency(amount) {
-  return new Intl.NumberFormat('vi-VN', { 
-    style: 'currency', 
-    currency: 'VND' 
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
   }).format(amount);
 }
 
@@ -206,16 +209,17 @@ function previewVoucherServer(voucherId) {
   const fd = new FormData();
 
   const subtotalEl = document.getElementById("subtotal-price");
-  const subtotal = subtotalEl ? parseVND(subtotalEl.textContent)
-    : (window.cart || []).reduce((s,i)=>s+i.price*i.qty,0);
+  const subtotal = subtotalEl
+    ? parseVND(subtotalEl.textContent)
+    : (window.cart || []).reduce((s, i) => s + i.price * i.qty, 0);
 
   fd.append("customer_id", window.currentOrder.customer_id);
   fd.append("voucher_id", voucherId);
   fd.append("total_amount", subtotal);
 
-  fetch("/COFFEE_PHP/Staff/previewVoucher", { method:"POST", body: fd })
-    .then(r => r.text())
-    .then(html => {
+  fetch("/COFFEE_PHP/Voucher/previewVoucher", { method: "POST", body: fd })
+    .then((r) => r.text())
+    .then((html) => {
       // nhét vào 1 container tạm (không hiện ra UI)
       const tmp = document.createElement("div");
       tmp.innerHTML = html;
@@ -233,7 +237,10 @@ function previewVoucherServer(voucherId) {
       const totalAfter = Number(pv.dataset.totalAfter || 0);
 
       // Lưu vào state
-      window.currentOrder.voucherPreview = { discount_amount: discount, total_after: totalAfter };
+      window.currentOrder.voucherPreview = {
+        discount_amount: discount,
+        total_after: totalAfter,
+      };
 
       // ✅ ĐỔ THẲNG VÀO KHU VỰC TỔNG TIỀN TRONG ORDER
       applyTotalsFromPreview(discount, totalAfter);
@@ -250,4 +257,3 @@ function applyTotalsFromPreview(discount, totalAfter) {
   if (totalEl) totalEl.textContent = formatCurrency(totalAfter);
   if (payBtn) payBtn.textContent = `Thanh Toán ${formatCurrency(totalAfter)}`;
 }
-

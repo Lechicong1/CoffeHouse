@@ -38,56 +38,6 @@ class StaffController extends Controller {
     }
 
     /**
-     * API: Lấy voucher đủ điều kiện cho POS
-     * POST { customer_id, bill_total }
-     */
-
-    //dume thang duc no lay o day ne
-    //controller no tra ve view thi phai o day
-   function getEligibleVouchers() {
-    header('Content-Type: text/html; charset=UTF-8');
-
-    $customerId = isset($_POST['customer_id']) ? (int)$_POST['customer_id'] : null;
-    $billTotal  = isset($_POST['bill_total']) ? (float)$_POST['bill_total'] : 0;
-
-    $voucherService = $this->service('VoucherService');
-    $vouchers = $voucherService->getEligibleVouchers($customerId, $billTotal);
-
-    // Render view with vouchers
-    $this->view('EmployeeDashBoard/Pages/voucher_list', [
-        'vouchers' => $vouchers
-    ]);
-    exit;
-}
-
-    /**
-     * API: Xem trước áp dụng voucher  
-     * POST { customer_id, voucher_id, total_amount }
-     * // trả về HTML marker
-     */     
-        function previewVoucher() {
-        header('Content-Type: text/html; charset=UTF-8');
-
-        $customerId = (int)($_POST['customer_id'] ?? 0);
-        $voucherId  = (int)($_POST['voucher_id'] ?? 0);
-        $total      = (float)($_POST['total_amount'] ?? 0);
-
-        $service = $this->service('VoucherService');
-        $res = $service->previewApplyVoucher($customerId, $voucherId, $total);
-
-        if (!$res['success']) {
-            // trả 1 marker lỗi để FE biết
-            echo '<span id="pv" data-ok="0" data-msg="'.htmlspecialchars($res['message'], ENT_QUOTES).'"></span>';
-            exit;
-        }
-
-        echo '<span id="pv" data-ok="1" data-discount="'.$res['discount_amount'].'" data-total-after="'.$res['total_after'].'"></span>';
-        exit;
-    }
-
-
-
-    /**
      * API: Create Order
      * URL: http://localhost/COFFEE_PHP/Staff/createOrder
      */

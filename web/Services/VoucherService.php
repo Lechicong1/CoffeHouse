@@ -163,18 +163,15 @@ class VoucherService extends Service {
      * @return array
      */
     public function previewApplyVoucher($customerId, $voucherId, $totalAmount) {
-    $customerRepo = $this->repository('CustomerRepository');
-    $voucherRepo  = $this->repository('VoucherRepository');
+        $customerRepo = $this->repository('CustomerRepository');
+        $voucherRepo  = $this->repository('VoucherRepository');
+        $customer = null;
+        $customerPoints = 0;
 
-    // Support guest preview: if no customerId provided, allow preview for vouchers
-    // that don't require customer points. For customers, load points.
-    $customer = null;
-    $customerPoints = 0;
-    if (!empty($customerId)) {
-        $customer = $customerRepo->findById($customerId);
-        if ($customer) $customerPoints = (int)$customer->points;
+        if (!empty($customerId)) {
+            $customer = $customerRepo->findById($customerId);
+            if ($customer) $customerPoints = (int)$customer->points;
     }
-
 
     $voucher = $voucherRepo->findById($voucherId);
     if (!$voucher) {
@@ -205,7 +202,7 @@ class VoucherService extends Service {
     if ((int)$voucher->point_cost > 0 && $customerPoints < (int)$voucher->point_cost) {
         return ['success'=>false, 'message'=>'Not enough points'];
     }
-
+    
     // ===== CALCULATE =====
     $discount = $this->calculateDiscount($voucher, $totalAmount);
     $totalAfter = max(0, $totalAmount - $discount);
@@ -223,7 +220,7 @@ class VoucherService extends Service {
 }
 
     /**
-     * Backwards-compatible wrapper: controller expects previewVoucher()
+     * Xem trước áp dụng voucher (wrapper)
      */
     public function previewVoucher($customerId, $voucherId, $totalAmount) {
         return $this->previewApplyVoucher($customerId, $voucherId, $totalAmount);

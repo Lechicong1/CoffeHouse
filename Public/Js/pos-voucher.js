@@ -192,3 +192,62 @@ function clearSelectedVoucher() {
   if (typeof updateCartUI === "function") updateCartUI();
   closeVoucherModal();
 }
+
+// Helper function to format currency
+function formatCurrency(amount) {
+  return new Intl.NumberFormat('vi-VN', { 
+    style: 'currency', 
+    currency: 'VND' 
+  }).format(amount);
+}
+
+// Preview voucher from server
+function previewVoucherServer(voucherId) {
+  const fd = new FormData();
+
+  const subtotalEl = document.getElementById("subtotal-price");
+  const subtotal = subtotalEl ? parseVND(subtotalEl.textContent)
+    : (window.cart || []).reduce((s,i)=>s+i.price*i.qty,0);
+
+  fd.append("customer_id", window.currentOrder.customer_id);
+  fd.append("voucher_id", voucherId);
+  fd.append("total_amount", subtotal);
+
+  fetch("/COFFEE_PHP/Staff/previewVoucher", { method:"POST", body: fd })
+    .then(r => r.text())
+    .then(html => {
+      // nhét vào 1 container tạm (không hiện ra UI)
+      const tmp = document.createElement("div");
+      tmp.innerHTML = html;
+
+      const pv = tmp.querySelector("#pv");
+      if (!pv) return;
+
+      if (pv.dataset.ok !== "1") {
+        // nếu muốn: hiện lỗi ở đâu đó nhỏ (hoặc bỏ)
+        console.warn(pv.dataset.msg || "Preview failed");
+        return;
+      }
+
+      const discount = Number(pv.dataset.discount || 0);
+      const totalAfter = Number(pv.dataset.totalAfter || 0);
+
+      // Lưu vào state
+      window.currentOrder.voucherPreview = { discount_amount: discount, total_after: totalAfter };
+
+      // ✅ ĐỔ THẲNG VÀO KHU VỰC TỔNG TIỀN TRONG ORDER
+      applyTotalsFromPreview(discount, totalAfter);
+    });
+}
+
+function applyTotalsFromPreview(discount, totalAfter) {
+  // đổi ID này theo đúng staff_order.php của bạn
+  const discountEl = document.getElementById("discount-price"); // nếu có
+  const totalEl = document.getElementById("total-price");
+  const payBtn = document.getElementById("btn-checkout");
+
+  if (discountEl) discountEl.textContent = formatCurrency(discount);
+  if (totalEl) totalEl.textContent = formatCurrency(totalAfter);
+  if (payBtn) payBtn.textContent = `Thanh Toán ${formatCurrency(totalAfter)}`;
+}
+

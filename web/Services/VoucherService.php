@@ -156,6 +156,68 @@ class VoucherService extends Service {
     }
 
     /**
+     * Xem trước áp dụng voucher
+     * @param int $customerId
+     * @param int $voucherId
+     * @param float $totalAmount
+     * @return array
+     */
+    public function previewApplyVoucher($customerId, $voucherId, $totalAmount) {
+    $customerRepo = $this->repository('CustomerRepository');
+    $voucherRepo  = $this->repository('VoucherRepository');
+
+    $customer = $customerRepo->findById($customerId);
+    if (!$customer) {
+        return ['success'=>false, 'message'=>'Customer not found'];
+    }
+
+    $voucher = $voucherRepo->findById($voucherId);
+    if (!$voucher) {
+        return ['success'=>false, 'message'=>'Voucher not found'];
+    }
+
+    // ===== VALIDATE =====
+    if ((int)$voucher->is_active !== 1) {
+        return ['success'=>false, 'message'=>'Voucher not active'];
+    }
+
+    $today = date('Y-m-d');
+    if ($voucher->start_date && strtotime($today) < strtotime($voucher->start_date)) {
+        return ['success'=>false, 'message'=>'Voucher not started yet'];
+    }
+    if ($voucher->end_date && strtotime($today) > strtotime($voucher->end_date)) {
+        return ['success'=>false, 'message'=>'Voucher expired'];
+    }
+
+    if (!is_null($voucher->quantity) && $voucher->used_count >= $voucher->quantity) {
+        return ['success'=>false, 'message'=>'Voucher out of stock'];
+    }
+
+    if ($totalAmount < $voucher->min_bill_total) {
+        return ['success'=>false, 'message'=>'Bill total below minimum'];
+    }
+
+    if ((int)$customer->points < (int)$voucher->point_cost) {
+        return ['success'=>false, 'message'=>'Not enough points'];
+    }
+
+    // ===== CALCULATE =====
+    $discount = $this->calculateDiscount($voucher, $totalAmount);
+    $totalAfter = max(0, $totalAmount - $discount);
+
+    return [
+        'success' => true,
+        'discount_amount' => (float)$discount,
+        'total_after' => (float)$totalAfter,
+        'voucher' => [
+            'id' => $voucher->id,
+            'name' => $voucher->name,
+            'point_cost' => $voucher->point_cost
+        ]
+    ];
+}
+
+    /**
      * Xóa voucher
      * @param int $id
      * @return array ['success' => bool, 'message' => string]

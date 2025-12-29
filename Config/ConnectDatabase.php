@@ -6,7 +6,7 @@
 class ConnectDatabase {
     private $host = '127.0.0.1';
     private $username = 'root';
-    private $password = '';
+    private $password = 'root';
     private $database = 'CoffeePHP';
     public $con;
 

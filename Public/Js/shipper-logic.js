@@ -49,11 +49,11 @@ function filterOrders(filter) {
         let shouldShow = false;
         if (filter === 'all') {
             shouldShow = true;
-        } else if (filter === 'pending' && status === 'READY_FOR_DELIVERY') {
+        } else if (filter === 'pending' && status === 'READY') {
             shouldShow = true;
         } else if (filter === 'delivering' && status === 'SHIPPING') {
             shouldShow = true;
-        } else if (filter === 'completed' && status === 'DELIVERED') {
+        } else if (filter === 'completed' && status === 'COMPLETED') {
             shouldShow = true;
         }
 

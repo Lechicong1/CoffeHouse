@@ -36,8 +36,8 @@ class ShipperController extends Controller {
     }
 
     /**
-     * Xử lý nhận đơn (READY_FOR_DELIVERY -> SHIPPING)
-     * URL: index.php?controller=shipper&action=startShipping
+     * Xử lý nhận đơn (READY -> SHIPPING)
+     * URL: index.php?url=Shipper/startShipping
      * Method: POST
      */
     public function startShipping() {
@@ -49,7 +49,7 @@ class ShipperController extends Controller {
                 
                 if ($result) {
                     // Redirect lại trang danh sách
-                    header('Location: /COFFEE_PHP/ShipperController/index');
+                    header('Location: index.php?url=Shipper/index');
                     exit;
                 } else {
                     echo "Lỗi: Không thể cập nhật trạng thái đơn hàng.";
@@ -59,8 +59,8 @@ class ShipperController extends Controller {
     }
 
     /**
-     * Xử lý hoàn thành đơn (SHIPPING -> DELIVERED)
-     * URL: index.php?controller=shipper&action=completeDelivery
+     * Xử lý hoàn thành đơn (SHIPPING -> COMPLETED)
+     * URL: index.php?url=Shipper/completeDelivery
      * Method: POST
      */
     public function completeDelivery() {
@@ -72,7 +72,7 @@ class ShipperController extends Controller {
                 
                 if ($result) {
                     // Redirect lại trang danh sách
-                    header('Location: /COFFEE_PHP/ShipperController/index');
+                    header('Location: index.php?url=Shipper/index');
                     exit;
                 } else {
                     echo "Lỗi: Không thể cập nhật trạng thái đơn hàng.";

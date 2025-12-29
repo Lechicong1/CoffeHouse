@@ -8,7 +8,7 @@
         foreach ($orders as $o) {
             if ($o->status == 'SHIPPING') {
                 $deliveringOrders++;
-            } elseif ($o->status == 'DELIVERED') {
+            } elseif ($o->status == 'COMPLETED') {
                 $completedOrders++;
             }
         }
@@ -74,13 +74,13 @@
                 <?php 
                     $statusClass = '';
                     $statusText = '';
-                    if ($order->status == 'READY_FOR_DELIVERY') {
+                    if ($order->status == 'READY') {
                         $statusClass = 'status-pending';
                         $statusText = 'Chờ giao';
                     } elseif ($order->status == 'SHIPPING') {
                         $statusClass = 'status-delivering';
                         $statusText = 'Đang giao';
-                    } elseif ($order->status == 'DELIVERED') {
+                    } elseif ($order->status == 'COMPLETED') {
                         $statusClass = 'status-completed';
                         $statusText = 'Đã hoàn thành';
                     }
@@ -120,15 +120,15 @@
                             Tổng: <?php echo number_format($order->total_amount); ?> đ
                         </div>
                         <div class="order-actions">
-                            <?php if ($order->status == 'READY_FOR_DELIVERY'): ?>
-                                <form id="form-start-shipping-<?php echo $order->id; ?>" action="ShipperController/startShipping" method="POST" style="display: none;">
+                            <?php if ($order->status == 'READY'): ?>
+                                <form id="form-start-shipping-<?php echo $order->id; ?>" action="index.php?url=Shipper/startShipping" method="POST" style="display: none;">
                                     <input type="hidden" name="order_id" value="<?php echo $order->id; ?>">
                                 </form>
                                 <button class="btn-action btn-deliver" onclick="handleDeliverOrder('<?php echo $order->id; ?>')">
                                     🚚 Giao hàng
                                 </button>
                             <?php elseif ($order->status == 'SHIPPING'): ?>
-                                <form id="form-complete-delivery-<?php echo $order->id; ?>" action="ShipperController/completeDelivery" method="POST" style="display: none;">
+                                <form id="form-complete-delivery-<?php echo $order->id; ?>" action="index.php?url=Shipper/completeDelivery" method="POST" style="display: none;">
                                     <input type="hidden" name="order_id" value="<?php echo $order->id; ?>">
                                 </form>
                                 <button class="btn-action btn-complete" onclick="handleCompleteOrder('<?php echo $order->id; ?>')">

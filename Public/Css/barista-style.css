@@ -1,0 +1,182 @@
+/* Barista Dashboard Styles */
+:root {
+    --bg-color: #f0f2e9;
+    --card-bg: #ffffff;
+    --text-primary: #1a4d2e; /* Dark Green */
+    --text-secondary: #4a4a4a;
+    --accent-green: #1a4d2e;
+    --accent-red: #e74c3c;
+    --accent-yellow: #f1c40f;
+    --accent-done: #27ae60;
+    --border-radius: 8px;
+    --shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    margin: 0;
+    padding: 20px;
+    color: var(--text-primary);
+}
+
+.dashboard-wrapper {
+    max-width: 1400px;
+    margin: 0 auto;
+    background-color: #fdfdfd;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.05);
+    border: 10px solid #4a6b52; /* Dark green border like in image */
+    min-height: 90vh;
+}
+
+.barista-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.barista-header h1 {
+    color: var(--text-primary);
+    font-size: 24px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.barista-info {
+    background: #fff;
+    padding: 8px 15px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    font-weight: bold;
+}
+
+/* Kanban Board */
+.kanban-board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.kanban-column {
+    background: transparent;
+    padding: 10px;
+}
+
+.column-header {
+    margin-bottom: 20px;
+    text-align: center;
+    border-bottom: 3px solid #ccc;
+    padding-bottom: 10px;
+}
+
+.column-header h2 {
+    font-size: 16px;
+    color: #e74c3c; /* Default red for New Orders */
+    margin: 0;
+    text-transform: uppercase;
+}
+
+.new-orders .column-header { border-color: var(--accent-red); }
+.new-orders .column-header h2 { color: var(--accent-red); }
+
+.in-progress .column-header { border-color: var(--accent-yellow); }
+.in-progress .column-header h2 { color: var(--accent-yellow); }
+
+.completed .column-header { border-color: var(--accent-done); }
+.completed .column-header h2 { color: var(--accent-done); }
+
+/* Order Card */
+.order-card {
+    background: var(--card-bg);
+    border-radius: var(--border-radius);
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: var(--shadow);
+    border: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 200px;
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: var(--accent-green);
+    font-size: 14px;
+}
+
+.card-body {
+    flex-grow: 1;
+}
+
+.item-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.item-list li {
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.item-list .qty {
+    font-weight: bold;
+    margin-right: 5px;
+}
+
+.order-note {
+    margin-top: 10px;
+    font-style: italic;
+    font-size: 12px;
+    color: #888;
+    background: #f9f9f9;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+.card-footer {
+    margin-top: 15px;
+    text-align: right;
+}
+
+.btn {
+    border: none;
+    padding: 8px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    transition: background 0.3s;
+}
+
+.btn-accept {
+    background-color: var(--accent-green);
+}
+
+.btn-accept:hover {
+    background-color: #143d24;
+}
+
+.btn-complete {
+    background-color: var(--accent-green);
+}
+
+.btn-complete:hover {
+    background-color: #143d24;
+}
+
+.status-done {
+    color: var(--accent-green);
+    font-weight: bold;
+}

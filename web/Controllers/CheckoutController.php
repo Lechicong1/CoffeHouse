@@ -108,6 +108,7 @@ class CheckoutController extends Controller {
                 'note' => trim($_POST['txtNote'] ?? ''),
                 'payment_method' => $_POST['payment_method'],
                 'total_amount' => (float)$_POST['txtTotalAmount'],
+                'voucher' => [ 'voucher_id' => isset($_POST['applied_voucher_id']) && $_POST['applied_voucher_id'] !== '' ? (int)$_POST['applied_voucher_id'] : null ],
                 'order_type' => 'ONLINE_DELIVERY'
             ];
 

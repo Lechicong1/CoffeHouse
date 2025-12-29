@@ -2,6 +2,7 @@
 include_once './web/Repositories/OrderRepository.php';
 include_once './web/Repositories/OrderItemRepository.php';
 include_once './web/Repositories/CartRepository.php';
+include_once './web/Repositories/ProductSizeRepository.php';
 include_once './web/Entity/OrderEntity.php';
 include_once './web/Entity/OrderItemEntity.php';
 include_once './web/Services/VoucherService.php';
@@ -16,11 +17,13 @@ class OrderService {
     private $orderRepo;
     private $orderItemRepo;
     private $cartRepo;
+    private $productSizeRepo;
 
     public function __construct() {
         $this->orderRepo = new OrderRepository();
         $this->orderItemRepo = new OrderItemRepository();
         $this->cartRepo = new CartRepository();
+        $this->productSizeRepo = new ProductSizeRepository();
     }
 
     /**
@@ -90,25 +93,54 @@ class OrderService {
     public function createOrder($data) {
         // 1. Tạo Order Entity
         $order = new OrderEntity();
-        $order->order_code = $data['order_code'];
+        $order->order_code = $this->generateUniqueOrderCode(); // Generate mã unique
         $order->staff_id = $data['staff_id'] ?? null; // Lấy từ session nếu có
         $order->customer_id = $data['customer_id'] ?? null; // Mặc định null hoặc khách lẻ
         $order->order_type = $data['order_type'] ?? 'AT_COUNTER';
-        $order->status = 'COMPLETED'; // POS thanh toán xong là completed luôn
+        $order->status = 'PROCESSING'; // Mặc định đang pha chế
         $order->payment_status = 'PAID';
         $order->payment_method = $data['payment_method'] ?? 'CASH';
 
-        // Tính toán sub_total (tổng trước giảm) từ items để tránh nhầm lẫn
+        // Tính toán sub_total từ DATABASE - KHÔNG TIN FRONTEND
+        // ĐÂY LÀ BẢO MẬT QUAN TRỌNG: Luôn query giá từ DB
         $sub_total = 0.0;
+        $validatedItems = [];
+        
         if (!empty($data['items']) && is_array($data['items'])) {
             foreach ($data['items'] as $it) {
-                $price = isset($it['price']) ? (float)$it['price'] : 0.0;
+                // Lấy product_size_id từ frontend
+                $sizeId = isset($it['size_id']) ? $it['size_id'] : null;
                 $qty = isset($it['qty']) ? (int)$it['qty'] : 0;
-                $sub_total += $price * $qty;
+                
+                if (!$sizeId || $qty <= 0) {
+                    continue; // Skip invalid items
+                }
+                
+                // QUERY GIÁ THẬT TỪ DATABASE - KHÔNG DÙNG GIÁ TỪ FRONTEND
+                $productSize = $this->productSizeRepo->findById($sizeId);
+                
+                if (!$productSize) {
+                    throw new Exception("Sản phẩm không tồn tại: size_id = $sizeId");
+                }
+                
+                // Dùng giá từ database
+                $realPrice = (float)$productSize->price;
+                $sub_total += $realPrice * $qty;
+                
+                // Lưu lại items đã validate với giá thật
+                $validatedItems[] = [
+                    'size_id' => $sizeId,
+                    'qty' => $qty,
+                    'price' => $realPrice, // Giá thật từ DB
+                    'notes' => $it['notes'] ?? ''
+                ];
             }
         } else {
-            $sub_total = isset($data['total_amount']) ? (float)$data['total_amount'] : 0.0;
+            throw new Exception('Không có sản phẩm trong đơn hàng');
         }
+        
+        // Ghi đè items với validated items (có giá thật)
+        $data['items'] = $validatedItems;
 
         // Quy ước: orders.total_amount lưu `sub_total` (trước khi trừ voucher/discount)
         $order->total_amount = $sub_total;
@@ -208,6 +240,7 @@ class OrderService {
             return [
                 'success' => true,
                 'order_id' => $orderId,
+                'order_code' => $order->order_code,
                 'message' => 'Tạo đơn hàng thành công',
                 'sub_total' => $order->total_amount,
                 'discount_amount' => (float)$discountAmount,
@@ -220,10 +253,36 @@ class OrderService {
     }
 
     /**
-     * Tạo mã đơn hàng tự động
+     * Tạo mã đơn hàng tự động (cũ - cho checkout)
      */
     private function generateOrderCode() {
         return 'ORD' . date('YmdHis') . rand(100, 999);
+    }
+
+    /**
+     * Tạo mã đơn hàng unique theo format ORD + 4 số
+     * Kiểm tra trùng và random lại nếu trùng
+     */
+    private function generateUniqueOrderCode() {
+        $maxAttempts = 10;
+        $attempts = 0;
+        
+        do {
+            // Tạo mã ORD + 4 số ngẫu nhiên
+            $code = 'ORD' . str_pad(rand(0, 9999), 4, '0', STR_PAD_LEFT);
+            
+            // Kiểm tra trùng trong database
+            $exists = $this->orderRepo->findByOrderCode($code);
+            
+            if (!$exists) {
+                return $code;
+            }
+            
+            $attempts++;
+        } while ($attempts < $maxAttempts);
+        
+        // Fallback: dùng timestamp nếu không tìm được mã unique
+        return 'ORD' . substr(time(), -4);
     }
 
     /**
@@ -231,6 +290,89 @@ class OrderService {
      */
     public function getOrderById($orderId) {
         return $this->orderRepo->findById($orderId);
+    }
+
+    /**
+     * Lấy danh sách đơn hàng với filter
+     * @param array $filters ['status' => 'PROCESSING', 'search' => 'ORD123']
+     * @return array
+     */
+    public function getOrders($filters = []) {
+        return $this->orderRepo->findAllWithFilters($filters);
+    }
+
+    /**
+     * Lấy chi tiết items của đơn hàng
+     * @param int $orderId
+     * @return array
+     */
+    public function getOrderItems($orderId) {
+        return $this->orderItemRepo->findByOrderId($orderId);
+    }
+
+    /**
+     * Cập nhật trạng thái đơn hàng
+     * @param int $orderId
+     * @param string $newStatus
+     * @return array
+     */
+    public function updateOrderStatus($orderId, $newStatus) {
+        try {
+            $order = $this->orderRepo->findById($orderId);
+            
+            if (!$order) {
+                return ['success' => false, 'message' => 'Không tìm thấy đơn hàng'];
+            }
+
+            // Validate status
+            $validStatuses = ['PROCESSING', 'DELIVERING', 'COMPLETED', 'CANCELLED'];
+            if (!in_array($newStatus, $validStatuses)) {
+                return ['success' => false, 'message' => 'Trạng thái không hợp lệ'];
+            }
+
+            // Nếu hủy đơn đã thanh toán -> Đánh dấu hoàn tiền
+            if ($newStatus === 'CANCELLED' && $order->payment_status === 'PAID') {
+                $order->payment_status = 'REFUNDED';
+            }
+
+            $order->status = $newStatus;
+            
+            if ($this->orderRepo->update($order)) {
+                return ['success' => true, 'message' => 'Cập nhật trạng thái thành công'];
+            }
+
+            return ['success' => false, 'message' => 'Lỗi khi cập nhật'];
+
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Cập nhật ghi chú đơn hàng
+     * @param int $orderId
+     * @param string $note
+     * @return array
+     */
+    public function updateOrderNote($orderId, $note) {
+        try {
+            $order = $this->orderRepo->findById($orderId);
+            
+            if (!$order) {
+                return ['success' => false, 'message' => 'Không tìm thấy đơn hàng'];
+            }
+
+            $order->note = trim($note);
+            
+            if ($this->orderRepo->update($order)) {
+                return ['success' => true, 'message' => 'Cập nhật ghi chú thành công'];
+            }
+
+            return ['success' => false, 'message' => 'Lỗi khi cập nhật'];
+
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
     }
 }
 ?>

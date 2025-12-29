@@ -1,38 +1,33 @@
 // ===================================
 // FILE: pos-logic.js
-// DESCRIPTION: Logic for POS Interface (Adapted from staff.js)
+// DESCRIPTION: Logic for POS Interface (MVC - Không dùng API JSON)
 // ===================================
 
 // --- DATA ---
-let menuItems = []; // Fetched from API
+let menuItems = []; // Loaded từ SERVER_MENU_DATA
 
 // --- STATE ---
 let cart = [];
-let currentOrderType = "dine-in";
+let currentOrderType = "AT_COUNTER"; // DINEIN hoặc TAKEAWAY
 let selectedPaymentMethod = null;
 let currentProductForSize = null; // Store product being added
 
 // --- INITIALIZATION ---
 document.addEventListener("DOMContentLoaded", () => {
-  fetchMenu(); // Fetch menu from server
+  // Load menu từ dữ liệu PHP đã truyền vào
+  if (typeof SERVER_MENU_DATA !== 'undefined') {
+    menuItems = SERVER_MENU_DATA;
+    renderMenu("coffee"); // Render default category
+  } else {
+    console.error('SERVER_MENU_DATA không tồn tại');
+  }
+
   updateDate();
   setupEventListeners();
   updateCartUI(); // Render initial cart
 });
 
 // --- FUNCTIONS ---
-
-async function fetchMenu() {
-  try {
-    const response = await fetch("/COFFEE_PHP/Staff/getMenu");
-    if (!response.ok) throw new Error("Failed to fetch menu");
-    menuItems = await response.json();
-    renderMenu("coffee"); // Render default category after fetch
-  } catch (error) {
-    console.error("Error fetching menu:", error);
-    alert("Không thể tải danh sách món ăn. Vui lòng thử lại.");
-  }
-}
 
 function updateDate() {
   const dateElement = document.getElementById("current-date");
@@ -334,42 +329,28 @@ function changeQty(id, change) {
 
 function setOrderType(type) {
   currentOrderType = type;
-  document
-    .querySelectorAll(".toggle-btn")
-    .forEach((btn) => btn.classList.remove("active"));
-  if (type === "dine-in") {
+  
+  // Update active button
+  document.querySelectorAll(".toggle-btn").forEach((btn) => btn.classList.remove("active"));
+  
+  if (type === "AT_COUNTER") {
     document.getElementById("btn-dine-in").classList.add("active");
-  } else {
+  } else if (type === "TAKEAWAY") {
     document.getElementById("btn-take-away").classList.add("active");
   }
 
-  // Update Inputs
-  const tableGroup = document.querySelector(
-    ".customer-details .input-box:nth-child(2)"
-  ); // Assuming 2nd child is table
-  const orderIdGroup = document.getElementById("order-id-group");
-  const orderIdInput = document.getElementById("order-id");
-
-  // Better selector for table group if it doesn't have ID
-  // In staff_order.php: <div class="input-box"><label>Bàn Số</label>...</div>
-  // Let's try to find it by label content if possible, or just assume structure
-  // But wait, in previous read of staff_order.php, it didn't have an ID.
-  // Let's use the structure:
-  // .customer-details > .input-box (Name)
-  // .customer-details > .input-box (Table)
-  // .customer-details > .input-box (Order ID)
-
-  const inputBoxes = document.querySelectorAll(".customer-details .input-box");
-  if (inputBoxes.length >= 3) {
-    const tableBox = inputBoxes[1];
-    const orderIdBox = inputBoxes[2]; // This one has id="order-id-group"
-
-    if (type === "dine-in") {
+  // Toggle giữa Bàn số và Mã đơn
+  const tableBox = document.getElementById("table-box");
+  const orderIdBox = document.getElementById("order-id-box");
+  
+  if (tableBox && orderIdBox) {
+    if (type === "AT_COUNTER") {
       tableBox.style.display = "block";
       orderIdBox.style.display = "none";
     } else {
       tableBox.style.display = "none";
       orderIdBox.style.display = "block";
+      const orderIdInput = document.getElementById("order-id");
       if (orderIdInput && !orderIdInput.value) {
         orderIdInput.value = generateOrderId();
       }
@@ -415,80 +396,75 @@ function updatePaymentSelection() {
 
   if (cashBtn) {
     cashBtn.style.borderColor =
-      selectedPaymentMethod === "cash" ? "var(--primary-green)" : "#eee";
+      selectedPaymentMethod === "CASH" ? "var(--primary-green)" : "#eee";
     cashBtn.style.backgroundColor =
-      selectedPaymentMethod === "cash" ? "#f0f9eb" : "white";
+      selectedPaymentMethod === "CASH" ? "#f0f9eb" : "white";
   }
 
   if (cardBtn) {
     cardBtn.style.borderColor =
-      selectedPaymentMethod === "card" ? "var(--primary-green)" : "#eee";
+      selectedPaymentMethod === "BANKING" ? "var(--primary-green)" : "#eee";
     cardBtn.style.backgroundColor =
-      selectedPaymentMethod === "card" ? "#f0f9eb" : "white";
+      selectedPaymentMethod === "BANKING" ? "#f0f9eb" : "white";
   }
 }
 
-async function processPayment() {
+function processPayment() {
   if (!selectedPaymentMethod) {
     alert("Vui lòng chọn phương thức thanh toán.");
     return;
   }
 
-  const totalAmount = cart.reduce(
-    (sum, item) => sum + item.price * item.qty,
-    0
-  );
-  const orderCode =
-    currentOrderType === "take-away"
-      ? document.getElementById("order-id").value
-      : "DINEIN-" + Math.floor(Date.now() / 1000);
+  if (cart.length === 0) {
+    alert("Giỏ hàng trống!");
+    return;
+  }
 
-  // Fix: Use very short codes for order_type to avoid truncation
-  // Assuming DB column might be short or ENUM
-  const orderData = {
-    order_code: orderCode,
-    order_type: currentOrderType === "take-away" ? "TAKEAWAY" : "DINEIN", // Removed underscores
-    payment_method: selectedPaymentMethod === "cash" ? "CASH" : "BANKING",
-    total_amount: totalAmount,
-    items: cart,
-    note: "",
-    customer_id:
-      window.currentOrder && window.currentOrder.customer_id
-        ? window.currentOrder.customer_id
-        : null,
-  };
-
-  // Include voucher info if applied — FE sends only voucher_id; backend computes discount/points
+  // Tính tổng tiền
+  const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+  
+  // Tính giảm giá voucher (GIỮ NGUYÊN LOGIC)
+  let voucherDiscount = 0;
+  let voucherId = null;
   if (window.currentOrder && window.currentOrder.voucher) {
     const v = window.currentOrder.voucher;
-    orderData.voucher = {
-      voucher_id: v.id,
-    };
-  }
-
-  try {
-    const response = await fetch("/COFFEE_PHP/Staff/createOrder", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(orderData),
-    });
-
-    const result = await response.json();
-
-    if (result.success) {
-      alert(`Thanh toán thành công! Mã đơn: ${result.order_id}`);
-      cart = [];
-      updateCartUI();
-      closePaymentModal();
+    voucherId = v.id;
+    if (v.discount_type === "FIXED") {
+      voucherDiscount = Number(v.discount_value) || 0;
     } else {
-      alert("Lỗi thanh toán: " + result.message);
+      voucherDiscount = subtotal * ((Number(v.discount_value) || 0) / 100.0);
     }
-  } catch (error) {
-    console.error("Error processing payment:", error);
-    alert("Lỗi kết nối server.");
+    if (v.max_discount_value) {
+      voucherDiscount = Math.min(voucherDiscount, Number(v.max_discount_value));
+    }
+    voucherDiscount = Math.min(voucherDiscount, subtotal);
+    voucherDiscount = Math.round(voucherDiscount);
   }
+
+  const totalAmount = Math.max(0, subtotal - voucherDiscount);
+
+  // Chuẩn bị cart items để gửi (chuyển sang format OrderService cần)
+  const cartItemsFormatted = cart.map(item => ({
+    size_id: item.id + '-' + item.size, // product_size_id
+    qty: item.qty,
+    price: item.price,
+    notes: item.notes || ''
+  }));
+
+  // Lấy customer ID từ window.selectedCustomer (được set bởi pos-customer.js)
+  const customerId = window.selectedCustomer ? window.selectedCustomer.id : '';
+
+  // Điền thông tin vào form ẩn
+  document.getElementById('form-order-type').value = currentOrderType;
+  document.getElementById('form-payment-method').value = selectedPaymentMethod;
+  document.getElementById('form-total-amount').value = totalAmount;
+  document.getElementById('form-customer-id').value = customerId;
+  document.getElementById('form-cart-items').value = JSON.stringify(cartItemsFormatted);
+  document.getElementById('form-note').value = '';
+  document.getElementById('form-voucher-id').value = voucherId || '';
+
+  // Submit form
+  document.getElementById('order-form').submit();
 }
 
 // Close modal if clicked outside

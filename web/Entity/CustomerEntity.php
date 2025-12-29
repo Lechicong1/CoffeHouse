@@ -15,6 +15,7 @@ class CustomerEntity {
     public $phone;
     public $email;
     public $address;
+    public $account_type;
     public $points;
     public $status;
 
@@ -32,6 +33,7 @@ class CustomerEntity {
             $this->phone = $data['phone'] ?? null;
             $this->email = $data['email'] ?? null;
             $this->address = $data['address'] ?? null;
+            $this->account_type = $data['account_type'] ?? ($data['accountType'] ?? 'GUEST_POS');
             $this->points = isset($data['points']) ? (int)$data['points'] : 0;
             $this->status = isset($data['status']) ? (int)$data['status'] : 1;
         }
@@ -49,6 +51,7 @@ class CustomerEntity {
             'phone' => $this->phone,
             'email' => $this->email,
             'address' => $this->address,
+            'account_type' => $this->account_type,
             'points' => $this->points,
             'status' => $this->status
         ];

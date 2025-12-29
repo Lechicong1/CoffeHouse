@@ -24,6 +24,16 @@ class CustomerService extends Service {
     }
 
     /**
+     * Lấy customer theo phone
+     * @param string $phone
+     * @return CustomerEntity|null
+     */
+    public function getCustomerByPhone($phone) {
+        $repository = $this->repository('CustomerRepository');
+        return $repository->findByPhone($phone);
+    }
+
+    /**
      * Lấy địa chỉ của khách hàng theo ID
      * @param int $id
      * @return string|null
@@ -177,6 +187,69 @@ class CustomerService extends Service {
                 'message' => 'Có lỗi xảy ra khi cập nhật khách hàng!'
             ];
         }
+    }
+
+    /**
+     * POS-friendly upsert: nếu tồn tại => cộng điểm (nếu có), trả về customer;
+     * nếu chưa tồn tại => tạo guest POS account (account_type = 'GUEST_POS').
+     * @param array $data ['phone','fullname','email','pointsToAdd']
+     * @return array ['success'=>bool,'customer'=>CustomerEntity,'created'=>bool,'message'=>string]
+     */
+    public function posUpsertCustomer($data) {
+        $phone = $data['phone'] ?? null;
+        if (!$phone) {
+            return ['success'=>false,'message'=>'Phone is required'];
+        }
+
+        $repository = $this->repository('CustomerRepository');
+        $cust = $repository->findByPhone($phone);
+        $pointsToAdd = isset($data['pointsToAdd']) ? (int)$data['pointsToAdd'] : 0;
+
+        if ($cust) {
+            if ($pointsToAdd > 0) {
+                $newPoints = $cust->points + $pointsToAdd;
+                $repository->updatePoints($cust->id, $newPoints);
+                $cust->points = $newPoints;
+            }
+            return ['success'=>true,'customer'=>$cust,'created'=>false];
+        }
+
+        // create guest POS customer
+        $username = 'pos_' . preg_replace('/[^0-9]/', '', $phone);
+        $customer = new CustomerEntity([
+            'username' => $username,
+            'password' => '',
+            'full_name' => $data['fullname'] ?? 'Khách lẻ',
+            'phone' => $phone,
+            'email' => $data['email'] ?? '',
+            'address' => $data['address'] ?? '',
+            'account_type' => 'GUEST_POS',
+            'points' => $pointsToAdd,
+            'status' => 1
+        ]);
+
+        $created = $repository->create($customer);
+        if ($created) {
+            $new = $repository->findByPhone($phone);
+            return ['success'=>true,'customer'=>$new,'created'=>true];
+        }
+
+        return ['success'=>false,'message'=>'Create failed'];
+    }
+
+    /**
+     * Nâng cấp customer POS thành tài khoản WEB bằng phone
+     * @param string $phone
+     * @param string $username
+     * @param string $password
+     * @param string|null $address
+     * @return bool
+     */
+    public function upgradeToWebAccountByPhone($phone, $username, $password, $address = null) {
+        $repository = $this->repository('CustomerRepository');
+        $cust = $repository->findByPhone($phone);
+        if (!$cust) return false;
+        return $repository->upgradeToWebAccount($cust->id, $username, $password, $address);
     }
 
     /**

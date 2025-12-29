@@ -155,7 +155,7 @@ class EmployeeRepository extends ConnectDatabase {
                 WHERE id = ?";
 
         $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "sssssis",
+        mysqli_stmt_bind_param($stmt, "sssssii",
             $employee->fullname,
             $employee->email,
             $employee->phonenumber,

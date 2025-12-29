@@ -1,16 +1,18 @@
 <?php
 include_once './web/Services/ProductService.php';
 include_once './web/Services/OrderService.php';
+include_once './web/Services/CustomerService.php';
 
 class StaffController extends Controller {
     private $productService;
     private $orderService;
+    private $customerService;
 
     public function __construct() {
         $this->productService = new ProductService();
         $this->orderService = new OrderService();
+        $this->customerService = new CustomerService();
     }
-    
     /**
      * Default Action: Redirect to POS or show Dashboard
      * URL: http://localhost/COFFEE_PHP/Staff
@@ -72,6 +74,55 @@ class StaffController extends Controller {
             'page' => 'staff_order',
             'section' => 'pos'
         ]);
+    }
+
+    /**
+     * API: Tìm / Lấy customer theo phone (POS)
+     * POST { phone: '090...' }
+     */
+    function searchCustomer() {
+        header('Content-Type: application/json');
+        $phone = isset($_POST['phone']) ? trim($_POST['phone']) : null;
+        if (!$phone) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => 'Missing phone']);
+            exit;
+        }
+        $cust = $this->customerService->getCustomerByPhone($phone);
+        if ($cust) {
+            echo json_encode(['success' => true, 'customer' => $cust->toArray()]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Not found']);
+        }
+        exit;
+    }
+
+    /**
+     * API: POS upsert customer: nếu có thì trả về và có thể cộng điểm; nếu chưa thì tạo mới guest customer
+     * POST { phone, fullname?, email?, pointsToAdd? }
+     */
+    function posUpsertCustomer() {
+        header('Content-Type: application/json');
+        $phone = isset($_POST['phone']) ? trim($_POST['phone']) : null;
+        $fullname = isset($_POST['fullname']) ? trim($_POST['fullname']) : 'Khách lẻ';
+        $email = isset($_POST['email']) ? trim($_POST['email']) : '';
+        $pointsToAdd = isset($_POST['pointsToAdd']) ? (int)$_POST['pointsToAdd'] : 0;
+
+        $result = $this->customerService->posUpsertCustomer([
+            'phone' => $phone,
+            'fullname' => $fullname,
+            'email' => $email,
+            'pointsToAdd' => $pointsToAdd
+        ]);
+
+        if ($result['success']) {
+            $cust = $result['customer'];
+            echo json_encode(['success' => true, 'customer' => $cust->toArray(), 'created' => $result['created']]);
+        } else {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'message' => $result['message'] ?? 'Error']);
+        }
+        exit;
     }
 
     /**

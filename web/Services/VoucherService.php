@@ -156,6 +156,80 @@ class VoucherService extends Service {
     }
 
     /**
+     * Xem trước áp dụng voucher
+     * @param int $customerId
+     * @param int $voucherId
+     * @param float $totalAmount
+     * @return array
+     */
+    public function previewApplyVoucher($customerId, $voucherId, $totalAmount) {
+    $customerRepo = $this->repository('CustomerRepository');
+    $voucherRepo  = $this->repository('VoucherRepository');
+
+    // Support guest preview: if no customerId provided, allow preview for vouchers
+    // that don't require customer points. For customers, load points.
+    $customer = null;
+    $customerPoints = 0;
+    if (!empty($customerId)) {
+        $customer = $customerRepo->findById($customerId);
+        if ($customer) $customerPoints = (int)$customer->points;
+    }
+
+
+    $voucher = $voucherRepo->findById($voucherId);
+    if (!$voucher) {
+        return ['success'=>false, 'message'=>'Voucher not found'];
+    }
+
+    // ===== VALIDATE =====
+    if ((int)$voucher->is_active !== 1) {
+        return ['success'=>false, 'message'=>'Voucher not active'];
+    }
+
+    $today = date('Y-m-d');
+    if ($voucher->start_date && strtotime($today) < strtotime($voucher->start_date)) {
+        return ['success'=>false, 'message'=>'Voucher not started yet'];
+    }
+    if ($voucher->end_date && strtotime($today) > strtotime($voucher->end_date)) {
+        return ['success'=>false, 'message'=>'Voucher expired'];
+    }
+
+    if (!is_null($voucher->quantity) && $voucher->used_count >= $voucher->quantity) {
+        return ['success'=>false, 'message'=>'Voucher out of stock'];
+    }
+
+    if ($totalAmount < $voucher->min_bill_total) {
+        return ['success'=>false, 'message'=>'Bill total below minimum'];
+    }
+
+    if ((int)$voucher->point_cost > 0 && $customerPoints < (int)$voucher->point_cost) {
+        return ['success'=>false, 'message'=>'Not enough points'];
+    }
+
+    // ===== CALCULATE =====
+    $discount = $this->calculateDiscount($voucher, $totalAmount);
+    $totalAfter = max(0, $totalAmount - $discount);
+
+    return [
+        'success' => true,
+        'discount_amount' => (float)$discount,
+        'total_after' => (float)$totalAfter,
+        'voucher' => [
+            'id' => $voucher->id,
+            'name' => $voucher->name,
+            'point_cost' => $voucher->point_cost
+        ]
+    ];
+}
+
+    /**
+     * Backwards-compatible wrapper: controller expects previewVoucher()
+     */
+    public function previewVoucher($customerId, $voucherId, $totalAmount) {
+        return $this->previewApplyVoucher($customerId, $voucherId, $totalAmount);
+    }
+
+    /**
      * Xóa voucher
      * @param int $id
      * @return array ['success' => bool, 'message' => string]
@@ -213,6 +287,60 @@ class VoucherService extends Service {
     public function getActiveVouchers() {
         $repository = $this->repository('VoucherRepository');
         return $repository->findActiveVouchers();
+    }
+
+    /**
+     * Lấy voucher đủ điều kiện cho customer và bill total
+     * @param int|null $customerId
+     * @param float $billTotal
+     * @return array VoucherEntity[]
+     */
+    public function getEligibleVouchers($customerId = null, $billTotal = 0) {
+        $voucherRepo = $this->repository('VoucherRepository');
+        $vouchers = $voucherRepo->findActiveVouchers();
+
+        $customerPoints = 0;
+        if ($customerId) {
+            $custRepo = $this->repository('CustomerRepository');
+            $cust = $custRepo->findById($customerId);
+            if ($cust) $customerPoints = (int)$cust->points;
+        }
+
+        $eligible = [];
+        foreach ($vouchers as $v) {
+            if ($v->point_cost > $customerPoints) continue;
+            if ($billTotal < $v->min_bill_total) continue;
+            $eligible[] = $v;
+        }
+
+        return $eligible;
+    }
+
+    /**
+     * Tính discount amount theo voucher và bill total
+    * @param VoucherEntity $v
+    * @param float $billTotal
+    * @return int Số tiền giảm (đơn vị nhỏ nhất, VND)
+     */
+    public function calculateDiscount($v, $billTotal) {
+        // Kiểm tra bill total có đạt yêu cầu tối thiểu không
+        if ($billTotal < $v->min_bill_total) {
+            return 0;
+        }
+
+        $discount = 0;
+        if ($v->discount_type === 'FIXED') {
+            $discount = (float)$v->discount_value;
+        } else { // PERCENT
+            $discount = $billTotal * ((float)$v->discount_value / 100.0);
+        }
+
+        if (!empty($v->max_discount_value)) {
+            $discount = min($discount, (float)$v->max_discount_value);
+        }
+
+        $discount = min($discount, $billTotal);
+        return (int)round($discount);
     }
 
     /**

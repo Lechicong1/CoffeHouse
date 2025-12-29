@@ -1,6 +1,22 @@
 <!-- Link CSS riêng cho POS -->
 <link rel="stylesheet" href="Public/Css/pos-style.css">
 
+<!-- Small POS layout tweaks for compact customer+voucher and voucher highlight -->
+<style>
+    .customer-details { display:flex; flex-wrap:wrap; gap:8px; align-items:flex-start; }
+    .customer-details .input-box { flex: 1 1 180px; min-width:160px; }
+    #pos-selected-customer, #pos-selected-voucher { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .voucher-card { border:1px solid #eee; padding:14px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; min-height:84px; background: #fff; }
+    .voucher-card:hover { background:#f7fff2; }
+    .voucher-card.selected { background:#e6f9d9; border-color:#b6da9f; box-shadow:0 0 0 4px rgba(182,218,159,0.12); }
+    .voucher-card .v-left { flex:1; padding-right:12px; }
+    .voucher-card .v-name { font-weight:700; font-size:1rem; margin-bottom:6px; }
+    .voucher-card .v-meta { font-size:0.9rem; color:#444; }
+    .voucher-card .v-note { font-size:0.85rem; color:#666; margin-top:6px; }
+    .voucher-card .v-actions { margin-left:8px; }
+    .voucher-card.disabled { opacity:0.55; }
+</style>
+
 <div class="pos-wrapper">
     <!-- LEFT SIDE: MENU -->
     <div class="menu-section">
@@ -62,7 +78,7 @@
 
         <div class="customer-details">
             <div class="input-box">
-                <input type="text" value="Khách Lẻ" placeholder="Tên Khách">
+                <input type="text" id="pos-customer-name" value="Khách Lẻ" placeholder="Tên Khách">
             </div>
             <div class="input-box">
                 <select>
@@ -74,6 +90,14 @@
             </div>
             <div class="input-box" id="order-id-group" style="display: none;">
                 <input type="text" id="order-id" readonly placeholder="Mã Đơn">
+            </div>
+            <div class="input-box">
+                <button type="button" id="open-customer-modal" class="btn" style="padding:6px 10px;">Chọn / Tìm Khách</button>
+                <div id="pos-selected-customer" style="margin-top:8px;color:#444;font-size:0.9rem;">Khách lẻ</div>
+            </div>
+            <div class="input-box">
+                <button type="button" id="open-voucher-modal" class="btn" style="padding:6px 10px;">Áp Voucher / Điểm</button>
+                <div id="pos-selected-voucher" style="margin-top:8px;color:#444;font-size:0.9rem;">Không có voucher</div>
             </div>
         </div>
 
@@ -137,3 +161,29 @@
 
 <!-- Logic JS riêng cho POS -->
 <script src="Public/Js/pos-logic.js"></script>
+<script src="Public/Js/pos-customer.js"></script>
+<script src="Public/Js/pos-voucher.js"></script>
+
+<!-- Customer Modal -->
+<div id="posCustomerModal" class="modal" style="display:none; position: fixed; z-index: 1200; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4);">
+    <div class="modal-content" style="max-width:420px; margin: 80px auto; background: #fff; border-radius:8px; overflow:hidden;">
+        <div style="padding:12px 16px; border-bottom:1px solid #eee; display:flex; align-items:center; justify-content:space-between;">
+            <h3 style="margin:0; font-size:1.1rem;">Tìm / Thêm Khách</h3>
+            <button style="background:none;border:none;font-size:1.4rem;cursor:pointer;" onclick="closePosCustomerModal()">&times;</button>
+        </div>
+        <div style="padding:16px;">
+            <label>Số điện thoại</label>
+            <input type="text" id="posPhone" placeholder="Nhập số điện thoại" style="width:100%;padding:8px;margin-bottom:8px;">
+            <label>Tên (tùy chọn)</label>
+            <input type="text" id="posFullName" placeholder="Khách lẻ" style="width:100%;padding:8px;margin-bottom:8px;">
+            <label>Email (tùy chọn)</label>
+            <input type="email" id="posEmail" placeholder="example@email.com" style="width:100%;padding:8px;margin-bottom:12px;">
+            <div style="display:flex; gap:8px;">
+                <button id="posFindBtn" class="btn btn-primary" onclick="posFindCustomer()">Tìm</button>
+                <button id="posCreateBtn" class="btn btn-success" onclick="posCreateOrUseCustomer()">Tạo / Dùng</button>
+                <button class="btn" onclick="closePosCustomerModal()">Đóng</button>
+            </div>
+            <div id="posCustomerMessage" style="margin-top:12px;color:#c00;"></div>
+        </div>
+    </div>
+</div>

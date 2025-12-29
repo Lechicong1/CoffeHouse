@@ -476,21 +476,21 @@ $currentSearch = $currentFilter['search'] ?? '';
     <!-- Filter Bar -->
     <div class="filter-bar">
         <div class="filter-buttons">
-            <a href="/COFFEE_PHP/Staff/orders" class="filter-btn <?php echo empty($currentStatus) ? 'active' : ''; ?>">
+            <a href="/COFFEE_PHP/StaffController/orders" class="filter-btn <?php echo empty($currentStatus) ? 'active' : ''; ?>">
                 Tất cả
             </a>
-            <a href="/COFFEE_PHP/Staff/orders?status=PROCESSING" class="filter-btn <?php echo $currentStatus === 'PROCESSING' ? 'active' : ''; ?>">
+            <a href="/COFFEE_PHP/StaffController/orders?status=PROCESSING" class="filter-btn <?php echo $currentStatus === 'PROCESSING' ? 'active' : ''; ?>">
                 ⏳ Đang pha chế
             </a>
-            <a href="/COFFEE_PHP/Staff/orders?status=COMPLETED" class="filter-btn <?php echo $currentStatus === 'COMPLETED' ? 'active' : ''; ?>">
+            <a href="/COFFEE_PHP/StaffController/orders?status=COMPLETED" class="filter-btn <?php echo $currentStatus === 'COMPLETED' ? 'active' : ''; ?>">
                 ✅ Hoàn thành
             </a>
-            <a href="/COFFEE_PHP/Staff/orders?status=CANCELLED" class="filter-btn <?php echo $currentStatus === 'CANCELLED' ? 'active' : ''; ?>">
+            <a href="/COFFEE_PHP/StaffController/orders?status=CANCELLED" class="filter-btn <?php echo $currentStatus === 'CANCELLED' ? 'active' : ''; ?>">
                 ❌ Đã hủy
             </a>
         </div>
 
-        <form method="GET" action="/COFFEE_PHP/Staff/orders" class="search-box">
+        <form method="GET" action="/COFFEE_PHP/StaffController/orders" class="search-box">
             <?php if (!empty($currentStatus)): ?>
                 <input type="hidden" name="status" value="<?php echo htmlspecialchars($currentStatus); ?>">
             <?php endif; ?>
@@ -679,7 +679,7 @@ $currentSearch = $currentFilter['search'] ?? '';
             <h3>Sửa ghi chú đơn hàng</h3>
             <button class="close-modal" onclick="closeEditNoteModal()">&times;</button>
         </div>
-        <form method="POST" action="/COFFEE_PHP/Staff/updateOrderNote">
+        <form method="POST" action="/COFFEE_PHP/StaffController/updateOrderNote">
             <input type="hidden" name="order_id" id="edit-order-id">
             <div class="form-group">
                 <label>Ghi chú:</label>
@@ -704,7 +704,7 @@ $currentSearch = $currentFilter['search'] ?? '';
         <p id="refund-warning" class="alert-text" style="display: none;">
             <strong>Lưu ý:</strong> Đơn hàng này đã thanh toán. Hệ thống sẽ ghi nhận HOÀN TIỀN cho khách.
         </p>
-        <form method="POST" action="/COFFEE_PHP/Staff/updateOrderStatus">
+        <form method="POST" action="/COFFEE_PHP/StaffController/updateOrderStatus">
             <input type="hidden" name="order_id" id="cancel-order-id">
             <input type="hidden" name="status" value="CANCELLED">
             <div class="modal-actions">
@@ -724,29 +724,39 @@ function openOrderDetail(orderId) {
     content.innerHTML = '<p style="text-align:center;padding:20px;">Đang tải...</p>';
     modal.style.display = 'flex';
     
-    // Fetch order items
-    fetch(`/COFFEE_PHP/Staff/getOrderDetail?order_id=${orderId}`)
+    // Fetch order items - thêm timestamp để tránh cache
+    fetch(`/COFFEE_PHP/StaffController/getOrderDetail?order_id=${orderId}&t=${Date.now()}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                let html = '<table class="items-table"><thead><tr><th>Sản phẩm</th><th>Size</th><th>SL</th><th>Giá</th><th>Thành tiền</th></tr></thead><tbody>';
+                let html = '<table class="items-table"><thead><tr><th>Sản phẩm</th><th>Size</th><th>SL</th><th>Giá</th><th>Thành tiền</th><th>Thao tác</th></tr></thead><tbody>';
                 
                 let total = 0;
                 data.items.forEach(item => {
                     const subtotal = item.price_at_purchase * item.quantity;
                     total += subtotal;
                     
+                    const imagePath = item.product_image ? `/COFFEE_PHP/${item.product_image}` : '/COFFEE_PHP/Public/Assets/default-product.jpg';
+                    const itemNote = item.note ? item.note : '';
+                    const noteDisplay = itemNote ? `<div style="font-size:0.85rem;color:#666;margin-top:5px;">📝 ${itemNote}</div>` : '';
+                    
                     html += `<tr>
                         <td>
                             <div style="display:flex;align-items:center;gap:10px;">
-                                <img src="${item.product_image || 'Public/Assets/default-product.jpg'}" class="item-image">
-                                <span>${item.product_name}</span>
+                                <img src="${imagePath}" class="item-image" onerror="this.src='/COFFEE_PHP/Public/Assets/default-product.jpg'">
+                                <div>
+                                    <div>${item.product_name}</div>
+                                    ${noteDisplay}
+                                </div>
                             </div>
                         </td>
                         <td>${item.size_name}</td>
                         <td>${item.quantity}</td>
                         <td>${new Intl.NumberFormat('vi-VN').format(item.price_at_purchase)} ₫</td>
                         <td><strong>${new Intl.NumberFormat('vi-VN').format(subtotal)} ₫</strong></td>
+                        <td>
+                            <button class="action-btn" onclick="openEditItemNoteModal(${item.id}, '${itemNote.replace(/'/g, "\\'")}')">✏️</button>
+                        </td>
                     </tr>`;
                 });
                 
@@ -777,6 +787,17 @@ function closeEditNoteModal() {
     document.getElementById('editNoteModal').style.display = 'none';
 }
 
+// Hàm sửa ghi chú cho từng item
+function openEditItemNoteModal(itemId, currentNote) {
+    document.getElementById('edit-item-id').value = itemId;
+    document.getElementById('edit-item-note').value = currentNote;
+    document.getElementById('editItemNoteModal').style.display = 'flex';
+}
+
+function closeEditItemNoteModal() {
+    document.getElementById('editItemNoteModal').style.display = 'none';
+}
+
 // Hàm hủy đơn
 function openCancelModal(orderId, orderCode, paymentStatus) {
     document.getElementById('cancel-order-id').value = orderId;
@@ -802,7 +823,7 @@ function updateStatus(orderId, status) {
     if (confirm('Xác nhận đánh dấu đơn hàng hoàn thành?')) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = '/COFFEE_PHP/Staff/updateOrderStatus';
+        form.action = '/COFFEE_PHP/StaffController/updateOrderStatus';
         
         const orderIdInput = document.createElement('input');
         orderIdInput.type = 'hidden';
@@ -837,3 +858,24 @@ window.onclick = function(event) {
     });
 }
 </script>
+
+<!-- Modal Sửa ghi chú cho Item -->
+<div id="editItemNoteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Sửa ghi chú món ăn</h3>
+            <button class="close-modal" onclick="closeEditItemNoteModal()">&times;</button>
+        </div>
+        <form method="POST" action="/COFFEE_PHP/StaffController/updateOrderItemNote">
+            <input type="hidden" name="item_id" id="edit-item-id">
+            <div class="form-group">
+                <label>Ghi chú món:</label>
+                <textarea name="note" id="edit-item-note" placeholder="Ví dụ: Ít đá, nhiều đường..." style="width:100%;min-height:100px;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:0.9rem;"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="modal-btn btn-cancel-modal" onclick="closeEditItemNoteModal()">Hủy</button>
+                <button type="submit" class="modal-btn btn-save">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -200,7 +200,7 @@ class OrderService {
                 
                 // Lưu lại items đã validate với giá thật
                 $validatedItems[] = [
-                    'size_id' => $sizeId,
+                    'size_id' => $productSize->id, // <--- CHỐT CHẶN: Lấy ID chính chủ từ DB
                     'qty' => $qty,
                     'price' => $realPrice, // Giá thật từ DB
                     'notes' => $it['notes'] ?? ''
@@ -447,6 +447,46 @@ class OrderService {
 
         } catch (Exception $e) {
             return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Cập nhật ghi chú cho từng item trong đơn hàng
+     * @param int $itemId
+     * @param string $note
+     * @return array
+     */
+    public function updateOrderItemNote($itemId, $note) {
+        try {
+            // Kiểm tra item có tồn tại không
+            $item = $this->orderItemRepo->findItemById($itemId);
+            if (!$item) {
+                return [
+                    'success' => false,
+                    'message' => 'Không tìm thấy sản phẩm trong đơn hàng'
+                ];
+            }
+
+            // Cập nhật note
+            $result = $this->orderItemRepo->updateItemNote($itemId, $note);
+            
+            if ($result) {
+                return [
+                    'success' => true,
+                    'message' => 'Cập nhật ghi chú thành công'
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Lỗi khi cập nhật ghi chú'
+                ];
+            }
+
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
         }
     }
 }

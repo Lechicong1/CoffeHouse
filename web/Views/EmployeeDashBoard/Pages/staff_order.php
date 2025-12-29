@@ -122,7 +122,7 @@
         </div>
 
         <!-- Form POST để submit đơn hàng (MVC không dùng JSON API) -->
-        <form id="order-form" method="POST" action="/COFFEE_PHP/Staff/createOrder" style="display: none;">
+        <form id="order-form" method="POST" action="/COFFEE_PHP/StaffController/createOrder" style="display: none;">
             <input type="hidden" name="order_type" id="form-order-type">
             <input type="hidden" name="payment_method" id="form-payment-method">
             <input type="hidden" name="total_amount" id="form-total-amount">
@@ -189,7 +189,7 @@
         </div>
         <div style="padding:16px;">
             <!-- Form tìm kiếm khách hàng -->
-            <form id="search-customer-form" method="POST" action="/COFFEE_PHP/Staff/searchCustomer">
+            <form id="search-customer-form" method="POST" action="/COFFEE_PHP/StaffController/searchCustomer">
                 <label>Số điện thoại</label>
                 <input type="text" name="phone" id="posPhone" placeholder="Nhập số điện thoại" style="width:100%;padding:8px;margin-bottom:8px;" required>
                 <button type="button" id="posFindBtn" class="btn btn-primary" onclick="posFindCustomer()">Tìm Khách</button>
@@ -199,7 +199,7 @@
             <hr style="margin: 16px 0;">
             
             <!-- Form tạo/cập nhật khách hàng -->
-            <form id="upsert-customer-form" method="POST" action="/COFFEE_PHP/Staff/upsertCustomer">
+            <form id="upsert-customer-form" method="POST" action="/COFFEE_PHP/StaffController/upsertCustomer">
                 <label>Số điện thoại</label>
                 <input type="text" name="phone" id="posPhoneUpsert" placeholder="Nhập số điện thoại" style="width:100%;padding:8px;margin-bottom:8px;" required>
                 <label>Tên (tùy chọn)</label>

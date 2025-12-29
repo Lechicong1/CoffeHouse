@@ -372,6 +372,48 @@ class StaffController extends Controller {
     }
 
     /**
+     * Cập nhật ghi chú cho từng item trong đơn hàng (POST)
+     * URL: http://localhost/COFFEE_PHP/StaffController/updateOrderItemNote
+     */
+    function updateOrderItemNote() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /COFFEE_PHP/StaffController/orders');
+            exit;
+        }
+
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
+        try {
+            $itemId = isset($_POST['item_id']) ? (int)$_POST['item_id'] : 0;
+            $note = isset($_POST['note']) ? trim($_POST['note']) : '';
+
+            if (!$itemId) {
+                throw new Exception('Thiếu thông tin');
+            }
+
+            $result = $this->orderService->updateOrderItemNote($itemId, $note);
+
+            if ($result['success']) {
+                echo "<script>
+                    alert('" . $result['message'] . "');
+                    window.location.href = '/COFFEE_PHP/StaffController/orders';
+                </script>";
+            } else {
+                throw new Exception($result['message']);
+            }
+
+        } catch (Exception $e) {
+            echo "<script>
+                alert('Lỗi: " . addslashes($e->getMessage()) . "');
+                window.history.back();
+            </script>";
+        }
+        exit;
+    }
+
+    /**
      * Lấy chi tiết đơn hàng (GET)
      * URL: http://localhost/COFFEE_PHP/StaffController/getOrderDetail?order_id=1
      */

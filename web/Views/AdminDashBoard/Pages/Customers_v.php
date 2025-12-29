@@ -18,16 +18,14 @@ $keyword = $data['keyword'] ?? '';
 
 <section id="customers" class="content-section">
     <div class="customer-management">
-        <!-- Page Header -->
-        <div class="page-header">
-            <h2><i class="fas fa-users"></i> Quản Lý Khách Hàng</h2>
-        </div>
-
-        <!-- Stats Cards -->
-        <div class="stats-cards">
-            <div class="stat-card">
-                <h3>Tổng Khách Hàng</h3>
-                <div class="number"><?php echo $totalCustomers; ?></div>
+        <!-- Section Header (match Employees UI) -->
+        <div class="section-header">
+            <div class="header-title">
+                <h2><i class="fas fa-users"></i> Quản Lý Khách Hàng</h2>
+                <p class="subtitle">Tổng số: <strong><?php echo $totalCustomers; ?></strong> khách hàng</p>
+            </div>
+            <div class="header-actions">
+                <!-- reserved for actions (filters / add) -->
             </div>
         </div>
 

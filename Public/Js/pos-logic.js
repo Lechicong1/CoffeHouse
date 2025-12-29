@@ -313,37 +313,6 @@ function updateCartUI() {
   const totalEl = document.getElementById("total-price");
   if (totalEl) totalEl.textContent = formatCurrency(total);
 
-  // Voucher discount row (create/update)
-  const paymentSummary = document.querySelector(".payment-summary");
-  if (paymentSummary) {
-    let voucherRow = document.getElementById("voucher-discount-row");
-    if (!voucherRow) {
-      voucherRow = document.createElement("div");
-      voucherRow.className = "summary-row voucher";
-      voucherRow.id = "voucher-discount-row";
-      voucherRow.innerHTML = `<span id="voucher-label"></span><span id="voucher-amount"></span>`;
-      const totalRow = paymentSummary.querySelector(".summary-row.total");
-      if (totalRow) paymentSummary.insertBefore(voucherRow, totalRow);
-      else paymentSummary.appendChild(voucherRow);
-    }
-
-    const voucherLabel = document.getElementById("voucher-label");
-    const voucherAmount = document.getElementById("voucher-amount");
-    if (window.currentOrder && window.currentOrder.voucher) {
-      const v = window.currentOrder.voucher;
-      voucherLabel.textContent = `Giảm (${v.name || "Voucher"})`;
-      if (window.currentOrder.voucherPreview) {
-        voucherAmount.textContent = "-" + formatCurrency(voucherDiscount);
-      } else if (voucherDiscount > 0) {
-        voucherAmount.textContent = "-" + formatCurrency(voucherDiscount);
-      } else {
-        voucherAmount.textContent = formatCurrency(0);
-      }
-    } else {
-      voucherLabel.textContent = "";
-      voucherAmount.textContent = formatCurrency(0);
-    }
-  }
 
   const btnTotalEl = document.getElementById("btn-total");
   if (btnTotalEl) btnTotalEl.textContent = formatCurrency(total);

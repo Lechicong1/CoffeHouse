@@ -8,6 +8,24 @@
   padding: 20px;
 }
 
+/* Compact header variant for Customers page to reduce vertical spacing */
+.customer-management .section-header {
+  margin-bottom: 12px;
+  align-items: center;
+}
+
+.customer-management .header-title h2 {
+  font-size: 24px;
+  margin: 0 0 6px 0;
+  line-height: 1.15;
+}
+
+.customer-management .subtitle {
+  color: #718096;
+  font-size: 13px;
+  margin: 0;
+}
+
 /* Page Header */
 .page-header {
   display: flex;

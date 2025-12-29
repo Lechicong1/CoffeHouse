@@ -15,9 +15,7 @@ class VoucherController extends Controller {
         $this->view('AdminDashBoard/MasterLayout', [
             'section' => 'vouchers',
             'page' => 'Vouchers_v',
-            'vouchers' => $vouchers,
-            'totalVouchers' => $service->countVouchers(),
-            'activeVouchers' => $service->countActiveVouchers()
+            'vouchers' => $vouchers
         ]);
     }
 
@@ -43,9 +41,7 @@ class VoucherController extends Controller {
             'section' => 'vouchers',
             'page' => 'Vouchers_v',
             'vouchers' => $vouchers,
-            'keyword' => $keyword,
-            'totalVouchers' => count($vouchers),
-            'activeVouchers' => $service->countActiveVouchers()
+            'keyword' => $keyword
         ]);
     }
 

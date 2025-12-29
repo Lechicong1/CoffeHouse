@@ -88,7 +88,7 @@ $currentSection = $data['section'] ?? 'pos';
 
             <!-- Logout -->
             <div class="sidebar-footer">
-                <a href="http://localhost/COFFEE_PHP/logout" class="menu-link logout-link">
+                <a href="/COFFEE_PHP/Auth/logout" class="menu-link logout-link">
                     <span class="menu-icon"><i class="fa-solid fa-right-from-bracket"></i></span>
                     <span class="menu-text">ĐĂNG XUẤT</span>
                 </a>

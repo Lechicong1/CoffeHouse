@@ -513,7 +513,7 @@ function handleLogout() {
     if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
         showAlert('Đang đăng xuất...', 'info');
         setTimeout(() => {
-            window.location.href = '../Auth/Login/login.html';
+            window.location.href = '/COFFEE_PHP/Auth/logout';
         }, 1500);
     }
 }

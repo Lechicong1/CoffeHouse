@@ -234,7 +234,7 @@
     </section>
     <?php endif; ?>
 
-    <?php include __DIR__ . '/footer.php'; ?>
+    <?php include __DIR__ . '/../footer.php'; ?>
 
     <!-- JavaScript -->
     <script src="/COFFEE_PHP/Public/Js/user-product-detail.js"></script>

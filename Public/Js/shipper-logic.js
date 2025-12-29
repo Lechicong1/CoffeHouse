@@ -149,7 +149,7 @@ function showAlert(message, type) {
  */
 function handleLogout() {
     if (confirm('Bạn có chắc chắn muốn đăng xuất?')) {
-        window.location.href = 'index.php?controller=auth&action=logout';
+        window.location.href = '/COFFEE_PHP/Auth/logout';
     }
 }
 

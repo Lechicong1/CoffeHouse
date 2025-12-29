@@ -25,5 +25,36 @@ class OrderItemRepository extends ConnectDatabase {
 
         return mysqli_stmt_execute($stmt);
     }
+
+    /**
+     * Lấy danh sách items của đơn hàng với thông tin sản phẩm
+     * @param int $orderId
+     * @return array
+     */
+    public function findByOrderId($orderId) {
+        $sql = "SELECT 
+                    oi.*, 
+                    ps.size_name, 
+                    p.name as product_name,
+                    p.image as product_image
+                FROM order_items oi
+                INNER JOIN product_sizes ps ON oi.product_size_id = ps.id
+                INNER JOIN products p ON ps.product_id = p.id
+                WHERE oi.order_id = ?
+                ORDER BY oi.id ASC";
+        
+        $stmt = mysqli_prepare($this->con, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $orderId);
+        mysqli_stmt_execute($stmt);
+        
+        $result = mysqli_stmt_get_result($stmt);
+        
+        $items = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $items[] = $row;
+        }
+        
+        return $items;
+    }
 }
 ?>

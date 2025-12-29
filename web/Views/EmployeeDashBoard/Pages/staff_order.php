@@ -115,6 +115,10 @@
                 <span>Tạm tính</span>
                 <span id="subtotal-price">0 ₫</span>
             </div>
+            <div class="summary-row" id="discount-row" style="display: none; color: #28a745;">
+                <span>Giảm (<span id="discount-voucher-name"></span>)</span>
+                <span id="discount-price">0 ₫</span>
+            </div>
             <div class="summary-row total">
                 <span>Tổng cộng</span>
                 <span id="total-price">0 ₫</span>

@@ -259,23 +259,7 @@ class VoucherService extends Service {
         }
     }
 
-    /**
-     * Đếm tổng số voucher
-     * @return int
-     */
-    public function countVouchers() {
-        $repository = $this->repository('VoucherRepository');
-        return $repository->countAll();
-    }
 
-    /**
-     * Đếm voucher đang hoạt động
-     * @return int
-     */
-    public function countActiveVouchers() {
-        $repository = $this->repository('VoucherRepository');
-        return $repository->countActive();
-    }
 
     /**
      * Lấy voucher đang còn hiệu lực

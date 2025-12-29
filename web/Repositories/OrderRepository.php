@@ -75,7 +75,7 @@ class OrderRepository extends ConnectDatabase {
      * @return array
      */
     public function findAllWithFilters($filters = []) {
-        $sql = "SELECT o.*, c.fullname as customer_name, c.phone as customer_phone 
+        $sql = "SELECT o.*, c.full_name as customer_name, c.phone as customer_phone 
                 FROM orders o 
                 LEFT JOIN customers c ON o.customer_id = c.id 
                 WHERE 1=1";
@@ -87,6 +87,13 @@ class OrderRepository extends ConnectDatabase {
         if (!empty($filters['status'])) {
             $sql .= " AND o.status = ?";
             $params[] = $filters['status'];
+            $types .= "s";
+        }
+        
+        // Filter by order_type
+        if (!empty($filters['order_type'])) {
+            $sql .= " AND o.order_type = ?";
+            $params[] = $filters['order_type'];
             $types .= "s";
         }
 
@@ -139,7 +146,7 @@ class OrderRepository extends ConnectDatabase {
         
         $stmt = mysqli_prepare($this->con, $sql);
         
-        mysqli_stmt_bind_param($stmt, "siissssississi", 
+        mysqli_stmt_bind_param($stmt, "siissssdssssi", 
             $order->order_code,
             $order->staff_id,
             $order->customer_id,

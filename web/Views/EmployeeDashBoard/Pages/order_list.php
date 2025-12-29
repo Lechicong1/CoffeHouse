@@ -16,7 +16,7 @@
     }
 
     .order-header h2 {
-        font-size: 1.8rem;
+        font-size: 1.5rem;
         color: #064528;
         margin: 0;
     }
@@ -38,12 +38,13 @@
     }
 
     .filter-btn {
-        padding: 10px 20px;
+        padding: 8px 16px;
         border: 2px solid #ddd;
         background: white;
         border-radius: 25px;
         cursor: pointer;
         font-weight: 600;
+        font-size: 0.85rem;
         transition: all 0.3s;
         text-decoration: none;
         color: #666;
@@ -67,20 +68,21 @@
 
     .search-box input {
         flex: 1;
-        padding: 12px 15px;
+        padding: 10px 15px;
         border: 2px solid #ddd;
         border-radius: 25px;
-        font-size: 1rem;
+        font-size: 0.85rem;
     }
 
     .search-box button {
-        padding: 12px 30px;
+        padding: 10px 25px;
         background: #064528;
         color: white;
         border: none;
         border-radius: 25px;
         cursor: pointer;
         font-weight: 600;
+        font-size: 0.85rem;
     }
 
     /* Order Table */
@@ -102,10 +104,10 @@
     }
 
     .order-table th {
-        padding: 15px;
+        padding: 12px;
         text-align: left;
         font-weight: 600;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
     }
 
     .order-table tbody tr {
@@ -118,8 +120,9 @@
     }
 
     .order-table td {
-        padding: 15px;
+        padding: 12px;
         vertical-align: middle;
+        font-size: 0.85rem;
     }
 
     .order-code {
@@ -142,18 +145,19 @@
     .customer-name {
         font-weight: 600;
         color: #333;
+        font-size: 0.85rem;
     }
 
     .customer-phone {
-        font-size: 0.85rem;
+        font-size: 0.75rem;
         color: #666;
     }
 
     .order-type-badge {
         display: inline-block;
-        padding: 3px 8px;
-        border-radius: 12px;
-        font-size: 0.75rem;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.7rem;
         font-weight: 600;
         margin-top: 3px;
     }
@@ -171,16 +175,16 @@
     .total-amount {
         font-weight: 700;
         color: #064528;
-        font-size: 1.1rem;
+        font-size: 0.9rem;
     }
 
     .payment-badge {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
-        padding: 5px 12px;
-        border-radius: 15px;
-        font-size: 0.85rem;
+        gap: 4px;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
         font-weight: 600;
     }
 
@@ -206,7 +210,7 @@
     .note-text {
         color: #666;
         font-style: italic;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
@@ -216,7 +220,7 @@
     .note-edit-btn {
         color: #064528;
         cursor: pointer;
-        font-size: 0.85rem;
+        font-size: 0.75rem;
         text-decoration: underline;
         margin-top: 3px;
         display: inline-block;
@@ -226,19 +230,29 @@
     .status-badge {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
-        padding: 6px 15px;
-        border-radius: 20px;
+        gap: 4px;
+        padding: 5px 12px;
+        border-radius: 15px;
         font-weight: 600;
-        font-size: 0.85rem;
+        font-size: 0.75rem;
     }
 
-    .status-processing {
+    .status-pending {
+        background: #fff3e0;
+        color: #e65100;
+    }
+
+    .status-preparing {
         background: #fff8e1;
         color: #f57f17;
     }
 
-    .status-delivering {
+    .status-ready {
+        background: #e1f5fe;
+        color: #0277bd;
+    }
+
+    .status-shipping {
         background: #e3f2fd;
         color: #1976d2;
     }
@@ -261,11 +275,11 @@
     }
 
     .action-btn {
-        padding: 6px 12px;
+        padding: 5px 10px;
         border: none;
         border-radius: 8px;
         cursor: pointer;
-        font-size: 0.85rem;
+        font-size: 0.75rem;
         font-weight: 600;
         transition: all 0.2s;
     }
@@ -308,7 +322,7 @@
         background: white;
         padding: 30px;
         border-radius: 15px;
-        max-width: 600px;
+        max-width: 900px;
         width: 90%;
         max-height: 80vh;
         overflow-y: auto;
@@ -565,8 +579,8 @@ $currentSearch = $currentFilter['search'] ?? '';
                                 <div class="note-text">
                                     <?php echo !empty($order['note']) ? htmlspecialchars($order['note']) : '<span style="color:#ccc;">Không có ghi chú</span>'; ?>
                                 </div>
-                                <?php if ($order['status'] === 'PROCESSING'): ?>
-                                    <span class="note-edit-btn" onclick="openEditNoteModal(<?php echo $order['id']; ?>, '<?php echo addslashes($order['note'] ?? ''); ?>')">
+                                <?php if ($order['status'] === 'PENDING'): ?>
+                                    <span class="note-edit-btn" onclick="openEditNoteModal(<?php echo $order['id']; ?>, '<?php echo addslashes($order['note'] ?? ''); ?>');">
                                         Sửa
                                     </span>
                                 <?php endif; ?>
@@ -575,11 +589,32 @@ $currentSearch = $currentFilter['search'] ?? '';
                             <!-- Trạng thái -->
                             <td>
                                 <?php
-                                $statusClass = 'status-processing';
-                                $statusText = 'Đang pha chế';
+                                $statusClass = 'status-pending';
+                                $statusText = 'Chờ xác nhận';
                                 $statusIcon = '⏳';
 
                                 switch ($order['status']) {
+                                    case 'PENDING':
+                                        $statusClass = 'status-pending';
+                                        $statusText = 'Chờ xác nhận';
+                                        $statusIcon = '⏳';
+                                        break;
+                                    case 'PROCESSING': // Tương thích với đơn hàng cũ
+                                    case 'PREPARING':
+                                        $statusClass = 'status-preparing';
+                                        $statusText = 'Đang pha chế';
+                                        $statusIcon = '☕';
+                                        break;
+                                    case 'READY':
+                                        $statusClass = 'status-ready';
+                                        $statusText = 'Pha chế xong';
+                                        $statusIcon = '✔️';
+                                        break;
+                                    case 'SHIPPING':
+                                        $statusClass = 'status-shipping';
+                                        $statusText = 'Đang giao';
+                                        $statusIcon = '🚚';
+                                        break;
                                     case 'COMPLETED':
                                         $statusClass = 'status-completed';
                                         $statusText = 'Hoàn thành';
@@ -592,11 +627,6 @@ $currentSearch = $currentFilter['search'] ?? '';
                                         if ($order['payment_status'] === 'REFUNDED') {
                                             $statusText .= ' (Đã hoàn tiền)';
                                         }
-                                        break;
-                                    case 'DELIVERING':
-                                        $statusClass = 'status-delivering';
-                                        $statusText = 'Đang giao';
-                                        $statusIcon = '🚚';
                                         break;
                                 }
                                 ?>
@@ -613,15 +643,10 @@ $currentSearch = $currentFilter['search'] ?? '';
                                         🖨️ In
                                     </button>
 
-                                    <!-- Hoàn thành (chỉ hiện khi PROCESSING) -->
-                                    <?php if ($order['status'] === 'PROCESSING'): ?>
+                                    <!-- Chỉ cho phép hoàn thành khi READY -->
+                                    <?php if ($order['status'] === 'READY'): ?>
                                         <button class="action-btn btn-complete" onclick="updateStatus(<?php echo $order['id']; ?>, 'COMPLETED')">
-                                            ✅ Xong
-                                        </button>
-
-                                        <!-- Hủy đơn -->
-                                        <button class="action-btn btn-cancel" onclick="openCancelModal(<?php echo $order['id']; ?>, '<?php echo addslashes($order['order_code']); ?>', '<?php echo $order['payment_status']; ?>')">
-                                            ❌ Hủy
+                                            ✅ Hoàn thành
                                         </button>
                                     <?php endif; ?>
                                 </div>

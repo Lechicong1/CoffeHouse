@@ -97,7 +97,7 @@ class OrderService {
         $order->staff_id = $data['staff_id'] ?? null; // Lấy từ session nếu có
         $order->customer_id = $data['customer_id'] ?? null; // Mặc định null hoặc khách lẻ
         $order->order_type = $data['order_type'] ?? 'AT_COUNTER';
-        $order->status = 'PROCESSING'; // Mặc định đang pha chế
+        $order->status = 'PENDING'; // Chờ xử lý khi nhân viên đặt hàng hộ khách
         $order->payment_status = 'PAID';
         $order->payment_method = $data['payment_method'] ?? 'CASH';
 
@@ -325,7 +325,7 @@ class OrderService {
             }
 
             // Validate status
-            $validStatuses = ['PROCESSING', 'DELIVERING', 'COMPLETED', 'CANCELLED'];
+            $validStatuses = ['PENDING', 'PREPARING', 'READY', 'SHIPPING', 'COMPLETED', 'CANCELLED'];
             if (!in_array($newStatus, $validStatuses)) {
                 return ['success' => false, 'message' => 'Trạng thái không hợp lệ'];
             }
@@ -360,6 +360,11 @@ class OrderService {
             
             if (!$order) {
                 return ['success' => false, 'message' => 'Không tìm thấy đơn hàng'];
+            }
+            
+            // Chỉ cho phép sửa note khi đơn hàng đang ở trạng thái PENDING
+            if ($order->status !== 'PENDING') {
+                return ['success' => false, 'message' => 'Chỉ có thể sửa ghi chú khi đơn hàng đang chờ xác nhận'];
             }
 
             $order->note = trim($note);

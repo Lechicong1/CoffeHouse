@@ -36,7 +36,7 @@ class OrderItemRepository extends ConnectDatabase {
                     oi.*, 
                     ps.size_name, 
                     p.name as product_name,
-                    p.image as product_image
+                    p.image_url as product_image
                 FROM order_items oi
                 INNER JOIN product_sizes ps ON oi.product_size_id = ps.id
                 INNER JOIN products p ON ps.product_id = p.id

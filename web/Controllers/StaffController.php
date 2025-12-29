@@ -21,7 +21,7 @@ class StaffController extends Controller {
 
     /**
      * Default Action: Hiển thị trang POS với dữ liệu menu
-     * URL: http://localhost/COFFEE_PHP/Staff/GetData
+     * URL: http://localhost/COFFEE_PHP/StaffController/GetData
      */
     function GetData() {
         if (session_status() !== PHP_SESSION_ACTIVE) {
@@ -54,7 +54,7 @@ class StaffController extends Controller {
 
     /**
      * POS Page (Alias cho GetData)
-     * URL: http://localhost/COFFEE_PHP/Staff/pos
+     * URL: http://localhost/COFFEE_PHP/StaffController/pos
      */
     function pos() {
         $this->GetData();
@@ -62,7 +62,7 @@ class StaffController extends Controller {
 
     /**
      * Xử lý tạo đơn hàng từ POS (POST) - Giống CheckoutController/placeOrder
-     * URL: http://localhost/COFFEE_PHP/Staff/createOrder
+     * URL: http://localhost/COFFEE_PHP/StaffController/createOrder
      */
     function createOrder() {
         // Kiểm tra phương thức POST
@@ -120,7 +120,7 @@ class StaffController extends Controller {
             if ($result['success']) {
                 echo "<script>
                     alert('Đặt hàng thành công! Mã đơn: {$result['order_code']}');
-                    window.location.href = '/COFFEE_PHP/Staff/GetData';
+                    window.location.href = '/COFFEE_PHP/StaffController/GetData';
                 </script>";
                 exit;
             } else {
@@ -137,10 +137,16 @@ class StaffController extends Controller {
     }
 
     /**
-     * Tìm khách hàng theo số điện thoại (POST)
-     * URL: http://localhost/COFFEE_PHP/Staff/searchCustomer
+     * Tìm khách hàng theo số điện thoại (POST) - Không dùng JSON
+     * URL: http://localhost/COFFEE_PHP/StaffController/searchCustomer
      */
-    public function searchCustomerPos() {
+    function searchCustomer() {
+        // Kiểm tra phương thức POST
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /COFFEE_PHP/StaffController/GetData');
+            exit;
+        }
+
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
@@ -153,9 +159,27 @@ class StaffController extends Controller {
             exit;
         }
 
-        $c = $this->customerService->getCustomerByPhone($phone);
-        if (!$c) {
-            echo "ERROR|Không tìm thấy khách";
+        try {
+            $customer = $this->customerService->getCustomerByPhone($phone);
+            
+            if ($customer) {
+                // Trả về trang với thông tin khách hàng
+                $_SESSION['pos_customer_search'] = $customer->toArray();
+                header('Location: /COFFEE_PHP/StaffController/GetData');
+                exit;
+            } else {
+                echo "<script>
+                    alert('Không tìm thấy khách hàng với số điện thoại: $phone');
+                    window.history.back();
+                </script>";
+                exit;
+            }
+
+        } catch (Exception $e) {
+            echo "<script>
+                alert('Lỗi: " . addslashes($e->getMessage()) . "');
+                window.history.back();
+            </script>";
             exit;
         }
 
@@ -166,10 +190,16 @@ class StaffController extends Controller {
 
 
     /**
-     * Tạo hoặc cập nhật khách hàng (POST) 
-     * URL: http://localhost/COFFEE_PHP/Staff/upsertCustomer
+     * Tạo hoặc cập nhật khách hàng (POST) - Không dùng JSON
+     * URL: http://localhost/COFFEE_PHP/StaffController/upsertCustomer
      */
-    public function upsertCustomerPos() {
+    function upsertCustomer() {
+        // Kiểm tra phương thức POST
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /COFFEE_PHP/StaffController/GetData');
+            exit;
+        }
+
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
@@ -194,8 +224,9 @@ class StaffController extends Controller {
                 'pointsToAdd' => $pointsToAdd
             ]);
 
-            if (!$result['success']) {
-                echo "ERROR|" . ($result['message'] ?? 'Lỗi khi tạo/cập nhật khách');
+            if ($result['success']) {
+                $_SESSION['pos_customer_search'] = $result['customer']->toArray();
+                header('Location: /COFFEE_PHP/StaffController/GetData');
                 exit;
             }
 
@@ -214,7 +245,7 @@ class StaffController extends Controller {
 
     /**
      * Orders Management Page
-     * URL: http://localhost/COFFEE_PHP/Staff/orders
+     * URL: http://localhost/COFFEE_PHP/StaffController/orders
      */
     function orders() {
         if (session_status() !== PHP_SESSION_ACTIVE) {
@@ -231,6 +262,9 @@ class StaffController extends Controller {
             if (isset($_GET['search']) && !empty($_GET['search'])) {
                 $filters['search'] = trim($_GET['search']);
             }
+            
+            // Chỉ hiển thị đơn hàng tại quầy (AT_COUNTER)
+            $filters['order_type'] = 'AT_COUNTER';
 
             // Lấy danh sách đơn hàng
             $orders = $this->orderService->getOrders($filters);
@@ -255,11 +289,11 @@ class StaffController extends Controller {
 
     /**
      * Cập nhật trạng thái đơn hàng (POST)
-     * URL: http://localhost/COFFEE_PHP/Staff/updateOrderStatus
+     * URL: http://localhost/COFFEE_PHP/StaffController/updateOrderStatus
      */
     function updateOrderStatus() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /COFFEE_PHP/Staff/orders');
+            header('Location: /COFFEE_PHP/StaffController/orders');
             exit;
         }
 
@@ -297,11 +331,11 @@ class StaffController extends Controller {
 
     /**
      * Cập nhật ghi chú đơn hàng (POST)
-     * URL: http://localhost/COFFEE_PHP/Staff/updateOrderNote
+     * URL: http://localhost/COFFEE_PHP/StaffController/updateOrderNote
      */
     function updateOrderNote() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /COFFEE_PHP/Staff/orders');
+            header('Location: /COFFEE_PHP/StaffController/orders');
             exit;
         }
 
@@ -338,8 +372,50 @@ class StaffController extends Controller {
     }
 
     /**
+     * Cập nhật ghi chú cho từng item trong đơn hàng (POST)
+     * URL: http://localhost/COFFEE_PHP/StaffController/updateOrderItemNote
+     */
+    function updateOrderItemNote() {
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            header('Location: /COFFEE_PHP/StaffController/orders');
+            exit;
+        }
+
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            session_start();
+        }
+
+        try {
+            $itemId = isset($_POST['item_id']) ? (int)$_POST['item_id'] : 0;
+            $note = isset($_POST['note']) ? trim($_POST['note']) : '';
+
+            if (!$itemId) {
+                throw new Exception('Thiếu thông tin');
+            }
+
+            $result = $this->orderService->updateOrderItemNote($itemId, $note);
+
+            if ($result['success']) {
+                echo "<script>
+                    alert('" . $result['message'] . "');
+                    window.location.href = '/COFFEE_PHP/StaffController/orders';
+                </script>";
+            } else {
+                throw new Exception($result['message']);
+            }
+
+        } catch (Exception $e) {
+            echo "<script>
+                alert('Lỗi: " . addslashes($e->getMessage()) . "');
+                window.history.back();
+            </script>";
+        }
+        exit;
+    }
+
+    /**
      * Lấy chi tiết đơn hàng (GET)
-     * URL: http://localhost/COFFEE_PHP/Staff/getOrderDetail?order_id=1
+     * URL: http://localhost/COFFEE_PHP/StaffController/getOrderDetail?order_id=1
      */
     function getOrderDetail() {
         if (session_status() !== PHP_SESSION_ACTIVE) {
@@ -364,7 +440,7 @@ class StaffController extends Controller {
 
     /**
      * Customers Management Page
-     * URL: http://localhost/COFFEE_PHP/Staff/customers
+     * URL: http://localhost/COFFEE_PHP/StaffController/customers
      */
     function customers() {
         $this->view('EmployeeDashBoard/MasterLayoutStaff', [
@@ -375,7 +451,7 @@ class StaffController extends Controller {
 
     /**
      * Staff Profile Page
-     * URL: http://localhost/COFFEE_PHP/Staff/profile
+     * URL: http://localhost/COFFEE_PHP/StaffController/profile
      */
     function profile() {
         $this->view('EmployeeDashBoard/MasterLayoutStaff', [

@@ -89,6 +89,13 @@ class OrderRepository extends ConnectDatabase {
             $params[] = $filters['status'];
             $types .= "s";
         }
+        
+        // Filter by order_type
+        if (!empty($filters['order_type'])) {
+            $sql .= " AND o.order_type = ?";
+            $params[] = $filters['order_type'];
+            $types .= "s";
+        }
 
         // Search by order_code or phone
         if (!empty($filters['search'])) {
@@ -139,7 +146,7 @@ class OrderRepository extends ConnectDatabase {
         
         $stmt = mysqli_prepare($this->con, $sql);
         
-        mysqli_stmt_bind_param($stmt, "siissssississi", 
+        mysqli_stmt_bind_param($stmt, "siissssdssssi", 
             $order->order_code,
             $order->staff_id,
             $order->customer_id,

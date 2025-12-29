@@ -162,16 +162,21 @@ function openSizeModal(itemId) {
 
         btn.onclick = () => {
           // pass product_size_id (sizeObj.id) so backend can validate price
-          addToCart(item, sizeObj.id, sizeObj.size, sizeObj.price);
+          if (!sizeObj.id) {
+            console.error('Missing product_size_id for', sizeObj);
+            alert('Lỗi: Không tìm thấy ID kích thước sản phẩm');
+            return;
+          }
+          addToCart(item, Number(sizeObj.id), sizeObj.size, sizeObj.price);
           closeSizeModal();
         };
         optionsContainer.appendChild(btn);
       });
     } else {
-      // Fallback if no sizes array
-      // Try use product default_size_id or fallback to item.id
-      const defaultSizeId = item.default_size_id || item.size_id || item.id;
-      addToCart(item, defaultSizeId, "M", item.price);
+      // Fallback if no sizes array - LẤY SIZE ĐẦU TIÊN NẾU CÓ
+      console.error('Product has no sizes array:', item);
+      alert('Lỗi: Sản phẩm không có thông tin kích thước');
+      closeSizeModal();
       return;
     }
     modal.style.display = "flex";
@@ -198,7 +203,7 @@ function addToCart(item, productSizeId, size, price) {
     cart.push({
       cartId: cartItemId,
       id: item.id,
-      product_size_id: productSizeId,
+      product_size_id: Number(productSizeId),
       name: item.name,
       image: item.image,
       price: parseInt(price), // client display price (DB is authoritative)
@@ -488,12 +493,28 @@ function processPayment() {
   }
 
   // Chuẩn bị cart items để gửi (chuyển sang format OrderService cần)
-  const cartItemsFormatted = cart.map((item) => ({
-    size_id: item.product_size_id || item.id + "-" + item.size, // product_size_id expected by backend
-    qty: item.qty,
-    price: item.price,
-    notes: item.notes || "",
-  }));
+  const cartItemsFormatted = cart.map((item) => {
+    if (!item.product_size_id) {
+      console.error('Missing product_size_id in cart item:', item);
+      alert('Lỗi: Sản phẩm trong giỏ hàng thiếu thông tin kích thước. Vui lòng xóa và thêm lại.');
+      throw new Error('Missing product_size_id');
+    }
+    if (!item.id) {
+      console.error('Missing product_id in cart item:', item);
+      alert('Lỗi: Sản phẩm trong giỏ hàng thiếu ID. Vui lòng xóa và thêm lại.');
+      throw new Error('Missing product_id');
+    }
+    return {
+      product_id: item.id,           // Product ID - để validate/debug
+      size_id: Number(item.product_size_id), // Product Size ID - LƯU VÀO DB
+      qty: item.qty,
+      price: item.price,
+      notes: item.notes || "",
+    };
+  });
+  
+  // Debug log để kiểm tra
+  console.log('Cart items formatted:', cartItemsFormatted);
 
   // Lấy customer ID từ window.selectedCustomer (được set bởi pos-customer.js)
   const customerId = window.selectedCustomer ? window.selectedCustomer.id : "";

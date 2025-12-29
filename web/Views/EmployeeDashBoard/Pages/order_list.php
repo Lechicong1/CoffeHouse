@@ -16,7 +16,7 @@
     }
 
     .order-header h2 {
-        font-size: 1.8rem;
+        font-size: 1.5rem;
         color: #064528;
         margin: 0;
     }
@@ -38,12 +38,13 @@
     }
 
     .filter-btn {
-        padding: 10px 20px;
+        padding: 8px 16px;
         border: 2px solid #ddd;
         background: white;
         border-radius: 25px;
         cursor: pointer;
         font-weight: 600;
+        font-size: 0.85rem;
         transition: all 0.3s;
         text-decoration: none;
         color: #666;
@@ -67,20 +68,21 @@
 
     .search-box input {
         flex: 1;
-        padding: 12px 15px;
+        padding: 10px 15px;
         border: 2px solid #ddd;
         border-radius: 25px;
-        font-size: 1rem;
+        font-size: 0.85rem;
     }
 
     .search-box button {
-        padding: 12px 30px;
+        padding: 10px 25px;
         background: #064528;
         color: white;
         border: none;
         border-radius: 25px;
         cursor: pointer;
         font-weight: 600;
+        font-size: 0.85rem;
     }
 
     /* Order Table */
@@ -102,10 +104,10 @@
     }
 
     .order-table th {
-        padding: 15px;
+        padding: 12px;
         text-align: left;
         font-weight: 600;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
     }
 
     .order-table tbody tr {
@@ -118,8 +120,9 @@
     }
 
     .order-table td {
-        padding: 15px;
+        padding: 12px;
         vertical-align: middle;
+        font-size: 0.85rem;
     }
 
     .order-code {
@@ -142,18 +145,19 @@
     .customer-name {
         font-weight: 600;
         color: #333;
+        font-size: 0.85rem;
     }
 
     .customer-phone {
-        font-size: 0.85rem;
+        font-size: 0.75rem;
         color: #666;
     }
 
     .order-type-badge {
         display: inline-block;
-        padding: 3px 8px;
-        border-radius: 12px;
-        font-size: 0.75rem;
+        padding: 2px 8px;
+        border-radius: 10px;
+        font-size: 0.7rem;
         font-weight: 600;
         margin-top: 3px;
     }
@@ -171,16 +175,16 @@
     .total-amount {
         font-weight: 700;
         color: #064528;
-        font-size: 1.1rem;
+        font-size: 0.9rem;
     }
 
     .payment-badge {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
-        padding: 5px 12px;
-        border-radius: 15px;
-        font-size: 0.85rem;
+        gap: 4px;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 0.75rem;
         font-weight: 600;
     }
 
@@ -206,7 +210,7 @@
     .note-text {
         color: #666;
         font-style: italic;
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
@@ -216,7 +220,7 @@
     .note-edit-btn {
         color: #064528;
         cursor: pointer;
-        font-size: 0.85rem;
+        font-size: 0.75rem;
         text-decoration: underline;
         margin-top: 3px;
         display: inline-block;
@@ -226,19 +230,29 @@
     .status-badge {
         display: inline-flex;
         align-items: center;
-        gap: 5px;
-        padding: 6px 15px;
-        border-radius: 20px;
+        gap: 4px;
+        padding: 5px 12px;
+        border-radius: 15px;
         font-weight: 600;
-        font-size: 0.85rem;
+        font-size: 0.75rem;
     }
 
-    .status-processing {
+    .status-pending {
+        background: #fff3e0;
+        color: #e65100;
+    }
+
+    .status-preparing {
         background: #fff8e1;
         color: #f57f17;
     }
 
-    .status-delivering {
+    .status-ready {
+        background: #e1f5fe;
+        color: #0277bd;
+    }
+
+    .status-shipping {
         background: #e3f2fd;
         color: #1976d2;
     }
@@ -261,11 +275,11 @@
     }
 
     .action-btn {
-        padding: 6px 12px;
+        padding: 5px 10px;
         border: none;
         border-radius: 8px;
         cursor: pointer;
-        font-size: 0.85rem;
+        font-size: 0.75rem;
         font-weight: 600;
         transition: all 0.2s;
     }
@@ -308,7 +322,7 @@
         background: white;
         padding: 30px;
         border-radius: 15px;
-        max-width: 600px;
+        max-width: 900px;
         width: 90%;
         max-height: 80vh;
         overflow-y: auto;
@@ -462,21 +476,21 @@ $currentSearch = $currentFilter['search'] ?? '';
     <!-- Filter Bar -->
     <div class="filter-bar">
         <div class="filter-buttons">
-            <a href="/COFFEE_PHP/Staff/orders" class="filter-btn <?php echo empty($currentStatus) ? 'active' : ''; ?>">
+            <a href="/COFFEE_PHP/StaffController/orders" class="filter-btn <?php echo empty($currentStatus) ? 'active' : ''; ?>">
                 Tất cả
             </a>
-            <a href="/COFFEE_PHP/Staff/orders?status=PROCESSING" class="filter-btn <?php echo $currentStatus === 'PROCESSING' ? 'active' : ''; ?>">
+            <a href="/COFFEE_PHP/StaffController/orders?status=PROCESSING" class="filter-btn <?php echo $currentStatus === 'PROCESSING' ? 'active' : ''; ?>">
                 ⏳ Đang pha chế
             </a>
-            <a href="/COFFEE_PHP/Staff/orders?status=COMPLETED" class="filter-btn <?php echo $currentStatus === 'COMPLETED' ? 'active' : ''; ?>">
+            <a href="/COFFEE_PHP/StaffController/orders?status=COMPLETED" class="filter-btn <?php echo $currentStatus === 'COMPLETED' ? 'active' : ''; ?>">
                 ✅ Hoàn thành
             </a>
-            <a href="/COFFEE_PHP/Staff/orders?status=CANCELLED" class="filter-btn <?php echo $currentStatus === 'CANCELLED' ? 'active' : ''; ?>">
+            <a href="/COFFEE_PHP/StaffController/orders?status=CANCELLED" class="filter-btn <?php echo $currentStatus === 'CANCELLED' ? 'active' : ''; ?>">
                 ❌ Đã hủy
             </a>
         </div>
 
-        <form method="GET" action="/COFFEE_PHP/Staff/orders" class="search-box">
+        <form method="GET" action="/COFFEE_PHP/StaffController/orders" class="search-box">
             <?php if (!empty($currentStatus)): ?>
                 <input type="hidden" name="status" value="<?php echo htmlspecialchars($currentStatus); ?>">
             <?php endif; ?>
@@ -565,8 +579,8 @@ $currentSearch = $currentFilter['search'] ?? '';
                                 <div class="note-text">
                                     <?php echo !empty($order['note']) ? htmlspecialchars($order['note']) : '<span style="color:#ccc;">Không có ghi chú</span>'; ?>
                                 </div>
-                                <?php if ($order['status'] === 'PROCESSING'): ?>
-                                    <span class="note-edit-btn" onclick="openEditNoteModal(<?php echo $order['id']; ?>, '<?php echo addslashes($order['note'] ?? ''); ?>')">
+                                <?php if ($order['status'] === 'PENDING'): ?>
+                                    <span class="note-edit-btn" onclick="openEditNoteModal(<?php echo $order['id']; ?>, '<?php echo addslashes($order['note'] ?? ''); ?>');">
                                         Sửa
                                     </span>
                                 <?php endif; ?>
@@ -575,11 +589,32 @@ $currentSearch = $currentFilter['search'] ?? '';
                             <!-- Trạng thái -->
                             <td>
                                 <?php
-                                $statusClass = 'status-processing';
-                                $statusText = 'Đang pha chế';
+                                $statusClass = 'status-pending';
+                                $statusText = 'Chờ xác nhận';
                                 $statusIcon = '⏳';
 
                                 switch ($order['status']) {
+                                    case 'PENDING':
+                                        $statusClass = 'status-pending';
+                                        $statusText = 'Chờ xác nhận';
+                                        $statusIcon = '⏳';
+                                        break;
+                                    case 'PROCESSING': // Tương thích với đơn hàng cũ
+                                    case 'PREPARING':
+                                        $statusClass = 'status-preparing';
+                                        $statusText = 'Đang pha chế';
+                                        $statusIcon = '☕';
+                                        break;
+                                    case 'READY':
+                                        $statusClass = 'status-ready';
+                                        $statusText = 'Pha chế xong';
+                                        $statusIcon = '✔️';
+                                        break;
+                                    case 'SHIPPING':
+                                        $statusClass = 'status-shipping';
+                                        $statusText = 'Đang giao';
+                                        $statusIcon = '🚚';
+                                        break;
                                     case 'COMPLETED':
                                         $statusClass = 'status-completed';
                                         $statusText = 'Hoàn thành';
@@ -592,11 +627,6 @@ $currentSearch = $currentFilter['search'] ?? '';
                                         if ($order['payment_status'] === 'REFUNDED') {
                                             $statusText .= ' (Đã hoàn tiền)';
                                         }
-                                        break;
-                                    case 'DELIVERING':
-                                        $statusClass = 'status-delivering';
-                                        $statusText = 'Đang giao';
-                                        $statusIcon = '🚚';
                                         break;
                                 }
                                 ?>
@@ -613,15 +643,10 @@ $currentSearch = $currentFilter['search'] ?? '';
                                         🖨️ In
                                     </button>
 
-                                    <!-- Hoàn thành (chỉ hiện khi PROCESSING) -->
-                                    <?php if ($order['status'] === 'PROCESSING'): ?>
+                                    <!-- Chỉ cho phép hoàn thành khi READY -->
+                                    <?php if ($order['status'] === 'READY'): ?>
                                         <button class="action-btn btn-complete" onclick="updateStatus(<?php echo $order['id']; ?>, 'COMPLETED')">
-                                            ✅ Xong
-                                        </button>
-
-                                        <!-- Hủy đơn -->
-                                        <button class="action-btn btn-cancel" onclick="openCancelModal(<?php echo $order['id']; ?>, '<?php echo addslashes($order['order_code']); ?>', '<?php echo $order['payment_status']; ?>')">
-                                            ❌ Hủy
+                                            ✅ Hoàn thành
                                         </button>
                                     <?php endif; ?>
                                 </div>
@@ -654,7 +679,7 @@ $currentSearch = $currentFilter['search'] ?? '';
             <h3>Sửa ghi chú đơn hàng</h3>
             <button class="close-modal" onclick="closeEditNoteModal()">&times;</button>
         </div>
-        <form method="POST" action="/COFFEE_PHP/Staff/updateOrderNote">
+        <form method="POST" action="/COFFEE_PHP/StaffController/updateOrderNote">
             <input type="hidden" name="order_id" id="edit-order-id">
             <div class="form-group">
                 <label>Ghi chú:</label>
@@ -679,7 +704,7 @@ $currentSearch = $currentFilter['search'] ?? '';
         <p id="refund-warning" class="alert-text" style="display: none;">
             <strong>Lưu ý:</strong> Đơn hàng này đã thanh toán. Hệ thống sẽ ghi nhận HOÀN TIỀN cho khách.
         </p>
-        <form method="POST" action="/COFFEE_PHP/Staff/updateOrderStatus">
+        <form method="POST" action="/COFFEE_PHP/StaffController/updateOrderStatus">
             <input type="hidden" name="order_id" id="cancel-order-id">
             <input type="hidden" name="status" value="CANCELLED">
             <div class="modal-actions">
@@ -699,29 +724,39 @@ function openOrderDetail(orderId) {
     content.innerHTML = '<p style="text-align:center;padding:20px;">Đang tải...</p>';
     modal.style.display = 'flex';
     
-    // Fetch order items
-    fetch(`/COFFEE_PHP/Staff/getOrderDetail?order_id=${orderId}`)
+    // Fetch order items - thêm timestamp để tránh cache
+    fetch(`/COFFEE_PHP/StaffController/getOrderDetail?order_id=${orderId}&t=${Date.now()}`)
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                let html = '<table class="items-table"><thead><tr><th>Sản phẩm</th><th>Size</th><th>SL</th><th>Giá</th><th>Thành tiền</th></tr></thead><tbody>';
+                let html = '<table class="items-table"><thead><tr><th>Sản phẩm</th><th>Size</th><th>SL</th><th>Giá</th><th>Thành tiền</th><th>Thao tác</th></tr></thead><tbody>';
                 
                 let total = 0;
                 data.items.forEach(item => {
                     const subtotal = item.price_at_purchase * item.quantity;
                     total += subtotal;
                     
+                    const imagePath = item.product_image ? `/COFFEE_PHP/${item.product_image}` : '/COFFEE_PHP/Public/Assets/default-product.jpg';
+                    const itemNote = item.note ? item.note : '';
+                    const noteDisplay = itemNote ? `<div style="font-size:0.85rem;color:#666;margin-top:5px;">📝 ${itemNote}</div>` : '';
+                    
                     html += `<tr>
                         <td>
                             <div style="display:flex;align-items:center;gap:10px;">
-                                <img src="${item.product_image || 'Public/Assets/default-product.jpg'}" class="item-image">
-                                <span>${item.product_name}</span>
+                                <img src="${imagePath}" class="item-image" onerror="this.src='/COFFEE_PHP/Public/Assets/default-product.jpg'">
+                                <div>
+                                    <div>${item.product_name}</div>
+                                    ${noteDisplay}
+                                </div>
                             </div>
                         </td>
                         <td>${item.size_name}</td>
                         <td>${item.quantity}</td>
                         <td>${new Intl.NumberFormat('vi-VN').format(item.price_at_purchase)} ₫</td>
                         <td><strong>${new Intl.NumberFormat('vi-VN').format(subtotal)} ₫</strong></td>
+                        <td>
+                            <button class="action-btn" onclick="openEditItemNoteModal(${item.id}, '${itemNote.replace(/'/g, "\\'")}')">✏️</button>
+                        </td>
                     </tr>`;
                 });
                 
@@ -752,6 +787,17 @@ function closeEditNoteModal() {
     document.getElementById('editNoteModal').style.display = 'none';
 }
 
+// Hàm sửa ghi chú cho từng item
+function openEditItemNoteModal(itemId, currentNote) {
+    document.getElementById('edit-item-id').value = itemId;
+    document.getElementById('edit-item-note').value = currentNote;
+    document.getElementById('editItemNoteModal').style.display = 'flex';
+}
+
+function closeEditItemNoteModal() {
+    document.getElementById('editItemNoteModal').style.display = 'none';
+}
+
 // Hàm hủy đơn
 function openCancelModal(orderId, orderCode, paymentStatus) {
     document.getElementById('cancel-order-id').value = orderId;
@@ -777,7 +823,7 @@ function updateStatus(orderId, status) {
     if (confirm('Xác nhận đánh dấu đơn hàng hoàn thành?')) {
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = '/COFFEE_PHP/Staff/updateOrderStatus';
+        form.action = '/COFFEE_PHP/StaffController/updateOrderStatus';
         
         const orderIdInput = document.createElement('input');
         orderIdInput.type = 'hidden';
@@ -812,3 +858,24 @@ window.onclick = function(event) {
     });
 }
 </script>
+
+<!-- Modal Sửa ghi chú cho Item -->
+<div id="editItemNoteModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Sửa ghi chú món ăn</h3>
+            <button class="close-modal" onclick="closeEditItemNoteModal()">&times;</button>
+        </div>
+        <form method="POST" action="/COFFEE_PHP/StaffController/updateOrderItemNote">
+            <input type="hidden" name="item_id" id="edit-item-id">
+            <div class="form-group">
+                <label>Ghi chú món:</label>
+                <textarea name="note" id="edit-item-note" placeholder="Ví dụ: Ít đá, nhiều đường..." style="width:100%;min-height:100px;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:0.9rem;"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="modal-btn btn-cancel-modal" onclick="closeEditItemNoteModal()">Hủy</button>
+                <button type="submit" class="modal-btn btn-save">Lưu</button>
+            </div>
+        </form>
+    </div>
+</div>

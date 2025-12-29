@@ -168,7 +168,7 @@ class OrderService {
         $order->staff_id = $data['staff_id'] ?? null; // Lấy từ session nếu có
         $order->customer_id = $data['customer_id'] ?? null; // Mặc định null hoặc khách lẻ
         $order->order_type = $data['order_type'] ?? 'AT_COUNTER';
-        $order->status = 'PROCESSING'; // Mặc định đang pha chế
+        $order->status = 'PENDING'; // Chờ xử lý khi nhân viên đặt hàng hộ khách
         $order->payment_status = 'PAID';
         $order->payment_method = $data['payment_method'] ?? 'CASH';
 
@@ -200,7 +200,7 @@ class OrderService {
                 
                 // Lưu lại items đã validate với giá thật
                 $validatedItems[] = [
-                    'size_id' => $sizeId,
+                    'size_id' => $productSize->id, // <--- CHỐT CHẶN: Lấy ID chính chủ từ DB
                     'qty' => $qty,
                     'price' => $realPrice, // Giá thật từ DB
                     'notes' => $it['notes'] ?? ''
@@ -395,7 +395,7 @@ class OrderService {
             }
 
             // Validate status
-            $validStatuses = ['PROCESSING', 'DELIVERING', 'COMPLETED', 'CANCELLED'];
+            $validStatuses = ['PENDING', 'PREPARING', 'READY', 'SHIPPING', 'COMPLETED', 'CANCELLED'];
             if (!in_array($newStatus, $validStatuses)) {
                 return ['success' => false, 'message' => 'Trạng thái không hợp lệ'];
             }
@@ -431,6 +431,11 @@ class OrderService {
             if (!$order) {
                 return ['success' => false, 'message' => 'Không tìm thấy đơn hàng'];
             }
+            
+            // Chỉ cho phép sửa note khi đơn hàng đang ở trạng thái PENDING
+            if ($order->status !== 'PENDING') {
+                return ['success' => false, 'message' => 'Chỉ có thể sửa ghi chú khi đơn hàng đang chờ xác nhận'];
+            }
 
             $order->note = trim($note);
             
@@ -442,6 +447,46 @@ class OrderService {
 
         } catch (Exception $e) {
             return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Cập nhật ghi chú cho từng item trong đơn hàng
+     * @param int $itemId
+     * @param string $note
+     * @return array
+     */
+    public function updateOrderItemNote($itemId, $note) {
+        try {
+            // Kiểm tra item có tồn tại không
+            $item = $this->orderItemRepo->findItemById($itemId);
+            if (!$item) {
+                return [
+                    'success' => false,
+                    'message' => 'Không tìm thấy sản phẩm trong đơn hàng'
+                ];
+            }
+
+            // Cập nhật note
+            $result = $this->orderItemRepo->updateItemNote($itemId, $note);
+            
+            if ($result) {
+                return [
+                    'success' => true,
+                    'message' => 'Cập nhật ghi chú thành công'
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Lỗi khi cập nhật ghi chú'
+                ];
+            }
+
+        } catch (Exception $e) {
+            return [
+                'success' => false,
+                'message' => $e->getMessage()
+            ];
         }
     }
 }

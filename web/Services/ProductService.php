@@ -49,6 +49,7 @@ class ProductService {
             $sizeList = [];
             foreach ($sizes as $size) {
                 $sizeList[] = [
+                    'id' => $size->id,  // product_size_id - QUAN TRỌNG!
                     'size' => $size->size_name,
                     'price' => (int)$size->price
                 ];

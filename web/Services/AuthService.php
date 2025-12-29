@@ -113,7 +113,7 @@ class AuthService extends Service {
                 case 'BARTENDER':
                     return '/COFFEE_PHP/Staff/orders';
                 case 'SHIPPER':
-                    return '/COFFEE_PHP/Staff/orders';
+                    return '/COFFEE_PHP/ShipperController';
                 case 'ADMIN':
                     return '/COFFEE_PHP/admin/dashboard';
                 default:

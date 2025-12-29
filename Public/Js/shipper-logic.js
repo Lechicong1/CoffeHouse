@@ -10,7 +10,7 @@ let selectedOrder = null;
 let pendingAction = null;
 
 // Chờ DOM load xong
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initDashboard();
 });
 
@@ -28,13 +28,13 @@ function initDashboard() {
  */
 function filterOrders(filter) {
     currentFilter = filter;
-    
+
     // Cập nhật UI nút filter
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.classList.remove('active');
     });
     document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
-    
+
     // Lọc các card
     const cards = document.querySelectorAll('.order-card');
     let hasVisible = false;
@@ -45,7 +45,7 @@ function filterOrders(filter) {
         // PHP: READY_FOR_DELIVERY -> pending
         // PHP: SHIPPING -> delivering
         // PHP: DELIVERED -> completed
-        
+
         let shouldShow = false;
         if (filter === 'all') {
             shouldShow = true;
@@ -108,17 +108,17 @@ function showModal(title, message, onConfirm) {
     const modalTitle = document.getElementById('modalTitle');
     const modalMessage = document.getElementById('modalMessage');
     const confirmBtn = document.getElementById('confirmBtn');
-    
+
     modalTitle.textContent = title;
     modalMessage.innerHTML = message;
-    
+
     // Xóa event listener cũ bằng cách clone
     const newConfirmBtn = confirmBtn.cloneNode(true);
     confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
-    
+
     // Thêm event listener mới
     newConfirmBtn.addEventListener('click', onConfirm);
-    
+
     modal.classList.add('show');
 }
 
@@ -137,7 +137,7 @@ function showAlert(message, type) {
     const alertBox = document.getElementById('alertBox');
     alertBox.textContent = message;
     alertBox.className = `alert alert-${type} show`;
-    
+
     // Tự động ẩn sau 4 giây
     setTimeout(() => {
         alertBox.classList.remove('show');
@@ -154,7 +154,7 @@ function handleLogout() {
 }
 
 // Đóng modal khi click bên ngoài
-window.onclick = function(event) {
+window.onclick = function (event) {
     const modal = document.getElementById('confirmModal');
     if (event.target === modal) {
         closeModal();

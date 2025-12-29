@@ -78,17 +78,35 @@ class AuthController extends Controller {
     }
 
     /**
-     * Đăng xuất
+     * Đăng xuất - Xóa hoàn toàn session
      */
     public function logout() {
+        // Khởi động session nếu chưa được khởi động
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
         
-        session_unset();
+        // Bước 1: Xóa tất cả biến session
+        $_SESSION = array();
+
+        // Bước 2: Xóa session cookie trên browser
+        if (isset($_COOKIE[session_name()])) {
+            $params = session_get_cookie_params();
+            setcookie(
+                session_name(),
+                '',
+                time() - 42000,
+                $params["path"],
+                $params["domain"],
+                $params["secure"],
+                $params["httponly"]
+            );
+        }
+
+        // Bước 3: Destroy session trên server
         session_destroy();
 
-        // Xóa cookie
+        // Bước 4: Xóa cookie "Remember me" nếu có
         if (isset($_COOKIE['remember_username'])) {
             setcookie('remember_username', '', time() - 3600, '/');
         }

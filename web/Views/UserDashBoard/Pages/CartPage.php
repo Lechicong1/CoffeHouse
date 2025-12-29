@@ -13,10 +13,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <?php
-    $currentPage = 'cart';
-    include __DIR__ . '/../header.php';
-    ?>
+<!--    --><?php
+//    $currentPage = 'cart';
+//    include __DIR__ . '/../header.php';
+//    ?>
 
     <section class="cart-section">
         <h1 class="cart-title">Giỏ hàng của bạn</h1>
@@ -115,6 +115,6 @@
         <?php endif; ?>
     </section>
 
-    <?php include __DIR__ . '/../footer.php'; ?>
+<?php include __DIR__ . '/../footer.php'; ?>
 </body>
 </html>

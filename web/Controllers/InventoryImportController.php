@@ -11,6 +11,14 @@ class InventoryImportController extends Controller {
     }
 
     public function GetData($message = null) {
+        if ($message) {
+            if ($message['success']) {
+                echo "<script>alert('" . addslashes($message['message']) . "')</script>";
+            } else {
+                echo "<script>alert('Lỗi: " . addslashes($message['message']) . "')</script>";
+            }
+        }
+
         $imports = $this->inventoryImportService->getAllImports();
         $ingredients = $this->ingredientService->getAllIngredients();
 

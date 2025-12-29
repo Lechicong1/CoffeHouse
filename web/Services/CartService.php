@@ -2,6 +2,7 @@
 /**
  * FILE: CartService.php
  * DESCRIPTION: Service xử lý business logic cho giỏ hàng
+ * CHUẨN MVC: Service chứa TOÀN BỘ logic nghiệp vụ, validation
  * AUTHOR: Coffee House System
  */
 
@@ -17,10 +18,28 @@ class CartService extends Service {
         $this->cartRepository = new CartRepository();
     }
 
-
+    /**
+     * Thêm sản phẩm vào giỏ hàng
+     * LOGIC: Validate -> Kiểm tra tồn tại -> Thêm mới hoặc cập nhật
+     */
     public function addToCart($customerId, $productSizeId, $quantity) {
         try {
-            // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa
+            // VALIDATION - Logic ở Service, không phải Controller
+            if (!$productSizeId) {
+                return [
+                    'success' => false,
+                    'message' => 'Vui lòng chọn size sản phẩm'
+                ];
+            }
+
+            if ($quantity < 1) {
+                return [
+                    'success' => false,
+                    'message' => 'Số lượng phải lớn hơn 0'
+                ];
+            }
+
+            // BUSINESS LOGIC: Kiểm tra sản phẩm đã có trong giỏ chưa
             $existing = $this->cartRepository->findExisting($customerId, $productSizeId);
 
             if ($existing) {
@@ -57,7 +76,9 @@ class CartService extends Service {
         }
     }
 
-
+    /**
+     * Lấy giỏ hàng của customer
+     */
     public function getCart($customerId) {
         try {
             $items = $this->cartRepository->findCartByCustomerId($customerId);
@@ -79,14 +100,29 @@ class CartService extends Service {
 
     /**
      * Cập nhật số lượng sản phẩm
-     * @param int $cartItemId
-     * @param int $quantity
-     * @return array
+     * LOGIC: Validate -> Kiểm tra quyền sở hữu -> Cập nhật hoặc xóa
      */
-    public function updateQuantity($cartItemId, $quantity) {
+    public function updateQuantity($customerId, $cartItemId, $quantity) {
         try {
+            // VALIDATION
+            if (!$cartItemId) {
+                return [
+                    'success' => false,
+                    'message' => 'Thiếu thông tin sản phẩm'
+                ];
+            }
+
+            // BUSINESS LOGIC: Kiểm tra quyền sở hữu
+            $cartItem = $this->cartRepository->findById($cartItemId);
+            if (!$cartItem || $cartItem->customer_id != $customerId) {
+                return [
+                    'success' => false,
+                    'message' => 'Không tìm thấy sản phẩm trong giỏ hàng của bạn'
+                ];
+            }
+
+            // Nếu số lượng <= 0 thì xóa item
             if ($quantity <= 0) {
-                // Nếu số lượng <= 0 thì xóa item
                 $this->cartRepository->delete($cartItemId);
                 return [
                     'success' => true,
@@ -94,6 +130,7 @@ class CartService extends Service {
                 ];
             }
 
+            // Cập nhật số lượng
             $this->cartRepository->updateQuantity($cartItemId, $quantity);
 
             return [
@@ -110,11 +147,28 @@ class CartService extends Service {
 
     /**
      * Xóa sản phẩm khỏi giỏ hàng
-     * @param int $cartItemId
-     * @return array
+     * LOGIC: Validate -> Kiểm tra quyền sở hữu -> Xóa
      */
-    public function removeItem($cartItemId) {
+    public function removeItem($customerId, $cartItemId) {
         try {
+            // VALIDATION
+            if (!$cartItemId) {
+                return [
+                    'success' => false,
+                    'message' => 'Thiếu thông tin sản phẩm'
+                ];
+            }
+
+            // BUSINESS LOGIC: Kiểm tra quyền sở hữu
+            $cartItem = $this->cartRepository->findById($cartItemId);
+            if (!$cartItem || $cartItem->customer_id != $customerId) {
+                return [
+                    'success' => false,
+                    'message' => 'Không tìm thấy sản phẩm trong giỏ hàng của bạn'
+                ];
+            }
+
+            // Xóa sản phẩm
             $this->cartRepository->delete($cartItemId);
 
             return [
@@ -131,8 +185,6 @@ class CartService extends Service {
 
     /**
      * Xóa toàn bộ giỏ hàng
-     * @param int $customerId
-     * @return array
      */
     public function clearCart($customerId) {
         try {
@@ -152,8 +204,6 @@ class CartService extends Service {
 
     /**
      * Lấy số lượng items trong giỏ hàng
-     * @param int $customerId
-     * @return array
      */
     public function getCartCount($customerId) {
         try {

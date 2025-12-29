@@ -46,12 +46,7 @@ $currentSection = $data['section'] ?? 'dashboard';
             <!-- Navigation Menu -->
             <nav class="sidebar-nav">
                 <ul class="menu-list">
-                    <li class="menu-item <?= $currentSection === 'dashboard' ? 'active' : '' ?>" data-target="dashboard">
-                        <a href="/COFFEE_PHP/admin/dashboard" class="menu-link">
-                            <span class="menu-icon">📊</span>
-                            <span class="menu-text">DASHBOARD</span>
-                        </a>
-                    </li>
+
                     <li class="menu-item <?= $currentSection === 'products' ? 'active' : '' ?>" data-target="products">
                         <a href="ProductController" class="menu-link">
                             <span class="menu-icon">🛒</span>
@@ -106,12 +101,7 @@ $currentSection = $data['section'] ?? 'dashboard';
                             <span class="menu-text">BÁO CÁO</span>
                         </a>
                     </li>
-                    <li class="menu-item <?= $currentSection === 'settings' ? 'active' : '' ?>" data-target="settings">
-                        <a href="/COFFEE_PHP/admin/settings" class="menu-link">
-                            <span class="menu-icon">⚙️</span>
-                            <span class="menu-text">CÀI ĐẶT</span>
-                        </a>
-                    </li>
+
                 </ul>
             </nav>
 

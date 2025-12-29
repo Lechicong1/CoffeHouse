@@ -70,7 +70,7 @@
                             <?php else: ?>
                                 <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500" alt="<?= htmlspecialchars($product->name) ?>">
                             <?php endif; ?>
-                            <?php if ($product->created_at && strtotime($product->created_at) > strtotime('-7 days')): ?>
+                            <?php if (isset($product->created_at) && $product->created_at && strtotime($product->created_at) > strtotime('-7 days')): ?>
                                 <span class="product-badge">Mới</span>
                             <?php endif; ?>
                         </div>
@@ -105,6 +105,6 @@
         </div>
     </section>
 
-    <?php include __DIR__ . '/footer.php'; ?>
+    <?php include __DIR__ . '/../footer.php'; ?>
 </body>
 </html>

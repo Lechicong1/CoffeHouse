@@ -14,6 +14,7 @@ class ProductEntity {
     public $description;
     public $image_url;
     public $is_active;
+    public $created_at;
 
     /**
      * Constructor - Khởi tạo entity rỗng hoặc từ array
@@ -27,6 +28,7 @@ class ProductEntity {
             $this->description = $data['description'] ?? null;
             $this->image_url = $data['image_url'] ?? null;
             $this->is_active = $data['is_active'] ?? true;
+            $this->created_at = $data['created_at'] ?? null;
         }
     }
 }

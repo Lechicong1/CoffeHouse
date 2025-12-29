@@ -21,14 +21,6 @@ class AuthService extends Service {
             ];
         }
 
-        if (strlen($username) < 3) {
-            return [
-                'success' => false,
-                'message' => 'Tên đăng nhập phải có ít nhất 3 ký tự!',
-                'user' => null,
-                'userType' => null
-            ];
-        }
 
         // Nếu userType được truyền vào thì chỉ query bảng tương ứng
         $custRepo = $this->repository('CustomerRepository');
@@ -121,9 +113,9 @@ class AuthService extends Service {
                 case 'BARTENDER':
                     return '/COFFEE_PHP/Staff/orders';
                 case 'SHIPPER':
-                    return '/COFFEE_PHP/Staff/orders';
+                    return '/COFFEE_PHP/ShipperController';
                 case 'ADMIN':
-                    return '/COFFEE_PHP/EmployeeController/GetData';
+                    return '/COFFEE_PHP/admin/dashboard';
                 default:
                     return '/COFFEE_PHP/EmployeeController/GetData';
             }

@@ -242,7 +242,7 @@
         </div>
     </section>
 
-    <?php include __DIR__ . '/footer.php'; ?>
+    <?php include __DIR__ . '/../footer.php'; ?>
 
     <!-- JAVASCRIPT -->
     <script src="../../../Public/Js/user-main.js"></script>

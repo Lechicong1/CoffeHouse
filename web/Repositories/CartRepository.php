@@ -57,6 +57,23 @@ class CartRepository extends ConnectDatabase {
     }
 
     /**
+     * Tìm cart item theo ID (để kiểm tra quyền sở hữu)
+     * @param int $id
+     * @return CartItemEntity|null
+     */
+    public function findById($id) {
+        $sql = "SELECT * FROM cart_items WHERE id = ?";
+        $stmt = mysqli_prepare($this->con, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        mysqli_stmt_execute($stmt);
+
+        $result = mysqli_stmt_get_result($stmt);
+        $data = mysqli_fetch_assoc($result);
+
+        return $data ? new CartItemEntity($data) : null;
+    }
+
+    /**
      * Thêm sản phẩm vào giỏ hàng
      * @param CartItemEntity $cartItem
      * @return int ID của item vừa thêm

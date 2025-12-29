@@ -163,12 +163,14 @@ class VoucherService extends Service {
      * @return array
      */
     public function previewApplyVoucher($customerId, $voucherId, $totalAmount) {
-    $customerRepo = $this->repository('CustomerRepository');
-    $voucherRepo  = $this->repository('VoucherRepository');
+        $customerRepo = $this->repository('CustomerRepository');
+        $voucherRepo  = $this->repository('VoucherRepository');
+        $customer = null;
+        $customerPoints = 0;
 
-    $customer = $customerRepo->findById($customerId);
-    if (!$customer) {
-        return ['success'=>false, 'message'=>'Customer not found'];
+        if (!empty($customerId)) {
+            $customer = $customerRepo->findById($customerId);
+            if ($customer) $customerPoints = (int)$customer->points;
     }
 
     $voucher = $voucherRepo->findById($voucherId);
@@ -197,10 +199,10 @@ class VoucherService extends Service {
         return ['success'=>false, 'message'=>'Bill total below minimum'];
     }
 
-    if ((int)$customer->points < (int)$voucher->point_cost) {
+    if ((int)$voucher->point_cost > 0 && $customerPoints < (int)$voucher->point_cost) {
         return ['success'=>false, 'message'=>'Not enough points'];
     }
-
+    
     // ===== CALCULATE =====
     $discount = $this->calculateDiscount($voucher, $totalAmount);
     $totalAfter = max(0, $totalAmount - $discount);
@@ -216,6 +218,13 @@ class VoucherService extends Service {
         ]
     ];
 }
+
+    /**
+     * Xem trước áp dụng voucher (wrapper)
+     */
+    public function previewVoucher($customerId, $voucherId, $totalAmount) {
+        return $this->previewApplyVoucher($customerId, $voucherId, $totalAmount);
+    }
 
     /**
      * Xóa voucher

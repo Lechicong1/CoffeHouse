@@ -21,9 +21,6 @@ $keyword = $data['keyword'] ?? '';
         <!-- Page Header -->
         <div class="page-header">
             <h2><i class="fas fa-users"></i> Quản Lý Khách Hàng</h2>
-            <button class="btn btn-success" onclick="openAddModal()">
-                <i class="fas fa-plus"></i> Thêm Khách Hàng
-            </button>
         </div>
 
         <!-- Stats Cards -->

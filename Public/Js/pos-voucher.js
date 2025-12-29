@@ -1,13 +1,19 @@
-// POS voucher helper (follows project FormData/post pattern)
+/*
+ * pos-voucher.js
+ * Mô tả: xử lý modal voucher cho POS
+ * - Mở modal, lấy danh sách voucher từ server (server trả HTML)
+ * - Chọn voucher, preview trên server, sau đó áp vào `window.currentOrder`
+ * Tất cả chú thích đã được chuyển sang tiếng Việt.
+ */
 document.addEventListener("DOMContentLoaded", function () {
   const btn = document.getElementById("open-voucher-modal");
   if (btn) btn.addEventListener("click", openVoucherModal);
 });
 
 // Parse a formatted VND string like "53.000 ₫" -> 53000
+// parseVND: chuyển chuỗi tiền dạng "53.000 ₫" -> số nguyên 53000
 function parseVND(text) {
   if (!text) return 0;
-  // remove non-digits
   const n = String(text).replace(/[^0-9\-]+/g, "");
   return Number(n) || 0;
 }
@@ -18,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btn) btn.addEventListener("click", openVoucherModal);
 });
 
+// openVoucherModal: mở modal và load danh sách voucher từ server
 function openVoucherModal() {
   if (!window.currentOrder || !window.currentOrder.customer_id) {
     alert("Vui lòng chọn khách hàng trước.");
@@ -26,6 +33,7 @@ function openVoucherModal() {
 
   let modal = document.getElementById("voucherModal");
   if (!modal) {
+    // Tạo modal tạm nếu server không inject
     modal = document.createElement("div");
     modal.id = "voucherModal";
     modal.style.position = "fixed";
@@ -80,28 +88,25 @@ function openVoucherModal() {
   }
   fd.append("bill_total", subtotal);
 
+  // Gọi endpoint lấy danh sách voucher (server trả HTML fragment)
   fetch("/COFFEE_PHP/Voucher/getEligibleVouchers", { method: "POST", body: fd })
     .then((r) => r.text())
     .then((html) => {
       console.log("Voucher HTML response:", html); // DEBUG
       const list = document.getElementById("voucherList");
       const msg = document.getElementById("voucherMsg");
-      console.log("voucherList element:", list); // DEBUG
       if (!list) return;
 
-      // Backend trả về HTML, không phải JSON
-      // Chèn trực tiếp HTML vào list
+      // Backend trả về HTML fragment - chèn vào
       list.innerHTML =
         html || '<div style="color:#333">Không có voucher phù hợp</div>';
 
-      // Clear message
       if (msg) msg.textContent = "";
-
-      // Wire up click events cho các voucher cards
+      // Gán sự kiện cho các card voucher vừa chèn
       wireVoucherCardClicks();
     })
     .catch((err) => {
-      console.error("Fetch error:", err); // DEBUG
+      console.error("Fetch error:", err);
       const msg = document.getElementById("voucherMsg");
       if (msg) msg.textContent = "Lỗi khi lấy voucher";
     });
@@ -173,30 +178,35 @@ function applySelectedVoucher() {
   window.currentOrder = window.currentOrder || {};
   window.currentOrder.voucher = v;
   const vid = v.voucher_id || v.id || v.VoucherId || v.voucherId || null;
+  // ✅ QUAN TRỌNG: đẩy voucher_id vào form hidden để POST lên BE
+  const voucherInput = document.getElementById("form-voucher-id");
+  if (voucherInput) voucherInput.value = String(vid || "");
   if (vid) window.currentOrder.voucher.voucher_id = vid;
   window.currentOrder.voucher.point_cost = Number(
     window.currentOrder.voucher.point_cost || 0
   );
   const sel = document.getElementById("pos-selected-voucher");
-  if (sel)
-    sel.textContent = `${v.name || ""} — ${
-      v.discount_type === "FIXED"
-        ? (v.discount_value || 0) + "₫"
-        : (v.discount_value || 0) + "%"
-    } — ${v.point_cost || 0} điểm`;
+  if (sel) sel.textContent = `${v.name || ""} — ${v.point_cost || 0} điểm`;
+  // Gọi preview từ server để lấy thông tin giảm giá và tổng sau giảm
+  if (vid) {
+    previewVoucherServer(vid);
+  }
   if (typeof updateCartUI === "function") updateCartUI();
   closeVoucherModal();
 }
 
 function clearSelectedVoucher() {
   if (window.currentOrder) delete window.currentOrder.voucher;
+  // Clear hidden voucher input so backend không nhận voucher
+  const voucherInput = document.getElementById("form-voucher-id");
+  if (voucherInput) voucherInput.value = "";
   const sel = document.getElementById("pos-selected-voucher");
   if (sel) sel.textContent = "Không có voucher";
   if (typeof updateCartUI === "function") updateCartUI();
   closeVoucherModal();
 }
 
-// Helper function to format currency
+// formatCurrency: định dạng số thành chuỗi tiền VND
 function formatCurrency(amount) {
   return new Intl.NumberFormat("vi-VN", {
     style: "currency",
@@ -204,7 +214,7 @@ function formatCurrency(amount) {
   }).format(amount);
 }
 
-// Preview voucher from server
+// previewVoucherServer: gọi server để preview voucher và cập nhật vào window.currentOrder
 function previewVoucherServer(voucherId) {
   const fd = new FormData();
 
@@ -248,12 +258,32 @@ function previewVoucherServer(voucherId) {
 }
 
 function applyTotalsFromPreview(discount, totalAfter) {
-  // đổi ID này theo đúng staff_order.php của bạn
-  const discountEl = document.getElementById("discount-price"); // nếu có
+  // staff_order.php hiện có:
   const totalEl = document.getElementById("total-price");
-  const payBtn = document.getElementById("btn-checkout");
+  const btnTotalEl = document.getElementById("btn-total");
+
+  // (tuỳ bạn) nếu muốn hiện 1 dòng giảm giá thì phải có element trong HTML,
+  // còn hiện tại staff_order.php chưa có #discount-price
+  const discountEl = document.getElementById("discount-price"); // có thì update, không có thì thôi
 
   if (discountEl) discountEl.textContent = formatCurrency(discount);
   if (totalEl) totalEl.textContent = formatCurrency(totalAfter);
+  if (btnTotalEl) btnTotalEl.textContent = formatCurrency(totalAfter);
+
+  // backward compatibility: nếu tồn tại nút checkout tên khác
+  const payBtn = document.getElementById("btn-checkout");
   if (payBtn) payBtn.textContent = `Thanh Toán ${formatCurrency(totalAfter)}`;
+
+  // ✅ Quan trọng: đẩy xuống hidden input để submit lên backend
+  const formTotal = document.getElementById("form-total-amount");
+  if (formTotal) formTotal.value = String(Math.round(totalAfter));
+
+  // nếu muốn submit voucher_id luôn
+  const formVoucher = document.getElementById("form-voucher-id");
+  if (formVoucher && window.currentOrder?.voucher?.voucher_id) {
+    formVoucher.value = window.currentOrder.voucher.voucher_id;
+  }
+  // Nếu modal thanh toán đang mở, cập nhật luôn giá hiển thị trong modal
+  const modalTotalEl = document.getElementById("modal-total");
+  if (modalTotalEl) modalTotalEl.textContent = formatCurrency(totalAfter);
 }

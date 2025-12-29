@@ -237,7 +237,7 @@ class VoucherController extends Controller {
         exit;
 }
 
-    // Preview áp dụng voucher
+    // Preview áp dụng voucher cho đơn hàng
     function previewVoucher() {
         header('Content-Type: text/html; charset=UTF-8');
         $customerId = (int)($_POST['customer_id'] ?? 0);

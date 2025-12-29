@@ -6,7 +6,7 @@ use web\Entity\EmployeeEntity;
 class EmployeeRepository extends ConnectDatabase {
 
     public function findAll() {
-        $sql = "SELECT * FROM employee ORDER BY id DESC";
+        $sql = "SELECT * FROM employee WHERE roleName IN ('ORDER', 'BARTENDER', 'SHIPPER')";
         $result = mysqli_query($this->con, $sql);
 
         $employees = [];

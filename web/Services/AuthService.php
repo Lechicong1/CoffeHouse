@@ -115,7 +115,7 @@ class AuthService extends Service {
                 case 'SHIPPER':
                     return '/COFFEE_PHP/Staff/orders';
                 case 'ADMIN':
-                    return '/COFFEE_PHP/EmployeeController/GetData';
+                    return '/COFFEE_PHP/admin/dashboard';
                 default:
                     return '/COFFEE_PHP/EmployeeController/GetData';
             }

@@ -9,7 +9,7 @@ class ShipperService {
     }
 
     /**
-     * Lấy danh sách đơn hàng cần giao (READY_FOR_DELIVERY)
+     * Lấy danh sách đơn hàng cần giao (READY)
      */
     public function getReadyOrders() {
         return $this->shipperRepo->findReadyForDeliveryOrders();
@@ -24,7 +24,7 @@ class ShipperService {
     }
 
     /**
-     * Chuyển trạng thái sang DELIVERED
+     * Chuyển trạng thái sang COMPLETED
      */
     public function completeDelivery($orderId) {
         return $this->shipperRepo->completeDelivery($orderId);

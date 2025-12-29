@@ -21,14 +21,6 @@ class AuthService extends Service {
             ];
         }
 
-        if (strlen($username) < 3) {
-            return [
-                'success' => false,
-                'message' => 'Tên đăng nhập phải có ít nhất 3 ký tự!',
-                'user' => null,
-                'userType' => null
-            ];
-        }
 
         // Nếu userType được truyền vào thì chỉ query bảng tương ứng
         $custRepo = $this->repository('CustomerRepository');

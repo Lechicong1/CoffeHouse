@@ -95,14 +95,44 @@ class ProductService {
             $imageUrl = '';
             if (isset($files['image']) && $files['image']['error'] == 0) {
                 $targetDir = "Public/Assets/";
+
+                // Tạo thư mục nếu chưa tồn tại
                 if (!file_exists($targetDir)) {
-                    mkdir($targetDir, 0777, true);
+                    if (!mkdir($targetDir, 0777, true)) {
+                        throw new Exception("Không thể tạo thư mục upload. Kiểm tra quyền truy cập!");
+                    }
                 }
+
+                // Kiểm tra quyền ghi
+                if (!is_writable($targetDir)) {
+                    throw new Exception("Thư mục '$targetDir' không có quyền ghi. Chạy: sudo chmod -R 777 Public/Assets/");
+                }
+
                 $fileName = time() . '_' . basename($files["image"]["name"]);
                 $targetFile = $targetDir . $fileName;
-                if (move_uploaded_file($files["image"]["tmp_name"], $targetFile)) {
-                    $imageUrl = $targetFile;
+
+                // Upload file
+                if (!move_uploaded_file($files["image"]["tmp_name"], $targetFile)) {
+                    $uploadError = error_get_last();
+                    throw new Exception("Upload file thất bại! Lỗi: " . ($uploadError ? $uploadError['message'] : 'Không xác định'));
                 }
+
+                // Set quyền cho file vừa upload (quan trọng trên Linux)
+                chmod($targetFile, 0666);
+                $imageUrl = $targetFile;
+            } elseif (isset($files['image']) && $files['image']['error'] != 4) {
+                // Error code khác 4 (UPLOAD_ERR_NO_FILE) nghĩa là có lỗi
+                $errorMessages = [
+                    1 => 'File quá lớn (vượt quá upload_max_filesize)',
+                    2 => 'File quá lớn (vượt quá MAX_FILE_SIZE)',
+                    3 => 'File chỉ được upload một phần',
+                    6 => 'Không tìm thấy thư mục tạm',
+                    7 => 'Không thể ghi file vào đĩa',
+                    8 => 'PHP extension dừng upload'
+                ];
+                $errorCode = $files['image']['error'];
+                $errorMsg = isset($errorMessages[$errorCode]) ? $errorMessages[$errorCode] : "Lỗi không xác định ($errorCode)";
+                throw new Exception("Lỗi upload: " . $errorMsg);
             }
 
             $productData = [
@@ -162,14 +192,44 @@ class ProductService {
 
             if (isset($files['image']) && $files['image']['error'] == 0) {
                 $targetDir = "Public/Assets/";
+
+                // Tạo thư mục nếu chưa tồn tại
                 if (!file_exists($targetDir)) {
-                    mkdir($targetDir, 0777, true);
+                    if (!mkdir($targetDir, 0777, true)) {
+                        throw new Exception("Không thể tạo thư mục upload. Kiểm tra quyền truy cập!");
+                    }
                 }
+
+                // Kiểm tra quyền ghi
+                if (!is_writable($targetDir)) {
+                    throw new Exception("Thư mục '$targetDir' không có quyền ghi. Chạy: sudo chmod -R 777 Public/Assets/");
+                }
+
                 $fileName = time() . '_' . basename($files["image"]["name"]);
                 $targetFile = $targetDir . $fileName;
-                if (move_uploaded_file($files["image"]["tmp_name"], $targetFile)) {
-                    $imageUrl = $targetFile;
+
+                // Upload file
+                if (!move_uploaded_file($files["image"]["tmp_name"], $targetFile)) {
+                    $uploadError = error_get_last();
+                    throw new Exception("Upload file thất bại! Lỗi: " . ($uploadError ? $uploadError['message'] : 'Không xác định'));
                 }
+
+                // Set quyền cho file vừa upload (quan trọng trên Linux)
+                chmod($targetFile, 0666);
+                $imageUrl = $targetFile;
+            } elseif (isset($files['image']) && $files['image']['error'] != 4) {
+                // Error code khác 4 (UPLOAD_ERR_NO_FILE) nghĩa là có lỗi
+                $errorMessages = [
+                    1 => 'File quá lớn (vượt quá upload_max_filesize)',
+                    2 => 'File quá lớn (vượt quá MAX_FILE_SIZE)',
+                    3 => 'File chỉ được upload một phần',
+                    6 => 'Không tìm thấy thư mục tạm',
+                    7 => 'Không thể ghi file vào đĩa',
+                    8 => 'PHP extension dừng upload'
+                ];
+                $errorCode = $files['image']['error'];
+                $errorMsg = isset($errorMessages[$errorCode]) ? $errorMessages[$errorCode] : "Lỗi không xác định ($errorCode)";
+                throw new Exception("Lỗi upload: " . $errorMsg);
             }
 
             $productData = [

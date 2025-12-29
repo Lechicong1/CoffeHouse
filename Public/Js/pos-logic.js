@@ -87,6 +87,12 @@ function renderMenuGrid(items) {
 
   grid.innerHTML = "";
 
+  // ✅ Đảm bảo voucher_id được set từ state (nguồn sự thật)
+  const voucherInput = document.getElementById("form-voucher-id");
+  if (voucherInput) {
+    const vid = window.currentOrder?.voucher?.voucher_id || "";
+    voucherInput.value = vid ? String(vid) : "";
+  }
   items.forEach((item) => {
     const itemEl = document.createElement("div");
     itemEl.className = "menu-item";
@@ -403,8 +409,23 @@ function openPaymentModal() {
   const modal = document.getElementById("payment-modal");
   if (modal) {
     modal.style.display = "flex";
-    // Update total in modal
-    const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+    // Update total in modal — ưu tiên dùng #form-total-amount (nguồn sự thật),
+    // nếu không có thì dùng #total-price, cuối cùng mới tính tạm từ cart
+    let total = 0;
+    const formTotalEl = document.getElementById("form-total-amount");
+    if (formTotalEl && formTotalEl.value) {
+      total = Number(formTotalEl.value) || 0;
+    } else {
+      const totalPriceEl = document.getElementById("total-price");
+      if (totalPriceEl && totalPriceEl.textContent) {
+        total =
+          Number(String(totalPriceEl.textContent).replace(/[^0-9\-]+/g, "")) ||
+          0;
+      } else {
+        total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      }
+    }
+
     const modalTotalEl = document.getElementById("modal-total");
     if (modalTotalEl) modalTotalEl.textContent = formatCurrency(total);
   }
@@ -454,28 +475,48 @@ function processPayment() {
     return;
   }
 
-  // Tính tổng tiền
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-
-  // Tính giảm giá voucher (GIỮ NGUYÊN LOGIC)
-  let voucherDiscount = 0;
+  // Lấy tổng tiền thực tế — ưu tiên #form-total-amount (nguồn sự thật),
+  // nếu không có thì lấy từ #total-price, cuối cùng mới tính từ cart
+  let totalAmount = 0;
+  // đảm bảo voucherId tồn tại ở scope bên ngoài để không gây ReferenceError
   let voucherId = null;
-  if (window.currentOrder && window.currentOrder.voucher) {
-    const v = window.currentOrder.voucher;
-    voucherId = v.id;
-    if (v.discount_type === "FIXED") {
-      voucherDiscount = Number(v.discount_value) || 0;
+  const formTotalEl = document.getElementById("form-total-amount");
+  if (formTotalEl && formTotalEl.value) {
+    totalAmount = Number(formTotalEl.value) || 0;
+  } else {
+    const totalPriceEl = document.getElementById("total-price");
+    if (totalPriceEl && totalPriceEl.textContent) {
+      totalAmount =
+        Number(String(totalPriceEl.textContent).replace(/[^0-9\-]+/g, "")) || 0;
     } else {
-      voucherDiscount = subtotal * ((Number(v.discount_value) || 0) / 100.0);
+      // Fallback: tính từ cart và voucher giống logic cũ
+      const subtotal = cart.reduce(
+        (sum, item) => sum + item.price * item.qty,
+        0
+      );
+      // Tính giảm giá voucher nếu cần
+      let voucherDiscount = 0;
+      if (window.currentOrder && window.currentOrder.voucher) {
+        const v = window.currentOrder.voucher;
+        voucherId = v.id || v.voucher_id || null;
+        if (v.discount_type === "FIXED") {
+          voucherDiscount = Number(v.discount_value) || 0;
+        } else {
+          voucherDiscount =
+            subtotal * ((Number(v.discount_value) || 0) / 100.0);
+        }
+        if (v.max_discount_value) {
+          voucherDiscount = Math.min(
+            voucherDiscount,
+            Number(v.max_discount_value)
+          );
+        }
+        voucherDiscount = Math.min(voucherDiscount, subtotal);
+        voucherDiscount = Math.round(voucherDiscount);
+      }
+      totalAmount = Math.max(0, subtotal - voucherDiscount);
     }
-    if (v.max_discount_value) {
-      voucherDiscount = Math.min(voucherDiscount, Number(v.max_discount_value));
-    }
-    voucherDiscount = Math.min(voucherDiscount, subtotal);
-    voucherDiscount = Math.round(voucherDiscount);
   }
-
-  const totalAmount = Math.max(0, subtotal - voucherDiscount);
 
   // Chuẩn bị cart items để gửi (chuyển sang format OrderService cần)
   const cartItemsFormatted = cart.map((item) => ({
@@ -491,12 +532,22 @@ function processPayment() {
   // Điền thông tin vào form ẩn
   document.getElementById("form-order-type").value = currentOrderType;
   document.getElementById("form-payment-method").value = selectedPaymentMethod;
-  document.getElementById("form-total-amount").value = totalAmount;
+  // Ghi lại total vào form (nếu chưa có hoặc để đảm bảo)
+  const formTotalSet = document.getElementById("form-total-amount");
+  if (formTotalSet) formTotalSet.value = String(Math.round(totalAmount));
   document.getElementById("form-customer-id").value = customerId;
   document.getElementById("form-cart-items").value =
     JSON.stringify(cartItemsFormatted);
   document.getElementById("form-note").value = "";
-  document.getElementById("form-voucher-id").value = voucherId || "";
+  // ✅ đảm bảo voucher_id luôn được set từ state trước khi submit
+  const voucherInput = document.getElementById("form-voucher-id");
+  if (voucherInput) {
+    const vid =
+      window.currentOrder?.voucher?.voucher_id ||
+      window.currentOrder?.voucher?.id ||
+      "";
+    voucherInput.value = vid ? String(vid) : "";
+  }
 
   // Submit form
   document.getElementById("order-form").submit();

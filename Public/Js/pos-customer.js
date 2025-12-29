@@ -1,48 +1,26 @@
 /*
- * Module POS - Quản lý Khách Hàng (pos-customer.js)
- * - File này xử lý modal tìm / tạo khách cho giao diện POS
- * - Kiểm tra request trả về kiểu JSON hoặc HTML (server trả view)
- * - Nếu server redirect về trang POS có biến JavaScript `CUSTOMER_SEARCH_RESULT`,
- *   hàm sẽ trích dữ liệu đó và cập nhật giao diện.
- *
- * Ghi chú: tất cả chú thích trong file đã được viết bằng tiếng Việt để dễ hiểu.
+ * pos-customer.js (refactor theo mẫu pos-voucher.js)
+ * - Tạo/hiển thị modal khách hàng nếu không có
+ * - Hỗ trợ fetch JSON / HTML / plain-text từ server
+ * - Cho phép chọn thẻ khách (class .customer-card) giống cách voucher hoạt động
+ * - Khi áp khách, cập nhật `window.currentOrder` và input ẩn `form-customer-id`
  */
 (function () {
-  // Module POS - quản lý khách hàng (theo mẫu voucher-web.js)
-  // parseCustomerFromHtml: cố gắng trích `CUSTOMER_SEARCH_RESULT` từ HTML trả về
-  // Nếu tìm thấy sẽ parse JSON và trả về object customer, không tìm thấy trả về null
-  function parseCustomerFromHtml(htmlText) {
-    try {
-      const re =
-        /const\s+CUSTOMER_SEARCH_RESULT\s*=\s*(null|\{[\s\S]*?\}|\[[\s\S]*?\])\s*;/m;
-      const m = htmlText.match(re);
-      if (m && m[1]) {
-        const jsonText = m[1];
-        if (jsonText === "null") return null;
-        return JSON.parse(jsonText);
-      }
-    } catch (e) {
-      console.warn("parseCustomerFromHtml failed", e);
-    }
-    return null;
-  }
+  // Small helpers
 
-  // formatMsg: set text + color cho phần tử hiển thị thông báo trong modal
   function formatMsg(el, text, color) {
     if (!el) return;
     el.style.color = color || "";
     el.textContent = text || "";
   }
 
-  // doFetchAsJsonOrHtml: fetch POST và trả về JSON hoặc object {_html: '...'} khi server trả HTML
-  // Nó thêm header `X-Requested-With` và `Accept` để server có thể nhận biết request AJAX
   async function doFetchAsJsonOrHtml(url, fd) {
     const opts = {
       method: "POST",
       body: fd,
       headers: {
         "X-Requested-With": "XMLHttpRequest",
-        Accept: "application/json, text/html",
+        Accept: "application/json, text/html, text/plain",
       },
     };
     const r = await fetch(url, opts);
@@ -54,7 +32,6 @@
       );
     }
     if (ct.includes("application/json")) return await r.json();
-    // if HTML, return object with _html for caller to inspect
     if (ct.includes("text/html")) {
       const html = await r.text();
       return { _html: html };
@@ -67,8 +44,6 @@
     }
   }
 
-  // updateUiWithCustomer: cập nhật giao diện POS khi đã có dữ liệu khách
-  // - cập nhật input tên, box hiển thị điểm, global `window.currentOrder` và `window.selectedCustomer`
   function updateUiWithCustomer(c) {
     if (!c) return;
     const nameInput = document.getElementById("pos-customer-name");
@@ -80,156 +55,240 @@
     window.currentOrder.customer = c;
     window.currentOrder.customer_id = c.id;
     window.currentOrder.customer_points = c.points;
-    // Backward-compatible global and hidden form
     window.selectedCustomer = c;
     const hiddenCustomerInput = document.getElementById("form-customer-id");
     if (hiddenCustomerInput) hiddenCustomerInput.value = c.id;
   }
 
-  // posFindCustomer: gửi request tìm khách theo số điện thoại, cập nhật UI theo kết quả
-  async function posFindCustomer() {
-    const phoneEl = document.getElementById("posPhone");
-    const phone = phoneEl ? phoneEl.value.trim() : "";
+  // Wire click handlers for customer cards injected by server
+  function wireCustomerCardClicks() {
+    const list = document.getElementById("posCustomerList");
+    if (!list) return;
+    const cards = list.querySelectorAll(".customer-card");
+    cards.forEach((card) => {
+      card.style.cursor = "pointer";
+      card.addEventListener("click", () => {
+        const id = card.getAttribute("data-id") || card.dataset.id || null;
+        const name =
+          card.getAttribute("data-name") ||
+          card.dataset.name ||
+          (card.textContent || "").trim();
+        const phone =
+          card.getAttribute("data-phone") || card.dataset.phone || "";
+        const points = Number(
+          card.getAttribute("data-points") || card.dataset.points || 0
+        );
+        const c = { id: id, full_name: name, phone: phone, points: points };
+        window.__pos_selected_customer = c;
+        cards.forEach((c2) => c2.classList.remove("selected"));
+        card.classList.add("selected");
+      });
+    });
+  }
+
+  function applySelectedCustomer() {
+    const c = window.__pos_selected_customer;
     const msgEl = document.getElementById("posCustomerMessage");
+    if (!c) {
+      formatMsg(msgEl, "Vui lòng chọn khách", "#c00");
+      return;
+    }
+    updateUiWithCustomer(c);
+    formatMsg(
+      msgEl,
+      `Đã chọn: ${c.full_name} — ${c.phone} — ${c.points} điểm`,
+      "#080"
+    );
+    closePosCustomerModal();
+  }
+
+  function clearSelectedCustomer() {
+    delete window.__pos_selected_customer;
+    if (window.currentOrder) delete window.currentOrder.customer;
+    const sel = document.getElementById("pos-selected-customer");
+    if (sel) sel.textContent = "Chưa có khách";
+    const nameInput = document.getElementById("pos-customer-name");
+    if (nameInput) nameInput.value = "";
+    const hiddenCustomerInput = document.getElementById("form-customer-id");
+    if (hiddenCustomerInput) hiddenCustomerInput.value = "";
+  }
+
+  async function posFindCustomer(phone) {
+    const msgEl = document.getElementById("posCustomerMessage");
+
+    // nếu onclick gọi mà không truyền phone -> tự lấy từ input #posPhone
+    if (!phone) {
+      const phoneInput = document.getElementById("posPhone");
+      phone = phoneInput ? phoneInput.value.trim() : "";
+    }
+
     if (!phone) {
       formatMsg(msgEl, "Vui lòng nhập số điện thoại", "#c00");
       return;
     }
-    const findBtn = document.getElementById("posFindBtn");
-    if (findBtn) {
-      findBtn.disabled = true;
-      findBtn.textContent = "Đang tìm...";
-    }
-
-    const fd = new FormData();
-    fd.append("phone", phone);
 
     try {
-      const data = await doFetchAsJsonOrHtml(
-        "/COFFEE_PHP/Staff/searchCustomer",
-        fd
-      );
-      if (data && data.success) {
-        updateUiWithCustomer(data.customer);
-        formatMsg(
-          msgEl,
-          `Đã tìm: ${data.customer.full_name} — ${data.customer.phone} — ${data.customer.points} điểm`,
-          "#080"
-        );
-      } else if (data && data._html) {
-        // page returned full HTML (redirect to GetData). try extract customer var
-        const c = parseCustomerFromHtml(data._html);
-        if (c) {
-          updateUiWithCustomer(c);
-          formatMsg(
-            msgEl,
-            `Đã tìm: ${c.full_name} — ${c.phone} — ${c.points} điểm`,
-            "#080"
-          );
-          closePosCustomerModal();
-        } else {
-          formatMsg(
-            msgEl,
-            "Server trả HTML. Vui lòng kiểm tra phiên hoặc đăng nhập lại.",
-            "#c00"
-          );
-        }
-      } else if (data && data._text) {
-        formatMsg(msgEl, "Không nhận được JSON - kiểm tra server", "#c00");
-      } else {
-        formatMsg(
-          msgEl,
-          data && data.message
-            ? data.message
-            : "Không tìm thấy khách với số này",
-          "#c00"
-        );
+      const r = await fetch("/COFFEE_PHP/Staff/searchCustomerPos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({ phone }),
+      });
+
+      const text = (await r.text()).trim();
+      console.log("searchCustomerPos response:", text);
+
+      const parts = text.split("|");
+
+      if (parts[0] === "OK") {
+        updateUiWithCustomer({
+          id: parts[1],
+          full_name: parts[2],
+          phone: parts[3],
+          points: Number(parts[4] || 0),
+        });
+        closePosCustomerModal();
+        return;
       }
+
+      if (parts[0] === "ERROR") {
+        formatMsg(msgEl, parts[1], "#c00");
+        return;
+      }
+
+      formatMsg(msgEl, "Phản hồi không hợp lệ từ server", "#c00");
     } catch (err) {
-      console.error("posFindCustomer error:", err);
-      formatMsg(msgEl, err.message || "Lỗi server", "#c00");
-    } finally {
-      if (findBtn) {
-        findBtn.disabled = false;
-        findBtn.textContent = "Tìm";
-      }
+      console.error(err);
+      formatMsg(msgEl, "Lỗi kết nối server", "#c00");
     }
   }
 
-  // posCreateOrUseCustomer: tạo khách mới hoặc lấy khách có sẵn (POS upsert)
-  // Gọi endpoint `/Staff/posUpsertCustomer` và xử lý JSON hoặc HTML trả về
-  async function posCreateOrUseCustomer() {
-    const phoneElUp = document.getElementById("posPhoneUpsert");
-    const phoneEl = phoneElUp || document.getElementById("posPhone");
-    const phone = phoneEl ? phoneEl.value.trim() : "";
+  async function posCreateOrUseCustomer(phone, fullname, email) {
     const msgEl = document.getElementById("posCustomerMessage");
+
+    // Nếu không truyền param khi gọi onclick -> tự lấy từ form upsert trong modal
+    if (!phone) {
+      const p =
+        document.getElementById("posPhoneUpsert") ||
+        document.getElementById("posPhone");
+      phone = p ? p.value.trim() : "";
+    }
+    if (!fullname) {
+      const n =
+        document.getElementById("posFullName") ||
+        document.getElementById("posFullnameCreate");
+      fullname = n ? n.value.trim() : "Khách lẻ";
+    }
+    if (!email) {
+      const e =
+        document.getElementById("posEmail") ||
+        document.getElementById("posEmailCreate");
+      email = e ? e.value.trim() : "";
+    }
+
     if (!phone) {
       formatMsg(msgEl, "Số điện thoại bắt buộc", "#c00");
       return;
     }
-    const fullnameEl = document.getElementById("posFullName");
-    const emailEl = document.getElementById("posEmail");
-    const fullname = (fullnameEl && fullnameEl.value.trim()) || "Khách lẻ";
-    const email = (emailEl && emailEl.value.trim()) || "";
-
-    const fd = new FormData();
-    fd.append("phone", phone);
-    fd.append("fullname", fullname);
-    fd.append("email", email);
-    fd.append("pointsToAdd", 0);
-
-    const createBtn = document.getElementById("posCreateBtn");
-    if (createBtn) {
-      createBtn.disabled = true;
-      createBtn.textContent = "Đang xử lý...";
-    }
 
     try {
-      const data = await doFetchAsJsonOrHtml(
-        "/COFFEE_PHP/Staff/posUpsertCustomer",
-        fd
-      );
-      if (data && data.success) {
-        updateUiWithCustomer(data.customer);
-        formatMsg(
-          msgEl,
-          data.created ? "Tạo khách thành công" : "Sử dụng khách sẵn có",
-          "#080"
-        );
+      const r = await fetch("/COFFEE_PHP/Staff/upsertCustomerPos", {
+        method: "POST",
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+          phone,
+          fullname,
+          email,
+          pointsToAdd: 0,
+        }),
+      });
+
+      const text = (await r.text()).trim();
+      console.log("upsertCustomerPos response:", text);
+      const parts = text.split("|");
+
+      if (parts[0] === "OK") {
+        const customer = {
+          id: parts[1],
+          full_name: parts[2],
+          phone: parts[3],
+          points: Number(parts[4] || 0),
+        };
+
+        updateUiWithCustomer(customer);
+        formatMsg(msgEl, "Tạo / dùng khách thành công", "#080");
         closePosCustomerModal();
-      } else if (data && data._html) {
-        const c = parseCustomerFromHtml(data._html);
-        if (c) {
-          updateUiWithCustomer(c);
-          formatMsg(msgEl, "Tạo/Dùng khách thành công", "#080");
-          closePosCustomerModal();
-        } else {
-          formatMsg(
-            msgEl,
-            "Server trả HTML. Vui lòng kiểm tra phiên hoặc đăng nhập lại.",
-            "#c00"
-          );
-        }
-      } else if (data && data._text) {
-        formatMsg(msgEl, "Không nhận được JSON - kiểm tra server", "#c00");
-      } else {
-        formatMsg(msgEl, data && data.message ? data.message : "Lỗi", "#c00");
+        return;
       }
+
+      if (parts[0] === "ERROR") {
+        formatMsg(msgEl, parts[1] || "Lỗi", "#c00");
+        return;
+      }
+
+      formatMsg(msgEl, "Phản hồi không hợp lệ từ server", "#c00");
     } catch (err) {
       console.error("posCreateOrUseCustomer error:", err);
-      formatMsg(msgEl, err.message || "Lỗi kết nối", "#c00");
-    } finally {
-      if (createBtn) {
-        createBtn.disabled = false;
-        createBtn.textContent = "Tạo / Dùng";
-      }
+      formatMsg(msgEl, "Lỗi kết nối server", "#c00");
     }
   }
 
-  // Mở modal chọn/tạo khách và reset message
+  // Modal creation / open logic (mimic pos-voucher style)
   function openPosCustomerModal() {
-    const m = document.getElementById("posCustomerModal");
-    if (m) m.style.display = "block";
+    let modal = document.getElementById("posCustomerModal");
+    if (!modal) {
+      modal = document.createElement("div");
+      modal.id = "posCustomerModal";
+      modal.style.position = "fixed";
+      modal.style.left = 0;
+      modal.style.top = 0;
+      modal.style.width = "100%";
+      modal.style.height = "100%";
+      modal.style.display = "flex";
+      modal.style.alignItems = "center";
+      modal.style.justifyContent = "center";
+      modal.style.background = "rgba(0,0,0,0.4)";
+      modal.innerHTML = `
+        <div style="background:#fff;padding:20px;border-radius:12px;min-width:560px;max-width:760px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <strong style="font-size:18px;color:#333;">Tìm / Chọn Khách</strong>
+            <button id="closePosCustomerBtn" type="button" style="background:none;border:none;font-size:26px;cursor:pointer;color:#999;">×</button>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
+            <input id="posPhone" placeholder="SĐT khách" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:8px;" />
+             <button id="posFindBtnModal" onclick="posFindCustomer()" class="btn" style="padding:8px 12px;border-radius:8px;border:1px solid #ddd;background:#fff;">Tìm</button>
+            <button id="posApplyBtn" class="btn btn-success" style="padding:8px 12px;border-radius:8px;border:none;background:#4caf50;color:#fff;">Chọn</button>
+          </div>
+          <div id="posCustomerMessage" style="min-height:18px;margin-bottom:8px;color:#c00"></div>
+          <div id="posCustomerList" style="max-height:380px;overflow:auto;border-top:1px solid #f0f0f0;padding-top:8px;"></div>
+          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;">
+            <button id="posClearBtn" class="btn" style="padding:8px 12px;border-radius:8px;border:1px solid #ddd;background:#fff;">Bỏ chọn</button>
+            <button id="posCreateBtn" class="btn" style="padding:8px 12px;border-radius:8px;border:1px solid #ddd;background:#fff;">Tạo / Dùng</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+      document
+        .getElementById("closePosCustomerBtn")
+        .addEventListener("click", closePosCustomerModal);
+      // Removed the event listener for posFindBtn as it is now handled inline
+      document
+        .getElementById("posApplyBtn")
+        .addEventListener("click", applySelectedCustomer);
+      document
+        .getElementById("posClearBtn")
+        .addEventListener("click", clearSelectedCustomer);
+      document.getElementById("posCreateBtn").addEventListener("click", () => {
+        const phone = document.getElementById("posPhone").value.trim();
+        posCreateOrUseCustomer(phone);
+      });
+    } else {
+      modal.style.display = "flex";
+    }
     const msgEl = document.getElementById("posCustomerMessage");
     if (msgEl) {
       msgEl.textContent = "";
@@ -237,71 +296,26 @@
     }
   }
 
-  // Đóng modal chọn khách
   function closePosCustomerModal() {
     const m = document.getElementById("posCustomerModal");
     if (m) m.style.display = "none";
   }
 
   function init() {
-    // attach open modal
     const openBtn = document.getElementById("open-customer-modal");
     if (openBtn) openBtn.addEventListener("click", openPosCustomerModal);
-
-    // attach find/create buttons if exist
-    const findBtn = document.getElementById("posFindBtn");
-    if (findBtn) findBtn.addEventListener("click", posFindCustomer);
-    const createBtn = document.getElementById("posCreateBtn");
-    if (createBtn) createBtn.addEventListener("click", posCreateOrUseCustomer);
-
-    // close modal when clicking outside content (optional UX)
-    const modal = document.getElementById("posCustomerModal");
-    if (modal) {
-      modal.addEventListener("click", (e) => {
-        if (e.target === modal) closePosCustomerModal();
-      });
-    }
   }
 
   if (document.readyState === "loading")
     document.addEventListener("DOMContentLoaded", init);
   else init();
 
-  // expose for manual use
+  // API
   window.openPosCustomerModal = openPosCustomerModal;
   window.closePosCustomerModal = closePosCustomerModal;
-  window.posFindCustomer = posFindCustomer;
-  window.posCreateOrUseCustomer = posCreateOrUseCustomer;
+  window.posFindCustomer = (phone) => posFindCustomer(phone);
+  window.posCreateOrUseCustomer = (phone, fullname, email) =>
+    posCreateOrUseCustomer(phone, fullname, email);
+  window.applySelectedCustomer = applySelectedCustomer;
+  window.clearSelectedCustomer = clearSelectedCustomer;
 })();
-
-// POS customer helper
-document.addEventListener("DOMContentLoaded", function () {
-  const btn = document.getElementById("open-customer-modal");
-  if (btn) btn.addEventListener("click", openPosCustomerModal);
-});
-
-// Helper: try extract CUSTOMER_SEARCH_RESULT from returned HTML page
-function parseCustomerFromHtml(htmlText) {
-  try {
-    const re =
-      /const\s+CUSTOMER_SEARCH_RESULT\s*=\s*(null|\{[\s\S]*?\}|\[[\s\S]*?\])\s*;/m;
-    const m = htmlText.match(re);
-    if (m && m[1]) {
-      const jsonText = m[1];
-      if (jsonText === "null") return null;
-      return JSON.parse(jsonText);
-    }
-  } catch (e) {
-    console.warn("parseCustomerFromHtml failed", e);
-  }
-  return null;
-}
-
-function openPosCustomerModal() {
-  document.getElementById("posCustomerModal").style.display = "block";
-  const msgEl = document.getElementById("posCustomerMessage");
-  if (msgEl) {
-    msgEl.textContent = "";
-    msgEl.style.color = "";
-  }
-}

@@ -137,80 +137,56 @@ class StaffController extends Controller {
     }
 
     /**
-     * Tìm khách hàng theo số điện thoại (POST) - Không dùng JSON
+     * Tìm khách hàng theo số điện thoại (POST)
      * URL: http://localhost/COFFEE_PHP/Staff/searchCustomer
      */
-    function searchCustomer() {
-        // Kiểm tra phương thức POST
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /COFFEE_PHP/Staff/GetData');
-            exit;
-        }
-
+    public function searchCustomerPos() {
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
 
-        $phone = isset($_POST['phone']) ? trim($_POST['phone']) : null;
-        
+        header("Content-Type: text/plain; charset=utf-8");
+
+        $phone = $_REQUEST['phone'] ?? '';
         if (!$phone) {
-            echo "<script>
-                alert('Vui lòng nhập số điện thoại');
-                window.history.back();
-            </script>";
+            echo "ERROR|Vui lòng nhập số điện thoại";
             exit;
         }
 
-        try {
-            $customer = $this->customerService->getCustomerByPhone($phone);
-            
-            if ($customer) {
-                // Trả về trang với thông tin khách hàng
-                $_SESSION['pos_customer_search'] = $customer->toArray();
-                header('Location: /COFFEE_PHP/Staff/GetData');
-                exit;
-            } else {
-                echo "<script>
-                    alert('Không tìm thấy khách hàng với số điện thoại: $phone');
-                    window.history.back();
-                </script>";
-                exit;
-            }
-
-        } catch (Exception $e) {
-            echo "<script>
-                alert('Lỗi: " . addslashes($e->getMessage()) . "');
-                window.history.back();
-            </script>";
+        $c = $this->customerService->getCustomerByPhone($phone);
+        if (!$c) {
+            echo "ERROR|Không tìm thấy khách";
             exit;
         }
+
+        // OK|id|name|phone|points
+        echo "OK|{$c->id}|{$c->full_name}|{$c->phone}|{$c->points}";
+        exit;
     }
 
+
     /**
-     * Tạo hoặc cập nhật khách hàng (POST) - Không dùng JSON
+     * Tạo hoặc cập nhật khách hàng (POST) 
      * URL: http://localhost/COFFEE_PHP/Staff/upsertCustomer
      */
-    function upsertCustomer() {
-        // Kiểm tra phương thức POST
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /COFFEE_PHP/Staff/GetData');
-            exit;
-        }
-
+    public function upsertCustomerPos() {
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
         }
 
+        header("Content-Type: text/plain; charset=utf-8");
+
+        $phone = $_REQUEST['phone'] ?? '';
+        $fullname = $_REQUEST['fullname'] ?? 'Khách lẻ';
+        $email = $_REQUEST['email'] ?? '';
+        $pointsToAdd = (int)($_REQUEST['pointsToAdd'] ?? 0);
+
+        if (!$phone) {
+            echo "ERROR|Vui lòng nhập số điện thoại";
+            exit;
+        }
+
         try {
-            $phone = isset($_POST['phone']) ? trim($_POST['phone']) : null;
-            $fullname = isset($_POST['fullname']) ? trim($_POST['fullname']) : 'Khách lẻ';
-            $email = isset($_POST['email']) ? trim($_POST['email']) : '';
-            $pointsToAdd = isset($_POST['pointsToAdd']) ? (int)$_POST['pointsToAdd'] : 0;
-
-            if (!$phone) {
-                throw new Exception("Vui lòng nhập số điện thoại");
-            }
-
             $result = $this->customerService->posUpsertCustomer([
                 'phone' => $phone,
                 'fullname' => $fullname,
@@ -218,22 +194,23 @@ class StaffController extends Controller {
                 'pointsToAdd' => $pointsToAdd
             ]);
 
-            if ($result['success']) {
-                $_SESSION['pos_customer_search'] = $result['customer']->toArray();
-                header('Location: /COFFEE_PHP/Staff/GetData');
+            if (!$result['success']) {
+                echo "ERROR|" . ($result['message'] ?? 'Lỗi khi tạo/cập nhật khách');
                 exit;
-            } else {
-                throw new Exception($result['message'] ?? 'Lỗi khi tạo/cập nhật khách hàng');
             }
 
+            $c = $result['customer'];
+
+            // OK|id|name|phone|points
+            echo "OK|{$c->id}|{$c->full_name}|{$c->phone}|{$c->points}";
+            exit;
+
         } catch (Exception $e) {
-            echo "<script>
-                alert('Lỗi: " . addslashes($e->getMessage()) . "');
-                window.history.back();
-            </script>";
+            echo "ERROR|" . $e->getMessage();
             exit;
         }
     }
+
 
     /**
      * Orders Management Page

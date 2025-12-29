@@ -17,6 +17,21 @@
     .voucher-card.disabled { opacity:0.55; }
 </style>
 
+<!-- Truyền dữ liệu menu từ PHP sang JavaScript -->
+<script>
+    // Dữ liệu menu được load từ server (MVC pattern)
+    const SERVER_MENU_DATA = <?php echo json_encode($data['menuItems'] ?? []); ?>;
+    const STAFF_ID = <?php echo json_encode($data['staffId'] ?? null); ?>;
+    
+    // Customer search result (nếu có)
+    <?php if (isset($_SESSION['pos_customer_search'])): ?>
+        const CUSTOMER_SEARCH_RESULT = <?php echo json_encode($_SESSION['pos_customer_search']); ?>;
+        <?php unset($_SESSION['pos_customer_search']); ?>
+    <?php else: ?>
+        const CUSTOMER_SEARCH_RESULT = null;
+    <?php endif; ?>
+</script>
+
 <div class="pos-wrapper">
     <!-- LEFT SIDE: MENU -->
     <div class="menu-section">
@@ -59,49 +74,39 @@
     </div>
 
     <!-- RIGHT SIDE: ORDER -->
-    <div class="order-section">
-        <div class="order-header">
-            <div class="order-header-left">
-                <button class="back-btn"><i class="fas fa-chevron-right"></i></button>
-                <div class="receipt-info">
-                    <h3>Hóa Đơn</h3>
-                    <span>#27362</span>
-                </div>
-            </div>
-            <button class="menu-dots"><i class="fas fa-bars"></i></button>
-        </div>
-
+    <div class="order-section" style="overflow-y: auto; max-height: calc(100vh - 140px);">
+        
         <div class="order-toggle">
-            <button class="toggle-btn active" id="btn-dine-in" onclick="setOrderType('dine-in')">Tại Bàn</button>
-            <button class="toggle-btn" id="btn-take-away" onclick="setOrderType('take-away')">Mang Về</button>
+            <button class="toggle-btn active" id="btn-dine-in" onclick="setOrderType('AT_COUNTER')">Tại Bàn</button>
+            <button class="toggle-btn" id="btn-take-away" onclick="setOrderType('TAKEAWAY')">Mang Về</button>
         </div>
 
-        <div class="customer-details">
-            <div class="input-box">
-                <input type="text" id="pos-customer-name" value="Khách Lẻ" placeholder="Tên Khách">
+        <!-- Hàng 1: Tên khách và Bàn số -->
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <div style="flex: 1;">
+                <input type="text" id="pos-customer-name" value="Khách Lẻ" placeholder="Tên Khách" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem;">
             </div>
-            <div class="input-box">
-                <select>
-                    <option value="" disabled selected>Bàn Số</option>
-                    <option>Bàn 1</option>
-                    <option>Bàn 2</option>
-                    <option>Bàn 3</option>
-                </select>
+            <div id="table-box" style="flex: 1;">
+                <input type="text" id="table-number" placeholder="Bàn số" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem;">
             </div>
-            <div class="input-box" id="order-id-group" style="display: none;">
-                <input type="text" id="order-id" readonly placeholder="Mã Đơn">
-            </div>
-            <div class="input-box">
-                <button type="button" id="open-customer-modal" class="btn" style="padding:6px 10px;">Chọn / Tìm Khách</button>
-                <div id="pos-selected-customer" style="margin-top:8px;color:#444;font-size:0.9rem;">Khách lẻ</div>
-            </div>
-            <div class="input-box">
-                <button type="button" id="open-voucher-modal" class="btn" style="padding:6px 10px;">Áp Voucher / Điểm</button>
-                <div id="pos-selected-voucher" style="margin-top:8px;color:#444;font-size:0.9rem;">Không có voucher</div>
+            <div id="order-id-box" style="flex: 1; display: none;">
+                <input type="text" id="order-id" readonly placeholder="Mã Đơn" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; background: #f5f5f5;">
             </div>
         </div>
 
-        <div class="order-list" id="order-list">
+        <!-- Hàng 2: Buttons Chọn khách và Voucher -->
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <div style="flex: 1;">
+                <button type="button" id="open-customer-modal" class="btn" style="width: 100%; padding: 8px; font-size: 0.85rem; border: 1px solid #064528; background: white; color: #064528; border-radius: 8px; cursor: pointer;">Chọn / Tìm Khách</button>
+                <div id="pos-selected-customer" style="margin-top: 5px; color: #444; font-size: 0.85rem; text-align: center;">Khách lẻ</div>
+            </div>
+            <div style="flex: 1;">
+                <button type="button" id="open-voucher-modal" class="btn" style="width: 100%; padding: 8px; font-size: 0.85rem; border: 1px solid #064528; background: white; color: #064528; border-radius: 8px; cursor: pointer;">Áp Voucher / Điểm</button>
+                <div id="pos-selected-voucher" style="margin-top: 5px; color: #444; font-size: 0.85rem; text-align: center;">Không có voucher</div>
+            </div>
+        </div>
+
+        <div class="order-list" id="order-list" style="max-height: 300px; overflow-y: auto;">
             <!-- Order Items injected by JS -->
         </div>
 
@@ -115,6 +120,17 @@
                 <span id="total-price">0 ₫</span>
             </div>
         </div>
+
+        <!-- Form POST để submit đơn hàng (MVC không dùng JSON API) -->
+        <form id="order-form" method="POST" action="/COFFEE_PHP/Staff/createOrder" style="display: none;">
+            <input type="hidden" name="order_type" id="form-order-type">
+            <input type="hidden" name="payment_method" id="form-payment-method">
+            <input type="hidden" name="total_amount" id="form-total-amount">
+            <input type="hidden" name="customer_id" id="form-customer-id">
+            <input type="hidden" name="cart_items" id="form-cart-items">
+            <input type="hidden" name="note" id="form-note">
+            <input type="hidden" name="voucher_id" id="form-voucher-id">
+        </form>
 
         <button class="place-order-btn" onclick="openPaymentModal()">
             <div class="btn-icon">
@@ -134,11 +150,11 @@
         <p style="margin-bottom: 30px;">Tổng Tiền: <span id="modal-total" style="font-weight: bold; color: var(--primary-green);">0 ₫</span></p>
         
         <div style="display: flex; gap: 20px; justify-content: center; margin-bottom: 30px;">
-            <div class="payment-option" id="pay-cash" onclick="selectPayment('cash')" style="border: 2px solid #eee; padding: 20px; border-radius: 15px; cursor: pointer; flex: 1;">
+            <div class="payment-option" id="pay-cash" onclick="selectPayment('CASH')" style="border: 2px solid #eee; padding: 20px; border-radius: 15px; cursor: pointer; flex: 1;">
                 <i class="fas fa-money-bill-wave fa-2x" style="margin-bottom: 10px;"></i>
                 <p>Tiền Mặt</p>
             </div>
-            <div class="payment-option" id="pay-card" onclick="selectPayment('card')" style="border: 2px solid #eee; padding: 20px; border-radius: 15px; cursor: pointer; flex: 1;">
+            <div class="payment-option" id="pay-card" onclick="selectPayment('BANKING')" style="border: 2px solid #eee; padding: 20px; border-radius: 15px; cursor: pointer; flex: 1;">
                 <i class="fas fa-qrcode fa-2x" style="margin-bottom: 10px;"></i>
                 <p>Thẻ / QR</p>
             </div>
@@ -172,18 +188,29 @@
             <button style="background:none;border:none;font-size:1.4rem;cursor:pointer;" onclick="closePosCustomerModal()">&times;</button>
         </div>
         <div style="padding:16px;">
-            <label>Số điện thoại</label>
-            <input type="text" id="posPhone" placeholder="Nhập số điện thoại" style="width:100%;padding:8px;margin-bottom:8px;">
-            <label>Tên (tùy chọn)</label>
-            <input type="text" id="posFullName" placeholder="Khách lẻ" style="width:100%;padding:8px;margin-bottom:8px;">
-            <label>Email (tùy chọn)</label>
-            <input type="email" id="posEmail" placeholder="example@email.com" style="width:100%;padding:8px;margin-bottom:12px;">
-            <div style="display:flex; gap:8px;">
-                <button id="posFindBtn" class="btn btn-primary" onclick="posFindCustomer()">Tìm</button>
-                <button id="posCreateBtn" class="btn btn-success" onclick="posCreateOrUseCustomer()">Tạo / Dùng</button>
-                <button class="btn" onclick="closePosCustomerModal()">Đóng</button>
-            </div>
-            <div id="posCustomerMessage" style="margin-top:12px;color:#c00;"></div>
+            <!-- Form tìm kiếm khách hàng -->
+            <form id="search-customer-form" method="POST" action="/COFFEE_PHP/Staff/searchCustomer">
+                <label>Số điện thoại</label>
+                <input type="text" name="phone" id="posPhone" placeholder="Nhập số điện thoại" style="width:100%;padding:8px;margin-bottom:8px;" required>
+                <button type="submit" class="btn btn-primary">Tìm Khách</button>
+            </form>
+            
+            <hr style="margin: 16px 0;">
+            
+            <!-- Form tạo/cập nhật khách hàng -->
+            <form id="upsert-customer-form" method="POST" action="/COFFEE_PHP/Staff/upsertCustomer">
+                <label>Số điện thoại</label>
+                <input type="text" name="phone" id="posPhoneUpsert" placeholder="Nhập số điện thoại" style="width:100%;padding:8px;margin-bottom:8px;" required>
+                <label>Tên (tùy chọn)</label>
+                <input type="text" name="fullname" id="posFullName" placeholder="Khách lẻ" style="width:100%;padding:8px;margin-bottom:8px;">
+                <label>Email (tùy chọn)</label>
+                <input type="email" name="email" id="posEmail" placeholder="example@email.com" style="width:100%;padding:8px;margin-bottom:12px;">
+                <input type="hidden" name="pointsToAdd" value="0">
+                <div style="display:flex; gap:8px;">
+                    <button type="submit" class="btn btn-success">Tạo / Dùng</button>
+                    <button type="button" class="btn" onclick="closePosCustomerModal()">Đóng</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

@@ -1,7 +1,9 @@
-// ===================================
-// FILE: pos-logic.js
-// DESCRIPTION: Logic for POS Interface (MVC - Không dùng API JSON)
-// ===================================
+/**
+ * pos-logic.js
+ * Mô tả: Logic chính của giao diện POS
+ * - Quản lý menu, giỏ hàng, hiển thị tổng tiền, modal chọn size và xử lý thanh toán
+ * - Lưu ý: server là nguồn dữ liệu chính cho giá (backend sẽ xác thực price khi tạo đơn)
+ */
 
 // --- DATA ---
 let menuItems = []; // Loaded từ SERVER_MENU_DATA
@@ -13,13 +15,14 @@ let selectedPaymentMethod = null;
 let currentProductForSize = null; // Store product being added
 
 // --- INITIALIZATION ---
+// Khi DOM sẵn sàng, khởi tạo ứng dụng POS
 document.addEventListener("DOMContentLoaded", () => {
   // Load menu từ dữ liệu PHP đã truyền vào
-  if (typeof SERVER_MENU_DATA !== 'undefined') {
+  if (typeof SERVER_MENU_DATA !== "undefined") {
     menuItems = SERVER_MENU_DATA;
     renderMenu("coffee"); // Render default category
   } else {
-    console.error('SERVER_MENU_DATA không tồn tại');
+    console.error("SERVER_MENU_DATA không tồn tại");
   }
 
   updateDate();
@@ -29,6 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // --- FUNCTIONS ---
 
+// updateDate: cập nhật ngày hiển thị ở header POS
 function updateDate() {
   const dateElement = document.getElementById("current-date");
   if (dateElement) {
@@ -38,6 +42,7 @@ function updateDate() {
   }
 }
 
+// setupEventListeners: gán các event cho category, search, ...
 function setupEventListeners() {
   // Category filtering
   const categoryCards = document.querySelectorAll(".category-card");
@@ -66,6 +71,7 @@ function setupEventListeners() {
   }
 }
 
+// renderMenu: lọc menu theo category và render lưới
 function renderMenu(category) {
   let itemsToRender = menuItems;
   if (category !== "all") {
@@ -74,12 +80,19 @@ function renderMenu(category) {
   renderMenuGrid(itemsToRender);
 }
 
+// renderMenuGrid: tạo DOM cho mỗi món và gắn nút thêm
 function renderMenuGrid(items) {
   const grid = document.getElementById("menu-grid");
   if (!grid) return;
 
   grid.innerHTML = "";
 
+  // ✅ Đảm bảo voucher_id được set từ state (nguồn sự thật)
+  const voucherInput = document.getElementById("form-voucher-id");
+  if (voucherInput) {
+    const vid = window.currentOrder?.voucher?.voucher_id || "";
+    voucherInput.value = vid ? String(vid) : "";
+  }
   items.forEach((item) => {
     const itemEl = document.createElement("div");
     itemEl.className = "menu-item";
@@ -97,6 +110,7 @@ function renderMenuGrid(items) {
   });
 }
 
+// formatCurrency: định dạng số sang VND
 function formatCurrency(amount) {
   return new Intl.NumberFormat("vi-VN", {
     style: "currency",
@@ -104,6 +118,8 @@ function formatCurrency(amount) {
   }).format(amount);
 }
 
+// openSizeModal: hiện modal chọn size cho món
+// Khi chọn size, truyền `product_size_id` về addToCart để backend có thể xác thực
 function openSizeModal(itemId) {
   // Use == to allow string/number comparison
   const item = menuItems.find((i) => i.id == itemId);
@@ -145,29 +161,35 @@ function openSizeModal(itemId) {
         )}</b>`;
 
         btn.onclick = () => {
-          addToCart(item, sizeObj.size, sizeObj.price);
+          // pass product_size_id (sizeObj.id) so backend can validate price
+          addToCart(item, sizeObj.id, sizeObj.size, sizeObj.price);
           closeSizeModal();
         };
         optionsContainer.appendChild(btn);
       });
     } else {
       // Fallback if no sizes array
-      addToCart(item, "M", item.price);
+      // Try use product default_size_id or fallback to item.id
+      const defaultSizeId = item.default_size_id || item.size_id || item.id;
+      addToCart(item, defaultSizeId, "M", item.price);
       return;
     }
     modal.style.display = "flex";
   }
 }
 
+// closeSizeModal: đóng modal chọn size
 function closeSizeModal() {
   const modal = document.getElementById("size-modal");
   if (modal) modal.style.display = "none";
   currentProductForSize = null;
 }
 
-function addToCart(item, size, price) {
-  // Create a unique ID for cart item based on product ID and size
-  const cartItemId = `${item.id}-${size}`;
+// addToCart: thêm món vào cart
+// - lưu `product_size_id` để backend dùng khi tạo order
+function addToCart(item, productSizeId, size, price) {
+  // Use product_size_id (numeric id) for backend validation
+  const cartItemId = `${item.id}-${productSizeId}`;
   const existingItem = cart.find((i) => i.cartId === cartItemId);
 
   if (existingItem) {
@@ -176,9 +198,10 @@ function addToCart(item, size, price) {
     cart.push({
       cartId: cartItemId,
       id: item.id,
+      product_size_id: productSizeId,
       name: item.name,
       image: item.image,
-      price: parseInt(price), // Ensure price is number
+      price: parseInt(price), // client display price (DB is authoritative)
       size: size,
       qty: 1,
       notes: "",
@@ -207,6 +230,7 @@ function updateQty(cartItemId, change) {
   }
 }
 
+// updateCartUI: render danh sách món, tính subtotal, áp voucher (ưu tiên giá server preview)
 function updateCartUI() {
   const list = document.getElementById("order-list");
   if (!list) return;
@@ -246,8 +270,15 @@ function updateCartUI() {
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
 
   // Voucher discount calculation (if any)
+  // Voucher discount calculation (prefer server preview if present)
   let voucherDiscount = 0;
-  if (window.currentOrder && window.currentOrder.voucher) {
+  let totalAfter = null;
+  if (window.currentOrder && window.currentOrder.voucherPreview) {
+    voucherDiscount = Number(
+      window.currentOrder.voucherPreview.discount_amount || 0
+    );
+    totalAfter = Number(window.currentOrder.voucherPreview.total_after || null);
+  } else if (window.currentOrder && window.currentOrder.voucher) {
     const v = window.currentOrder.voucher;
     if (v) {
       if (v.discount_type === "FIXED") {
@@ -267,7 +298,10 @@ function updateCartUI() {
   }
 
   // Update totals (NO TAX)
-  const total = Math.max(0, subtotal - voucherDiscount);
+  const total =
+    totalAfter !== null
+      ? Math.max(0, totalAfter)
+      : Math.max(0, subtotal - voucherDiscount);
 
   const subtotalEl = document.getElementById("subtotal-price");
   if (subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
@@ -295,14 +329,16 @@ function updateCartUI() {
 
     const voucherLabel = document.getElementById("voucher-label");
     const voucherAmount = document.getElementById("voucher-amount");
-    if (
-      window.currentOrder &&
-      window.currentOrder.voucher &&
-      voucherDiscount > 0
-    ) {
+    if (window.currentOrder && window.currentOrder.voucher) {
       const v = window.currentOrder.voucher;
       voucherLabel.textContent = `Giảm (${v.name || "Voucher"})`;
-      voucherAmount.textContent = "-" + formatCurrency(voucherDiscount);
+      if (window.currentOrder.voucherPreview) {
+        voucherAmount.textContent = "-" + formatCurrency(voucherDiscount);
+      } else if (voucherDiscount > 0) {
+        voucherAmount.textContent = "-" + formatCurrency(voucherDiscount);
+      } else {
+        voucherAmount.textContent = formatCurrency(0);
+      }
     } else {
       voucherLabel.textContent = "";
       voucherAmount.textContent = formatCurrency(0);
@@ -329,10 +365,12 @@ function changeQty(id, change) {
 
 function setOrderType(type) {
   currentOrderType = type;
-  
+
   // Update active button
-  document.querySelectorAll(".toggle-btn").forEach((btn) => btn.classList.remove("active"));
-  
+  document
+    .querySelectorAll(".toggle-btn")
+    .forEach((btn) => btn.classList.remove("active"));
+
   if (type === "AT_COUNTER") {
     document.getElementById("btn-dine-in").classList.add("active");
   } else if (type === "TAKEAWAY") {
@@ -342,7 +380,7 @@ function setOrderType(type) {
   // Toggle giữa Bàn số và Mã đơn
   const tableBox = document.getElementById("table-box");
   const orderIdBox = document.getElementById("order-id-box");
-  
+
   if (tableBox && orderIdBox) {
     if (type === "AT_COUNTER") {
       tableBox.style.display = "block";
@@ -371,8 +409,23 @@ function openPaymentModal() {
   const modal = document.getElementById("payment-modal");
   if (modal) {
     modal.style.display = "flex";
-    // Update total in modal
-    const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+    // Update total in modal — ưu tiên dùng #form-total-amount (nguồn sự thật),
+    // nếu không có thì dùng #total-price, cuối cùng mới tính tạm từ cart
+    let total = 0;
+    const formTotalEl = document.getElementById("form-total-amount");
+    if (formTotalEl && formTotalEl.value) {
+      total = Number(formTotalEl.value) || 0;
+    } else {
+      const totalPriceEl = document.getElementById("total-price");
+      if (totalPriceEl && totalPriceEl.textContent) {
+        total =
+          Number(String(totalPriceEl.textContent).replace(/[^0-9\-]+/g, "")) ||
+          0;
+      } else {
+        total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+      }
+    }
+
     const modalTotalEl = document.getElementById("modal-total");
     if (modalTotalEl) modalTotalEl.textContent = formatCurrency(total);
   }
@@ -409,6 +462,8 @@ function updatePaymentSelection() {
   }
 }
 
+// processPayment: chuẩn bị form ẩn và submit sang backend (`Staff/createOrder`)
+// Lưu ý: frontend chỉ hiển thị tổng; backend sẽ tính toán lại từ `product_size_id` và items
 function processPayment() {
   if (!selectedPaymentMethod) {
     alert("Vui lòng chọn phương thức thanh toán.");
@@ -420,51 +475,82 @@ function processPayment() {
     return;
   }
 
-  // Tính tổng tiền
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
-  
-  // Tính giảm giá voucher (GIỮ NGUYÊN LOGIC)
-  let voucherDiscount = 0;
+  // Lấy tổng tiền thực tế — ưu tiên #form-total-amount (nguồn sự thật),
+  // nếu không có thì lấy từ #total-price, cuối cùng mới tính từ cart
+  let totalAmount = 0;
+  // đảm bảo voucherId tồn tại ở scope bên ngoài để không gây ReferenceError
   let voucherId = null;
-  if (window.currentOrder && window.currentOrder.voucher) {
-    const v = window.currentOrder.voucher;
-    voucherId = v.id;
-    if (v.discount_type === "FIXED") {
-      voucherDiscount = Number(v.discount_value) || 0;
+  const formTotalEl = document.getElementById("form-total-amount");
+  if (formTotalEl && formTotalEl.value) {
+    totalAmount = Number(formTotalEl.value) || 0;
+  } else {
+    const totalPriceEl = document.getElementById("total-price");
+    if (totalPriceEl && totalPriceEl.textContent) {
+      totalAmount =
+        Number(String(totalPriceEl.textContent).replace(/[^0-9\-]+/g, "")) || 0;
     } else {
-      voucherDiscount = subtotal * ((Number(v.discount_value) || 0) / 100.0);
+      // Fallback: tính từ cart và voucher giống logic cũ
+      const subtotal = cart.reduce(
+        (sum, item) => sum + item.price * item.qty,
+        0
+      );
+      // Tính giảm giá voucher nếu cần
+      let voucherDiscount = 0;
+      if (window.currentOrder && window.currentOrder.voucher) {
+        const v = window.currentOrder.voucher;
+        voucherId = v.id || v.voucher_id || null;
+        if (v.discount_type === "FIXED") {
+          voucherDiscount = Number(v.discount_value) || 0;
+        } else {
+          voucherDiscount =
+            subtotal * ((Number(v.discount_value) || 0) / 100.0);
+        }
+        if (v.max_discount_value) {
+          voucherDiscount = Math.min(
+            voucherDiscount,
+            Number(v.max_discount_value)
+          );
+        }
+        voucherDiscount = Math.min(voucherDiscount, subtotal);
+        voucherDiscount = Math.round(voucherDiscount);
+      }
+      totalAmount = Math.max(0, subtotal - voucherDiscount);
     }
-    if (v.max_discount_value) {
-      voucherDiscount = Math.min(voucherDiscount, Number(v.max_discount_value));
-    }
-    voucherDiscount = Math.min(voucherDiscount, subtotal);
-    voucherDiscount = Math.round(voucherDiscount);
   }
 
-  const totalAmount = Math.max(0, subtotal - voucherDiscount);
-
   // Chuẩn bị cart items để gửi (chuyển sang format OrderService cần)
-  const cartItemsFormatted = cart.map(item => ({
-    size_id: item.id + '-' + item.size, // product_size_id
+  const cartItemsFormatted = cart.map((item) => ({
+    size_id: item.product_size_id || item.id + "-" + item.size, // product_size_id expected by backend
     qty: item.qty,
     price: item.price,
-    notes: item.notes || ''
+    notes: item.notes || "",
   }));
 
   // Lấy customer ID từ window.selectedCustomer (được set bởi pos-customer.js)
-  const customerId = window.selectedCustomer ? window.selectedCustomer.id : '';
+  const customerId = window.selectedCustomer ? window.selectedCustomer.id : "";
 
   // Điền thông tin vào form ẩn
-  document.getElementById('form-order-type').value = currentOrderType;
-  document.getElementById('form-payment-method').value = selectedPaymentMethod;
-  document.getElementById('form-total-amount').value = totalAmount;
-  document.getElementById('form-customer-id').value = customerId;
-  document.getElementById('form-cart-items').value = JSON.stringify(cartItemsFormatted);
-  document.getElementById('form-note').value = '';
-  document.getElementById('form-voucher-id').value = voucherId || '';
+  document.getElementById("form-order-type").value = currentOrderType;
+  document.getElementById("form-payment-method").value = selectedPaymentMethod;
+  // Ghi lại total vào form (nếu chưa có hoặc để đảm bảo)
+  const formTotalSet = document.getElementById("form-total-amount");
+  if (formTotalSet) formTotalSet.value = String(Math.round(totalAmount));
+  document.getElementById("form-customer-id").value = customerId;
+  document.getElementById("form-cart-items").value =
+    JSON.stringify(cartItemsFormatted);
+  document.getElementById("form-note").value = "";
+  // ✅ đảm bảo voucher_id luôn được set từ state trước khi submit
+  const voucherInput = document.getElementById("form-voucher-id");
+  if (voucherInput) {
+    const vid =
+      window.currentOrder?.voucher?.voucher_id ||
+      window.currentOrder?.voucher?.id ||
+      "";
+    voucherInput.value = vid ? String(vid) : "";
+  }
 
   // Submit form
-  document.getElementById('order-form').submit();
+  document.getElementById("order-form").submit();
 }
 
 // Close modal if clicked outside

@@ -8,7 +8,7 @@ include_once './web/Entity/OrderItemEntity.php';
 include_once './web/Services/VoucherService.php';
 include_once './web/Repositories/VoucherRepository.php';
 include_once './web/Repositories/CustomerRepository.php';
-// Note: VoucherRedemption components removed — redemption handled directly via repositories
+// việc đổi voucher được xử lý trực tiếp qua repository
 
 use web\Entity\OrderEntity;
 use web\Entity\OrderItemEntity;
@@ -60,7 +60,7 @@ class OrderService {
             $order->shipping_fee = 0;
             $order->note = $data['note'] ?? '';
 
-            // Begin DB transaction and save order+items, then handle voucher redemption and point deduction
+            // Bắt đầu transaction DB, lưu order + items, sau đó xử lý đổi voucher và trừ điểm
             $con = $this->orderRepo->con;
             if (!mysqli_begin_transaction($con)) {
                 return ['success' => false, 'message' => 'Không thể bắt đầu transaction DB'];
@@ -72,7 +72,7 @@ class OrderService {
                 throw new Exception('Lỗi khi tạo đơn hàng');
             }
 
-            // Save order items
+            // Lưu các item của đơn hàng
             $this->orderItemRepo->con = $con;
             foreach ($cartItems as $cartItem) {
                 $item = new OrderItemEntity();
@@ -85,7 +85,7 @@ class OrderService {
                 $this->orderItemRepo->create($item);
             }
 
-            // Voucher processing (if provided)
+            // Xử lý voucher (nếu có)
             $discountAmount = 0.0;
             if (!empty($data['voucher']) && !empty($order->customer_id)) {
                 $voucherId = isset($data['voucher']['voucher_id']) ? (int)$data['voucher']['voucher_id'] : null;
@@ -97,7 +97,7 @@ class OrderService {
                         return ['success' => false, 'message' => 'Voucher không tồn tại'];
                     }
 
-                    // Calculate discount based on stored pre-discount total
+                    // Tính tiền giảm dựa trên tổng trước khi giảm đã lưu
                     $discountAmount = $vService->calculateDiscount($v, $order->total_amount);
                     $pointsUsed = (int)$v->point_cost;
 
@@ -117,14 +117,14 @@ class OrderService {
                         return ['success' => false, 'message' => 'Không đủ điểm để đổi voucher'];
                     }
 
-                    // increment used_count
+                    // Tăng `used_count` của voucher
                     $v->used_count = (int)$v->used_count + 1;
                     if (!$voucherRepo->update($v)) {
                         mysqli_rollback($con);
                         return ['success' => false, 'message' => 'Không thể cập nhật voucher.used_count'];
                     }
 
-                    // deduct customer points if any
+                    // Trừ điểm khách hàng (nếu có)
                     if ($pointsUsed > 0) {
                         $newPoints = max(0, (int)$cust->points - $pointsUsed);
                         if (!$customerRepo->updatePoints($cust->id, $newPoints)) {
@@ -135,7 +135,7 @@ class OrderService {
                 }
             }
 
-            // Clear cart
+            // Xóa giỏ hàng
             $this->cartRepo->clearCart($customerId);
 
             mysqli_commit($con);
@@ -172,8 +172,8 @@ class OrderService {
         $order->payment_status = 'PAID';
         $order->payment_method = $data['payment_method'] ?? 'CASH';
 
-        // Tính toán sub_total từ DATABASE - KHÔNG TIN FRONTEND
-        // ĐÂY LÀ BẢO MẬT QUAN TRỌNG: Luôn query giá từ DB
+        // Tính toán `sub_total` từ DATABASE - KHÔNG TIN GIÁ TỪ FRONTEND
+        // ĐÂY LÀ QUY TẮC BẢO MẬT: luôn truy vấn giá thật từ DB
         $sub_total = 0.0;
         $validatedItems = [];
         
@@ -184,10 +184,10 @@ class OrderService {
                 $qty = isset($it['qty']) ? (int)$it['qty'] : 0;
                 
                 if (!$sizeId || $qty <= 0) {
-                    continue; // Skip invalid items
+                    continue; // Bỏ qua item không hợp lệ
                 }
                 
-                // QUERY GIÁ THẬT TỪ DATABASE - KHÔNG DÙNG GIÁ TỪ FRONTEND
+                // Truy vấn giá thật từ DATABASE - KHÔNG DÙNG GIÁ TỪ FRONTEND
                 $productSize = $this->productSizeRepo->findById($sizeId);
                 
                 if (!$productSize) {
@@ -213,7 +213,7 @@ class OrderService {
         // Ghi đè items với validated items (có giá thật)
         $data['items'] = $validatedItems;
 
-        // Quy ước: orders.total_amount lưu `sub_total` (trước khi trừ voucher/discount)
+        // Quy ước: orders.total_amount lưu `sub_total` (trước khi trừ voucher/giảm giá)
         $order->total_amount = $sub_total;
         $order->note = $data['note'] ?? '';
         
@@ -222,7 +222,7 @@ class OrderService {
              // Xử lý logic mang về nếu cần
         }
 
-        // 2. Lưu Order trong transaction (bao gồm items và redeem)
+        // 2. Lưu Order trong transaction (bao gồm items và xử lý đổi voucher)
         $con = $this->orderRepo->con;
         if (!mysqli_begin_transaction($con)) {
             return ['success' => false, 'message' => 'Không thể bắt đầu transaction DB'];
@@ -235,7 +235,7 @@ class OrderService {
                 return ['success' => false, 'message' => 'Lỗi khi tạo đơn hàng'];
             }
 
-            // 3. Lưu Order Items (reuse cùng connection)
+            // 3. Lưu Order Items (dùng chung kết nối DB)
             $this->orderItemRepo->con = $con;
             foreach ($data['items'] as $itemData) {
                 $item = new OrderItemEntity();
@@ -248,7 +248,7 @@ class OrderService {
                 $this->orderItemRepo->create($item);
             }
 
-            // Nếu có thông tin voucher được gửi kèm, backend sẽ TÍNH và redeem trong cùng transaction
+            // Nếu có thông tin voucher gửi kèm, backend sẽ TÍNH và thực hiện đổi trong cùng transaction
             $discountAmount = 0.0;
             if (!empty($data['voucher']) && !empty($order->customer_id)) {
                 $custId = $order->customer_id;
@@ -261,18 +261,18 @@ class OrderService {
                         mysqli_rollback($con);
                         return ['success' => false, 'message' => 'Voucher không tồn tại'];
                     }
-
-                    // Server-side calculate discount and pointsUsed (FE does not send discount)
+                    
+                    // Tính toán tiền giảm và số điểm cần dùng ở phía server (FE không gửi giá trị giảm)
                     $discountAmount = $vService->calculateDiscount($v, $order->total_amount);
                     $pointsUsed = (int)$v->point_cost;
 
-                    // Apply redemption using repositories (user removed VoucherRedemptionService)
+                    // Thực hiện đổi voucher thông qua repository (đã loại bỏ VoucherRedemptionService)
                     $voucherRepo = new VoucherRepository();
                     $voucherRepo->con = $con;
                     $customerRepo = new CustomerRepository();
                     $customerRepo->con = $con;
 
-                    // reload customer under same connection
+                    // Tải lại thông tin khách hàng sử dụng cùng kết nối DB
                     $cust = $customerRepo->findById($custId);
                     if (!$cust) {
                         mysqli_rollback($con);
@@ -284,21 +284,20 @@ class OrderService {
                         return ['success' => false, 'message' => 'Không đủ điểm để đổi voucher'];
                     }
 
-                    // increment used_count
+                    // Tăng `used_count` của voucher
                     $v->used_count = (int)$v->used_count + 1;
                     if (!$voucherRepo->update($v)) {
                         mysqli_rollback($con);
                         return ['success' => false, 'message' => 'Không thể cập nhật voucher.used_count'];
                     }
 
-                    // deduct customer points
+                    // Trừ điểm của khách hàng
                     $newPoints = max(0, (int)$cust->points - $pointsUsed);
                     if (!$customerRepo->updatePoints($custId, $newPoints)) {
                         mysqli_rollback($con);
                         return ['success' => false, 'message' => 'Không thể cập nhật điểm khách hàng'];
                     }
 
-                    // VoucherRedemption logging removed per user request
                 }
             }
 

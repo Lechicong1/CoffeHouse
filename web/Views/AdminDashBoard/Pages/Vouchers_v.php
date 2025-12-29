@@ -196,11 +196,11 @@ $keyword = $data['keyword'] ?? '';
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group">
-                        <label>Giảm Tối Đa (VNĐ)</label>
-                        <input type="number" name="txtMaxDiscount" id="txtMaxDiscount" min="0">
-                        <small class="form-help">Chỉ áp dụng cho loại phần trăm</small>
-                    </div>
+                    <div class="form-group" id="maxDiscountGroup" style="display: none;">
+                            <label>Giảm Tối Đa (VNĐ)</label>
+                            <input type="number" name="txtMaxDiscount" id="txtMaxDiscount" min="0">
+                            <small class="form-help">Chỉ áp dụng cho loại phần trăm</small>
+                        </div>
 
                     <div class="form-group">
                         <label>Đơn Hàng Tối Thiểu (VNĐ)</label>
@@ -261,6 +261,7 @@ $keyword = $data['keyword'] ?? '';
             document.getElementById('voucherForm').reset();
             document.getElementById('txtId').value = '';
             document.getElementById('txtUsedCount').value = '0';
+            updateDiscountValueLabel();
             document.getElementById('voucherModal').style.display = 'block';
         }
 
@@ -303,11 +304,14 @@ $keyword = $data['keyword'] ?? '';
         function updateDiscountValueLabel() {
             const discountType = document.getElementById('ddlDiscountType').value;
             const label = document.getElementById('lblDiscountValue');
+            const maxGroup = document.getElementById('maxDiscountGroup');
             
             if (discountType === 'FIXED') {
                 label.innerHTML = 'Giá Trị Giảm (VNĐ) <span style="color: red;">*</span>';
+                if (maxGroup) maxGroup.style.display = 'none';
             } else {
                 label.innerHTML = 'Giá Trị Giảm (%) <span style="color: red;">*</span>';
+                if (maxGroup) maxGroup.style.display = 'block';
             }
         }
 

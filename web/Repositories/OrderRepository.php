@@ -75,7 +75,7 @@ class OrderRepository extends ConnectDatabase {
      * @return array
      */
     public function findAllWithFilters($filters = []) {
-        $sql = "SELECT o.*, c.fullname as customer_name, c.phone as customer_phone 
+        $sql = "SELECT o.*, c.full_name as customer_name, c.phone as customer_phone 
                 FROM orders o 
                 LEFT JOIN customers c ON o.customer_id = c.id 
                 WHERE 1=1";

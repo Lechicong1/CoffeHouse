@@ -192,8 +192,9 @@
             <form id="search-customer-form" method="POST" action="/COFFEE_PHP/Staff/searchCustomer">
                 <label>Số điện thoại</label>
                 <input type="text" name="phone" id="posPhone" placeholder="Nhập số điện thoại" style="width:100%;padding:8px;margin-bottom:8px;" required>
-                <button type="submit" class="btn btn-primary">Tìm Khách</button>
+                <button type="button" id="posFindBtn" class="btn btn-primary" onclick="posFindCustomer()">Tìm Khách</button>
             </form>
+            <div id="posCustomerMessage" style="margin-top:8px;color:#444;font-size:0.95rem;"></div>
             
             <hr style="margin: 16px 0;">
             
@@ -207,7 +208,7 @@
                 <input type="email" name="email" id="posEmail" placeholder="example@email.com" style="width:100%;padding:8px;margin-bottom:12px;">
                 <input type="hidden" name="pointsToAdd" value="0">
                 <div style="display:flex; gap:8px;">
-                    <button type="submit" class="btn btn-success">Tạo / Dùng</button>
+                    <button type="button" id="posCreateBtn" class="btn btn-success" onclick="posCreateOrUseCustomer()">Tạo / Dùng</button>
                     <button type="button" class="btn" onclick="closePosCustomerModal()">Đóng</button>
                 </div>
             </form>

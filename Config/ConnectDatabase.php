@@ -4,9 +4,9 @@
  * Sử dụng MySQLi theo mô hình MVC truyền thống
  */
 class ConnectDatabase {
-    private $host = '35.192.42.207';
+    private $host = '127.0.0.1';
     private $username = 'root';
-    private $password = 'admin123';
+    private $password = '742005';
     private $database = 'CoffeePHP';
     public $con;
 

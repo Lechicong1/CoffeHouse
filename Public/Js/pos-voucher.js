@@ -1,13 +1,19 @@
-// POS voucher helper (follows project FormData/post pattern)
+/*
+ * pos-voucher.js
+ * Mô tả: xử lý modal voucher cho POS
+ * - Mở modal, lấy danh sách voucher từ server (server trả HTML)
+ * - Chọn voucher, preview trên server, sau đó áp vào `window.currentOrder`
+ * Tất cả chú thích đã được chuyển sang tiếng Việt.
+ */
 document.addEventListener("DOMContentLoaded", function () {
   const btn = document.getElementById("open-voucher-modal");
   if (btn) btn.addEventListener("click", openVoucherModal);
 });
 
 // Parse a formatted VND string like "53.000 ₫" -> 53000
+// parseVND: chuyển chuỗi tiền dạng "53.000 ₫" -> số nguyên 53000
 function parseVND(text) {
   if (!text) return 0;
-  // remove non-digits
   const n = String(text).replace(/[^0-9\-]+/g, "");
   return Number(n) || 0;
 }
@@ -18,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btn) btn.addEventListener("click", openVoucherModal);
 });
 
+// openVoucherModal: mở modal và load danh sách voucher từ server
 function openVoucherModal() {
   if (!window.currentOrder || !window.currentOrder.customer_id) {
     alert("Vui lòng chọn khách hàng trước.");
@@ -26,6 +33,7 @@ function openVoucherModal() {
 
   let modal = document.getElementById("voucherModal");
   if (!modal) {
+    // Tạo modal tạm nếu server không inject
     modal = document.createElement("div");
     modal.id = "voucherModal";
     modal.style.position = "fixed";
@@ -80,28 +88,25 @@ function openVoucherModal() {
   }
   fd.append("bill_total", subtotal);
 
+  // Gọi endpoint lấy danh sách voucher (server trả HTML fragment)
   fetch("/COFFEE_PHP/Voucher/getEligibleVouchers", { method: "POST", body: fd })
     .then((r) => r.text())
     .then((html) => {
       console.log("Voucher HTML response:", html); // DEBUG
       const list = document.getElementById("voucherList");
       const msg = document.getElementById("voucherMsg");
-      console.log("voucherList element:", list); // DEBUG
       if (!list) return;
 
-      // Backend trả về HTML, không phải JSON
-      // Chèn trực tiếp HTML vào list
+      // Backend trả về HTML fragment - chèn vào
       list.innerHTML =
         html || '<div style="color:#333">Không có voucher phù hợp</div>';
 
-      // Clear message
       if (msg) msg.textContent = "";
-
-      // Wire up click events cho các voucher cards
+      // Gán sự kiện cho các card voucher vừa chèn
       wireVoucherCardClicks();
     })
     .catch((err) => {
-      console.error("Fetch error:", err); // DEBUG
+      console.error("Fetch error:", err);
       const msg = document.getElementById("voucherMsg");
       if (msg) msg.textContent = "Lỗi khi lấy voucher";
     });
@@ -184,6 +189,10 @@ function applySelectedVoucher() {
         ? (v.discount_value || 0) + "₫"
         : (v.discount_value || 0) + "%"
     } — ${v.point_cost || 0} điểm`;
+  // Ask server to preview voucher effect (server-calculated totals)
+  if (vid) {
+    previewVoucherServer(vid);
+  }
   if (typeof updateCartUI === "function") updateCartUI();
   closeVoucherModal();
 }

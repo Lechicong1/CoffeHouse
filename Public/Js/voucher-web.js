@@ -1,5 +1,10 @@
-// voucher-web.js
-// Handles voucher modal, loading voucher_list from server and previewing via VoucherController
+/*
+ * voucher-web.js
+ * Mô tả: Script xử lý modal voucher cho trang Checkout chính
+ * - Tải danh sách voucher từ server, preview bằng endpoint `/Voucher/previewVoucher`
+ * - Khi preview, server trả HTML chứa <div id="pv" data-ok="1" data-discount="..." data-totalAfter="...">
+ * - File này dùng hàm parse và cập nhật giao diện checkout
+ */
 (function () {
   function formatVND(n) {
     return new Intl.NumberFormat("vi-VN").format(n) + "đ";
@@ -18,6 +23,7 @@
     return fallback || 0;
   }
 
+  // openVoucherList: mở modal voucher (dùng cho trang checkout) và load voucher_list từ server
   function openVoucherList() {
     const fd = new FormData();
     if (typeof CUSTOMER_ID !== "undefined" && CUSTOMER_ID !== null)
@@ -67,6 +73,8 @@
       });
   }
 
+  // previewAndApplyVoucher: gọi server preview để lấy thông tin discount và tổng sau giảm
+  // - Server trả HTML fragment, ta parse `#pv` để lấy dữ liệu (data-* attributes)
   function previewAndApplyVoucher(voucherId, totalAmount) {
     const fd = new FormData();
     if (typeof CUSTOMER_ID !== "undefined" && CUSTOMER_ID !== null)
@@ -126,6 +134,7 @@
       });
   }
 
+  // init: gán sự kiện cho nút mở modal và nút đóng
   function init() {
     // modal container (if not injected by server side)
     if (!document.getElementById("voucherModalCheckout")) {

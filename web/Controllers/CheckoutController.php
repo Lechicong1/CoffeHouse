@@ -7,19 +7,16 @@
 require_once './web/Services/CartService.php';
 require_once './web/Services/CustomerService.php';
 require_once './web/Services/OrderService.php';
-require_once './web/Services/VoucherService.php';
 
 class CheckoutController extends Controller {
     private $cartService;
     private $customerService;
     private $orderService;
-    private $voucherService;
 
     public function __construct() {
         $this->cartService = new CartService();
         $this->customerService = new CustomerService();
         $this->orderService = new OrderService();
-        $this->voucherService = new VoucherService();
     }
 
     /**

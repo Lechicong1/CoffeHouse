@@ -4,10 +4,6 @@ use web\Entity\VoucherEntity;
 
 class VoucherRepository extends ConnectDatabase {
 
-    /**
-     * Lấy tất cả voucher
-     * @return array
-     */
     public function findAll() {
         $sql = "SELECT * FROM vouchers ORDER BY `id` DESC";
         $result = mysqli_query($this->con, $sql);
@@ -20,11 +16,6 @@ class VoucherRepository extends ConnectDatabase {
         return $vouchers;
     }
 
-    /**
-     * Lấy voucher theo ID
-     * @param int $id
-     * @return VoucherEntity|null
-     */
     public function findById($id) {
         $sql = "SELECT * FROM vouchers WHERE id = ?";
         $stmt = mysqli_prepare($this->con, $sql);
@@ -37,12 +28,6 @@ class VoucherRepository extends ConnectDatabase {
         return $data ? new VoucherEntity($data) : null;
     }
 
-    /**
-     * Lấy voucher theo tên
-     * @param string $name
-     * @param int|null $excludeId ID voucher cần loại trừ (khi update)
-     * @return VoucherEntity|null
-     */
     public function findByName($name, $excludeId = null) {
         if ($excludeId) {
             $sql = "SELECT * FROM vouchers WHERE name = ? AND id != ?";
@@ -61,11 +46,6 @@ class VoucherRepository extends ConnectDatabase {
         return $data ? new VoucherEntity($data) : null;
     }
 
-    /**
-     * Tìm kiếm voucher
-     * @param string $keyword
-     * @return array
-     */
     public function search($keyword) {
         $sql = "SELECT * FROM vouchers 
                 WHERE name LIKE ? 
@@ -87,11 +67,6 @@ class VoucherRepository extends ConnectDatabase {
         return $vouchers;
     }
 
-    /**
-     * Tạo voucher mới
-     * @param VoucherEntity $voucher
-     * @return bool
-     */
     public function create($voucher) {
         $sql = "INSERT INTO vouchers (name, point_cost, discount_type, discount_value, 
                 max_discount_value, min_bill_total, start_date, end_date, quantity, 
@@ -116,11 +91,6 @@ class VoucherRepository extends ConnectDatabase {
         return mysqli_stmt_execute($stmt);
     }
 
-    /**
-     * Cập nhật voucher
-     * @param VoucherEntity $voucher
-     * @return bool
-     */
     public function update($voucher) {
         $sql = "UPDATE vouchers 
                 SET name = ?, point_cost = ?, discount_type = ?, discount_value = ?,
@@ -147,11 +117,6 @@ class VoucherRepository extends ConnectDatabase {
         return mysqli_stmt_execute($stmt);
     }
 
-    /**
-     * Xóa voucher
-     * @param int $id
-     * @return bool
-     */
     public function delete($id) {
         $sql = "DELETE FROM vouchers WHERE id = ?";
         $stmt = mysqli_prepare($this->con, $sql);
@@ -159,12 +124,6 @@ class VoucherRepository extends ConnectDatabase {
         return mysqli_stmt_execute($stmt);
     }
 
-
-
-    /**
-     * Lấy voucher đang còn hiệu lực
-     * @return array
-     */
     public function findActiveVouchers() {
         $sql = "SELECT * FROM vouchers 
                 WHERE is_active = 1 
@@ -180,6 +139,21 @@ class VoucherRepository extends ConnectDatabase {
         }
 
         return $vouchers;
+    }
+
+    /**
+     * Tự động set is_active = 0 cho các voucher đã hết hạn
+     * @return int Số voucher đã deactivate
+     */
+    public function deactivateExpiredVouchers() {
+        $sql = "UPDATE vouchers 
+                SET is_active = 0 
+                WHERE is_active = 1 
+                AND end_date IS NOT NULL 
+                AND end_date < CURDATE()";
+        
+        mysqli_query($this->con, $sql);
+        return mysqli_affected_rows($this->con);
     }
 }
 ?>

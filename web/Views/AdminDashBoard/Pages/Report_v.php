@@ -187,6 +187,8 @@ $showInventoryDetails = isset($_GET['show_inventory']);
             <div style="display: flex; gap: 10px;">
                 <!-- Nút Xuất Excel Chi Tiết Nhân Viên -->
                 <form method="POST" action="ReportController/xuatexcelEmployee" style="display: inline-block;">
+                    <input type="hidden" name="from_date" value="<?= $fromDate ?>">
+                    <input type="hidden" name="to_date" value="<?= $toDate ?>">
                     <button type="submit" name="btnXuatexcelEmployee" class="btn-primary" style="background: #27ae60; padding: 8px 16px;">
                         📊 Xuất Excel
                     </button>
@@ -202,6 +204,7 @@ $showInventoryDetails = isset($_GET['show_inventory']);
                         <th>Tên nhân viên</th>
                         <th>Vai trò</th>
                         <th>Lương</th>
+                        <th>Ngày tạo</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -210,36 +213,31 @@ $showInventoryDetails = isset($_GET['show_inventory']);
                     if (empty($employees)):
                     ?>
                         <tr>
-                            <td colspan="4" style="text-align: center; padding: 20px; color: #95a5a6;">
-                                📭 Không có dữ liệu nhân viên
+                            <td colspan="5" style="text-align: center; padding: 20px; color: #95a5a6;">
+                                📭 Không có nhân viên được tạo trong khoảng thời gian này
                             </td>
                         </tr>
                     <?php else:
-                        $roleMap = [
-                            'ORDER' => 'Nhân viên Order',
-                            'BARTENDER' => 'Nhân viên Pha chế',
-                            'SHIPPER' => 'Nhân viên Giao hàng'
-                        ];
                         foreach ($employees as $emp):
-                            $roleDisplay = $roleMap[$emp->roleName] ?? $emp->roleName;
                     ?>
                         <tr>
-                            <td><strong>#<?= $emp->id ?></strong></td>
-                            <td><?= htmlspecialchars($emp->fullname) ?></td>
+                            <td><strong>#<?= $emp['id'] ?></strong></td>
+                            <td><?= htmlspecialchars($emp['fullname']) ?></td>
                             <td>
                                 <span style="background: #B6DA9F; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">
-                                    <?= $roleDisplay ?>
+                                    <?= htmlspecialchars($emp['roleName']) ?>
                                 </span>
                             </td>
                             <td style="font-weight: 700; color: #27ae60;">
-                                <?= number_format($emp->luong ?? 0, 0, ',', ',') ?> VNĐ
+                                <?= number_format($emp['luong'] ?? 0, 0, ',', ',') ?> VNĐ
                             </td>
+                            <td><?= date('d/m/Y', strtotime($emp['create_at'])) ?></td>
                         </tr>
                     <?php endforeach; endif; ?>
                 </tbody>
             </table>
             <div class="modal-total">
-                <strong>Tổng lương:</strong>
+                <strong>Tổng lương (trong kỳ):</strong>
                 <span><?= number_format($report['total_salary'] ?? 0, 0, ',', ',') ?> VNĐ</span>
             </div>
         </div>

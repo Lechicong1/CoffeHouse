@@ -19,6 +19,24 @@ class IngredientService extends Service {
     }
 
     /**
+     * Đồng bộ trạng thái hết hạn
+     * Chuyển tất cả nguyên liệu hết hạn sang is_active = 0
+     */
+    public function syncExpiryStatuses() {
+        $this->ingredientRepo->deactivateExpiredIngredients();
+    }
+
+    /**
+     * Lấy danh sách nguyên liệu đang hoạt động
+     * Đã lọc bỏ nguyên liệu hết hạn hoặc bị vô hiệu hóa
+     */
+    public function getActiveIngredients() {
+        // Trước khi lấy, chạy đồng bộ để disable các cái vừa hết hạn
+        $this->syncExpiryStatuses();
+        return $this->ingredientRepo->findActive();
+    }
+
+    /**
      * Lấy nguyên liệu theo ID
      */
     public function getIngredientById($id) {
@@ -52,6 +70,16 @@ class IngredientService extends Service {
         $ingredient->name = trim($data['name']);
         $ingredient->unit = trim($data['unit']);
         $ingredient->stock_quantity = 0; // Mặc định tồn kho = 0
+        $ingredient->expiry_date = !empty($data['expiry_date']) ? $data['expiry_date'] : null;
+        
+        // Logic đồng bộ: Nếu expiry_date đã qua (hết hạn) thì is_active = 0
+        if (!empty($ingredient->expiry_date)) {
+            $expiryDate = new DateTime($ingredient->expiry_date);
+            $today = new DateTime('today');
+            $ingredient->is_active = ($expiryDate >= $today) ? 1 : 0;
+        } else {
+            $ingredient->is_active = 1;
+        }
 
         // Lưu vào database
         $result = $this->ingredientRepo->create($ingredient);
@@ -79,7 +107,17 @@ class IngredientService extends Service {
         // Cập nhật thông tin (KHÔNG cập nhật stock_quantity)
         $ingredient->name = trim($data['name']);
         $ingredient->unit = trim($data['unit']);
+        $ingredient->expiry_date = !empty($data['expiry_date']) ? $data['expiry_date'] : null;
         // $ingredient->stock_quantity giữ nguyên giá trị cũ
+        
+        // Logic đồng bộ: Nếu expiry_date đã qua (hết hạn) thì is_active = 0
+        if (!empty($ingredient->expiry_date)) {
+            $expiryDate = new DateTime($ingredient->expiry_date);
+            $today = new DateTime('today');
+            $ingredient->is_active = ($expiryDate >= $today) ? 1 : 0;
+        } else {
+            $ingredient->is_active = 1;
+        }
 
         // Lưu vào database
         if ($this->ingredientRepo->update($ingredient)) {

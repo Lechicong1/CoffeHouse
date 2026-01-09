@@ -39,7 +39,7 @@ class ReportController extends Controller {
 
         // Nếu request yêu cầu xem chi tiết nhân viên
         if (isset($_GET['show_employees'])) {
-            $viewData['employees'] = $this->reportService->getEmployeeDetails();
+            $viewData['employees'] = $this->reportService->getEmployeeDetails($fromDate, $toDate);
         }
 
         // Nếu request yêu cầu xem chi tiết nhập nguyên liệu
@@ -57,16 +57,20 @@ class ReportController extends Controller {
         header('Content-Type: application/json');
 
         try {
-            $employees = $this->reportService->getEmployeeDetails();
+            $fromDate = $_GET['from_date'] ?? date('Y-m-01');
+            $toDate = $_GET['to_date'] ?? date('Y-m-d');
+
+            $employees = $this->reportService->getEmployeeDetails($fromDate, $toDate);
 
             // Format dữ liệu cho frontend
             $data = [];
             foreach ($employees as $employee) {
                 $data[] = [
-                    'id' => $employee->id,
-                    'name' => $employee->fullname,
-                    'roleName' => $employee->roleName,
-                    'salary' => $employee->luong
+                    'id' => $employee['id'],
+                    'name' => $employee['fullname'],
+                    'roleName' => $employee['roleName'],
+                    'salary' => $employee['luong'],
+                    'create_at' => $employee['create_at']
                 ];
             }
 
@@ -197,22 +201,20 @@ class ReportController extends Controller {
      */
     function xuatexcelEmployee() {
         if (isset($_POST['btnXuatexcelEmployee'])) {
-            // Lấy chi tiết nhân viên
-            $employees = $this->reportService->getEmployeeDetails();
+            $fromDate = $_POST['from_date'] ?? date('Y-m-01');
+            $toDate = $_POST['to_date'] ?? date('Y-m-d');
 
-            $roleMap = [
-                'ORDER' => 'Nhân viên Order',
-                'BARTENDER' => 'Nhân viên Pha chế',
-                'SHIPPER' => 'Nhân viên Giao hàng'
-            ];
+            // Lấy chi tiết nhân viên theo thời gian
+            $employees = $this->reportService->getEmployeeDetails($fromDate, $toDate);
 
             // Chuyển đổi sang array để xuất Excel
-            $data = array_map(function($emp) use ($roleMap) {
+            $data = array_map(function($emp) {
                 return [
-                    'id' => $emp->id,
-                    'fullname' => $emp->fullname,
-                    'roleName' => $roleMap[$emp->roleName] ?? $emp->roleName,
-                    'luong' => number_format($emp->luong, 0, ',', '.')
+                    'id' => $emp['id'],
+                    'fullname' => $emp['fullname'],
+                    'roleName' => $emp['roleName'],
+                    'luong' => number_format($emp['luong'], 0, ',', '.'),
+                    'created_at' => date('d/m/Y', strtotime($emp['created_at']))
                 ];
             }, $employees);
 
@@ -221,10 +223,12 @@ class ReportController extends Controller {
                 'id' => 'ID',
                 'fullname' => 'Tên Nhân Viên',
                 'roleName' => 'Vai Trò',
-                'luong' => 'Lương (VNĐ)'
+                'luong' => 'Lương (VNĐ)',
+                'created_at' => 'Ngày Tạo'
             ];
 
-            ExcelHelper::exportToExcel($data, $headers, 'ChiTietNhanVienVaLuong');
+            $fileName = 'ChiTietNhanVienVaLuong_' . date('d-m-Y', strtotime($fromDate)) . '_den_' . date('d-m-Y', strtotime($toDate));
+            ExcelHelper::exportToExcel($data, $headers, $fileName);
         }
     }
 

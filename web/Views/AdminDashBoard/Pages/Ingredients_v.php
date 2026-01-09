@@ -8,6 +8,7 @@
 $ingredients = $data['ingredients'] ?? [];
 $stats = $data['stats'] ?? ['total' => 0];
 $keyword = $data['keyword'] ?? '';
+// Helper functions removed. Display logic moved to Client (JS).
 ?>
 
 <!-- Import CSS riêng cho trang Ingredients -->
@@ -54,6 +55,8 @@ $keyword = $data['keyword'] ?? '';
                     <th>Tên nguyên liệu</th>
                     <th>Đơn vị</th>
                     <th>Số lượng tồn kho</th>
+                    <th>Hạn sử dụng</th>
+                    <th>Tồn kho</th>
                     <th>Trạng thái</th>
                     <th>Thao tác</th>
                 </tr>
@@ -61,7 +64,7 @@ $keyword = $data['keyword'] ?? '';
             <tbody>
                 <?php if (empty($ingredients)): ?>
                     <tr>
-                        <td colspan="6" style="padding: 40px; text-align: center; color: #999;">
+                        <td colspan="8" style="padding: 40px; text-align: center; color: #999;">
                             📭 Không có nguyên liệu nào!
                         </td>
                     </tr>
@@ -75,13 +78,16 @@ $keyword = $data['keyword'] ?? '';
                             <td><strong><?= htmlspecialchars($ingredient->name) ?></strong></td>
                             <td><?= htmlspecialchars($ingredient->unit) ?></td>
                             <td style="font-weight: 600;">
-                                <?= $ingredient->getFormattedQuantity() ?>
+                                <?= number_format($ingredient->stock_quantity, 0, ',', '.') . ' ' . htmlspecialchars($ingredient->unit) ?>
                             </td>
-                            <td>
-                                <span class="badge badge-<?= $ingredient->getStockStatusClass() ?>">
-                                    <?= $ingredient->getStockStatus() ?>
-                                </span>
-                            </td>
+                            <!-- Cột Hạn sử dụng - Xử lý hiển thị bằng JS -->
+                            <td class="col-expiry" data-date="<?= $ingredient->expiry_date ?>"></td>
+                            
+                            <!-- Cột Tồn kho - Xử lý hiển thị bằng JS -->
+                            <td class="col-stock" data-qty="<?= $ingredient->stock_quantity ?>"></td>
+                            
+                            <!-- Cột Trạng thái - Xử lý hiển thị bằng JS -->
+                            <td class="col-status" data-active="<?= $ingredient->is_active ?>"></td>
                             <td>
                                 <button class="btn-edit" onclick='openIngredientModal("edit", <?= htmlspecialchars(json_encode($ingredient->toArray())) ?>)' title="Sửa">
                                     ✏️ Sửa
@@ -124,6 +130,11 @@ $keyword = $data['keyword'] ?? '';
                 <div class="form-group">
                     <label><span class="label-icon">📏</span> Đơn vị</label>
                     <input type="text" id="unit" name="txtUnit" required placeholder="VD: kg, lít, gói">
+                </div>
+
+                <div class="form-group">
+                    <label><span class="label-icon">📅</span> Hạn sử dụng</label>
+                    <input type="date" id="expiryDate" name="txtExpiryDate">
                 </div>
             </div>
 

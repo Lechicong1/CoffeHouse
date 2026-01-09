@@ -40,6 +40,15 @@ $keyword = $data['keyword'] ?? '';
                     </button>
                 </form>
             </div>
+
+            <!-- Button Xuất Excel -->
+            <form method="POST" action="/COFFEE_PHP/CustomerController/xuatexcel" style="display: inline-block; margin: 0 10px;">
+                <input type="hidden" name="txtSearch" value="<?= htmlspecialchars($keyword) ?>">
+                <button type="submit" name="btnXuatexcel" class="btn btn-success">
+                    <i class="fas fa-file-excel"></i> Xuất Excel
+                </button>
+            </form>
+
             <?php if (isset($keyword) && !empty($keyword)): ?>
                 <a href="/COFFEE_PHP/CustomerController/GetData" class="btn btn-warning">
                     <i class="fas fa-redo"></i> Xem tất cả

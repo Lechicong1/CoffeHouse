@@ -45,6 +45,14 @@ $roles = $data['roles'] ?? [
                 </select>
             </form>
 
+            <!-- Button Xuất Excel -->
+            <form method="POST" action="EmployeeController/xuatexcel" style="margin: 0;">
+                <input type="hidden" name="txtSearch" value="<?= htmlspecialchars($keyword) ?>">
+                <button type="submit" name="btnXuatexcel" class="btn-primary" style="background: #27ae60;">
+                    📊 Xuất Excel
+                </button>
+            </form>
+
             <!-- Button Thêm mới -->
             <button class="btn-primary" onclick="openEmployeeModal('add')">
                 ➕ Thêm nhân viên mới

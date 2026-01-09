@@ -15,6 +15,14 @@ $keyword = $data['keyword'] ?? '';
             <p class="subtitle">Tổng số: <strong><?= count($imports) ?></strong> phiếu nhập</p>
         </div>
         <div class="header-actions">
+            <!-- Button Xuất Excel -->
+            <form method="POST" action="InventoryImportController/xuatexcel" style="display: inline-block; margin-right: 10px;">
+                <input type="hidden" name="txtSearch" value="<?= htmlspecialchars($keyword) ?>">
+                <button type="submit" name="btnXuatexcel" class="btn-primary" style="background: #27ae60;">
+                    📊 Xuất Excel
+                </button>
+            </form>
+
             <!-- Button Thêm mới -->
             <button class="btn-primary" onclick="openImportModal('add')">
                 ➕ Tạo phiếu nhập

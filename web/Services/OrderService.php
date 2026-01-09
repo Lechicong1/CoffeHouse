@@ -227,6 +227,13 @@ class OrderService {
             $final_total = $order->total_amount - (float)$discountAmount;
             if ($final_total < 0) $final_total = 0.0;
 
+            // Nếu có discount, update lại total_amount trong DB
+            if ($discountAmount > 0) {
+                $order->id = $orderId;
+                $order->total_amount = $final_total;
+                $this->orderRepo->update($order);
+            }
+
             // Cộng điểm cho khách hàng (POS: cộng ngay khi thanh toán)
             $pointsAwarded = $this->awardLoyaltyPoints($order->customer_id, $order->total_amount);
 

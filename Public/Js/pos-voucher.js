@@ -37,9 +37,9 @@ function openVoucherModal() {
     document.getElementById("closeVoucherBtn").addEventListener("click", closeVoucherModal);
     document.getElementById("clearVoucherBtn").addEventListener("click", clearSelectedVoucher);
     document.getElementById("applyVoucherBtn").addEventListener("click", applySelectedVoucher);
-  } else {
-    modal.style.display = "flex";
   }
+  // Luôn hiển thị modal
+  modal.style.display = "flex";
 
   const fd = new FormData();
   fd.append("customer_id", window.currentOrder.customer_id);

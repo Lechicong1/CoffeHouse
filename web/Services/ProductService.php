@@ -14,36 +14,12 @@ class ProductService {
         $this->productRepository = new ProductRepository();
         $this->categoryRepository = new CategoryRepository();
     }
-    // ĐỨC THÊM CODE Ở ĐÂY NÈ
     public function getMenuForPOS() {
         $products = $this->productRepository->findAll();
         $menu = [];
-        
-        // Helper to map category names to keys used in POS
-        $categoryMap = [
-            'Cà Phê' => 'coffee',
-            'Trà' => 'tea',
-            'Bánh' => 'snack',
-            'Bánh Ngọt' => 'snack',
-            'Coffee' => 'coffee',
-            'Tea' => 'tea',
-            'Snack' => 'snack'
-        ];
 
         foreach ($products as $product) {
             if (!$product->is_active) continue;
-
-            $category = $this->categoryRepository->findById($product->category_id);
-            $categoryKey = 'other';
-            if ($category) {
-                $catName = $category->name;
-                foreach ($categoryMap as $key => $val) {
-                    if (stripos($catName, $key) !== false) {
-                        $categoryKey = $val;
-                        break;
-                    }
-                }
-            }
 
             $sizes = $this->productRepository->getSizesByProductId($product->id);
             $sizeList = [];
@@ -73,7 +49,6 @@ class ProductService {
                 'image' => $product->image_url ? $product->image_url : 'Public/Assets/default-coffee.png',
                 'price' => (int)$price,
                 'sizes' => $sizeList,
-                'category' => $categoryKey,
                 'category_id' => $product->category_id
             ];
         }

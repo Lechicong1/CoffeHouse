@@ -21,6 +21,7 @@
 <script>
     // Dữ liệu menu được load từ server (MVC pattern)
     const SERVER_MENU_DATA = <?php echo json_encode($data['menuItems'] ?? []); ?>;
+    const SERVER_CATEGORIES = <?php echo json_encode($data['categories'] ?? []); ?>;
     const STAFF_ID = <?php echo json_encode($data['staffId'] ?? null); ?>;
     
     // Customer search result (nếu có)
@@ -47,24 +48,13 @@
             </div>
         </div>
 
-        <!-- Categories -->
-        <div class="categories">
-            <div class="category-card active" data-category="coffee">
-                <div class="category-status">Sẵn sàng</div>
-                <div class="category-content">
-                    <h3>Cà Phê</h3>
-                    <span>50 món</span>
-                </div>
-                <i class="fas fa-coffee fa-5x category-img" style="color: rgba(255,255,255,0.2);"></i>
+        <!-- Categories với navigation -->
+        <div class="categories-wrapper" style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px;">
+            <button id="cat-prev" class="cat-nav-btn" style="padding: 8px 12px; background: #f0f0f0; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; min-width: 40px;" disabled>◀</button>
+            <div class="categories" id="categories-container" style="display: flex; gap: 10px; overflow: hidden; flex: 1;">
+                <!-- Categories sẽ được inject bởi JavaScript -->
             </div>
-            <div class="category-card" data-category="tea">
-                <div class="category-status">Sẵn sàng</div>
-                <div class="category-content">
-                    <h3>Trà</h3>
-                    <span>20 món</span>
-                </div>
-                <i class="fas fa-leaf fa-5x category-img" style="color: #eee;"></i>
-            </div>
+            <button id="cat-next" class="cat-nav-btn" style="padding: 8px 12px; background: #f0f0f0; border: none; border-radius: 8px; cursor: pointer; font-size: 18px; min-width: 40px;">▶</button>
         </div>
 
         <!-- Menu Grid -->
@@ -87,7 +77,29 @@
                 <input type="text" id="pos-customer-name" value="Khách Lẻ" placeholder="Tên Khách" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem;">
             </div>
             <div id="table-box" style="flex: 1;">
-                <input type="text" id="table-number" placeholder="Bàn số" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem;">
+                <select id="pos-table-select" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; background: white; cursor: pointer;">
+                    <option value="">-- Chọn Bàn --</option>
+                    <option value="1" selected>Bàn 1</option>
+                    <option value="2">Bàn 2</option>
+                    <option value="3">Bàn 3</option>
+                    <option value="4">Bàn 4</option>
+                    <option value="5">Bàn 5</option>
+                    <option value="6">Bàn 6</option>
+                    <option value="7">Bàn 7</option>
+                    <option value="8">Bàn 8</option>
+                    <option value="9">Bàn 9</option>
+                    <option value="10">Bàn 10</option>
+                    <option value="11">Bàn 11</option>
+                    <option value="12">Bàn 12</option>
+                    <option value="13">Bàn 13</option>
+                    <option value="14">Bàn 14</option>
+                    <option value="15">Bàn 15</option>
+                    <option value="16">Bàn 16</option>
+                    <option value="17">Bàn 17</option>
+                    <option value="18">Bàn 18</option>
+                    <option value="19">Bàn 19</option>
+                    <option value="20">Bàn 20</option>
+                </select>
             </div>
             <div id="order-id-box" style="flex: 1; display: none;">
                 <input type="text" id="order-id" readonly placeholder="Mã Đơn" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; background: #f5f5f5;">
@@ -130,6 +142,7 @@
             <input type="hidden" name="cart_items" id="form-cart-items">
             <input type="hidden" name="note" id="form-note">
             <input type="hidden" name="voucher_id" id="form-voucher-id">
+            <input type="hidden" name="table_number" id="form-table-number">
         </form>
 
         <button class="place-order-btn" onclick="openPaymentModal()">
@@ -175,10 +188,10 @@
     </div>
 </div>
 
-<!-- Logic JS riêng cho POS -->
-<script src="Public/Js/pos-logic.js"></script>
-<script src="Public/Js/pos-customer.js"></script>
-<script src="Public/Js/pos-voucher.js"></script>
+<!-- Logic JS riêng cho POS (cache-bust để luôn load phiên bản mới) -->
+<script src="Public/Js/pos-logic.js?v=<?php echo time(); ?>"></script>
+<script src="Public/Js/pos-customer.js?v=<?php echo time(); ?>"></script>
+<script src="Public/Js/pos-voucher.js?v=<?php echo time(); ?>"></script>
 
 <!-- Customer Modal -->
 <div id="posCustomerModal" class="modal" style="display:none; position: fixed; z-index: 1200; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4);">

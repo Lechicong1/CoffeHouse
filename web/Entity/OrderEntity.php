@@ -23,6 +23,7 @@ class OrderEntity {
     public $receiver_phone;
     public $shipping_fee;
     public $note;
+    public $table_number;
     public $created_at;
     public $updated_at;
 
@@ -47,6 +48,7 @@ class OrderEntity {
             $this->receiver_phone = $data['receiver_phone'] ?? null;
             $this->shipping_fee = $data['shipping_fee'] ?? 0;
             $this->note = $data['note'] ?? null;
+            $this->table_number = $data['table_number'] ?? null;
             $this->created_at = $data['created_at'] ?? null;
             $this->updated_at = $data['updated_at'] ?? null;
             $this->customer_name = $data['customer_name'] ?? null;

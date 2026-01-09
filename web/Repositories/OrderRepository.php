@@ -7,16 +7,19 @@ use web\Entity\OrderEntity;
 class OrderRepository extends ConnectDatabase {
     
     public function create(OrderEntity $order) {
-        $sql = "INSERT INTO orders (order_code, staff_id, customer_id, order_type, status, payment_status, payment_method, total_amount, receiver_name, receiver_phone, shipping_address, note) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        // Debug log
+        error_log("DEBUG OrderRepository->create - table_number: " . ($order->table_number ?? 'NULL'));
+        
+        $sql = "INSERT INTO orders (order_code, staff_id, customer_id, order_type, status, payment_status, payment_method, total_amount, receiver_name, receiver_phone, shipping_address, note, table_number) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         $stmt = mysqli_prepare($this->con, $sql);
         
         // Định nghĩa kiểu dữ liệu cho các tham số (s: string, i: integer, d: double, b: blob)
         // order_code(s), staff_id(i), customer_id(i), order_type(s), status(s), 
         // payment_status(s), payment_method(s), total_amount(i), receiver_name(s), 
-        // receiver_phone(s), shipping_address(s), note(s)
-        $types = "siissssissss";
+        // receiver_phone(s), shipping_address(s), note(s), table_number(s)
+        $types = "siisssssissss";
         
         mysqli_stmt_bind_param($stmt, $types, 
             $order->order_code,
@@ -30,7 +33,8 @@ class OrderRepository extends ConnectDatabase {
             $order->receiver_name,
             $order->receiver_phone,
             $order->shipping_address,
-            $order->note
+            $order->note,
+            $order->table_number
         );
 
         if (mysqli_stmt_execute($stmt)) {
@@ -75,7 +79,7 @@ class OrderRepository extends ConnectDatabase {
      * @return array
      */
     public function findAllWithFilters($filters = []) {
-        $sql = "SELECT o.*, c.full_name as customer_name, c.phone as customer_phone 
+        $sql = "SELECT o.*, c.full_name as customer_name, c.phone as customer_phone, o.table_number 
                 FROM orders o 
                 LEFT JOIN customers c ON o.customer_id = c.id 
                 WHERE 1=1";
@@ -141,12 +145,13 @@ class OrderRepository extends ConnectDatabase {
                 receiver_name = ?, 
                 receiver_phone = ?, 
                 shipping_address = ?, 
-                note = ?
+                note = ?,
+                table_number = ?
                 WHERE id = ?";
         
         $stmt = mysqli_prepare($this->con, $sql);
         
-        mysqli_stmt_bind_param($stmt, "siissssdssssi", 
+        mysqli_stmt_bind_param($stmt, "siissssdsssssi", 
             $order->order_code,
             $order->staff_id,
             $order->customer_id,
@@ -159,6 +164,7 @@ class OrderRepository extends ConnectDatabase {
             $order->receiver_phone,
             $order->shipping_address,
             $order->note,
+            $order->table_number,
             $order->id
         );
 

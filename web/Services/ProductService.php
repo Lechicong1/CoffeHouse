@@ -73,7 +73,8 @@ class ProductService {
                 'image' => $product->image_url ? $product->image_url : 'Public/Assets/default-coffee.png',
                 'price' => (int)$price,
                 'sizes' => $sizeList,
-                'category' => $categoryKey
+                'category' => $categoryKey,
+                'category_id' => $product->category_id
             ];
         }
         return $menu;

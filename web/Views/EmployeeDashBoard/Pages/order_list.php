@@ -506,6 +506,7 @@ $currentSearch = $currentFilter['search'] ?? '';
                 <tr>
                     <th>Mã đơn</th>
                     <th>Khách hàng</th>
+                    <th>Số bàn</th>
                     <th>Tổng tiền</th>
                     <th>Thanh toán</th>
                     <th>Ghi chú</th>
@@ -516,7 +517,7 @@ $currentSearch = $currentFilter['search'] ?? '';
             <tbody>
                 <?php if (empty($orders)): ?>
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 40px; color: #999;">
+                        <td colspan="8" style="text-align: center; padding: 40px; color: #999;">
                             Không có đơn hàng nào
                         </td>
                     </tr>
@@ -543,6 +544,17 @@ $currentSearch = $currentFilter['search'] ?? '';
                                         <?php echo $order['order_type'] === 'AT_COUNTER' ? 'Tại quầy' : 'Mang về'; ?>
                                     </span>
                                 </div>
+                            </td>
+
+                            <!-- Số bàn -->
+                            <td>
+                                <?php if (!empty($order['table_number'])): ?>
+                                    <span style="font-weight: 600; color: #064528; display: inline-flex; align-items: center; gap: 4px;">
+                                        Bàn <?php echo htmlspecialchars($order['table_number']); ?>
+                                    </span>
+                                <?php else: ?>
+                                    <span style="color: #999; font-size: 0.85rem;">--</span>
+                                <?php endif; ?>
                             </td>
 
                             <!-- Tổng tiền -->
@@ -579,11 +591,7 @@ $currentSearch = $currentFilter['search'] ?? '';
                                 <div class="note-text">
                                     <?php echo !empty($order['note']) ? htmlspecialchars($order['note']) : '<span style="color:#ccc;">Không có ghi chú</span>'; ?>
                                 </div>
-                                <?php if ($order['status'] === 'PENDING'): ?>
-                                    <span class="note-edit-btn" onclick="openEditNoteModal(<?php echo $order['id']; ?>, '<?php echo addslashes($order['note'] ?? ''); ?>');">
-                                        Sửa
-                                    </span>
-                                <?php endif; ?>
+                                <!-- Note edit moved to Edit Order modal -->
                             </td>
 
                             <!-- Trạng thái -->
@@ -638,6 +646,12 @@ $currentSearch = $currentFilter['search'] ?? '';
                             <!-- Hành động -->
                             <td>
                                 <div class="action-btns">
+                                    <?php if ($order['status'] === 'PENDING'): ?>
+                                        <button class="action-btn btn-edit" onclick="openEditOrderModal(<?php echo $order['id']; ?>, '<?php echo $order['order_type']; ?>', '<?php echo htmlspecialchars($order['table_number'] ?? '', ENT_QUOTES); ?>', '<?php echo addslashes($order['note'] ?? ''); ?>')">
+                                            ✏️ Sửa
+                                        </button>
+                                    <?php endif; ?>
+
                                     <!-- In hóa đơn -->
                                     <button class="action-btn btn-print" onclick="printOrder(<?php echo $order['id']; ?>)">
                                         🖨️ In
@@ -672,21 +686,39 @@ $currentSearch = $currentFilter['search'] ?? '';
     </div>
 </div>
 
-<!-- Modal Sửa ghi chú -->
-<div id="editNoteModal" class="modal">
+<!-- Modal Chỉnh sửa đơn hàng (số bàn / loại đơn / ghi chú) -->
+<div id="editOrderModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>Sửa ghi chú đơn hàng</h3>
-            <button class="close-modal" onclick="closeEditNoteModal()">&times;</button>
+            <h3>Chỉnh sửa đơn hàng</h3>
+            <button class="close-modal" onclick="closeEditOrderModal()">&times;</button>
         </div>
-        <form method="POST" action="/COFFEE_PHP/StaffController/updateOrderNote">
+        <form method="POST" action="/COFFEE_PHP/StaffController/updateOrderDetails">
             <input type="hidden" name="order_id" id="edit-order-id">
             <div class="form-group">
+                <label>Loại đơn:</label>
+                <select name="order_type" id="edit-order-type" style="padding:8px;border:1px solid #ddd;border-radius:6px;">
+                    <option value="AT_COUNTER">Tại quầy</option>
+                    <option value="TAKEAWAY">Mang về</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="edit-table-group">
+                <label>Số bàn:</label>
+                <select name="table_number" id="edit-table-number" style="padding:8px;border:1px solid #ddd;border-radius:6px;">
+                    <option value="">-- Không chọn --</option>
+                    <?php for ($i=1;$i<=20;$i++): ?>
+                        <option value="<?php echo $i; ?>"><?php echo 'Bàn ' . $i; ?></option>
+                    <?php endfor; ?>
+                </select>
+            </div>
+
+            <div class="form-group">
                 <label>Ghi chú:</label>
-                <textarea name="note" id="edit-note" placeholder="Nhập ghi chú..."></textarea>
+                <textarea name="note" id="edit-note" placeholder="Nhập ghi chú..." style="min-height:80px;"></textarea>
             </div>
             <div class="modal-actions">
-                <button type="button" class="modal-btn btn-cancel-modal" onclick="closeEditNoteModal()">Hủy</button>
+                <button type="button" class="modal-btn btn-cancel-modal" onclick="closeEditOrderModal()">Hủy</button>
                 <button type="submit" class="modal-btn btn-save">Lưu</button>
             </div>
         </form>
@@ -720,6 +752,8 @@ $currentSearch = $currentFilter['search'] ?? '';
 function openOrderDetail(orderId) {
     const modal = document.getElementById('orderDetailModal');
     const content = document.getElementById('orderDetailContent');
+    // lưu orderId hiện tại để dùng khi submit AJAX cho note
+    window.currentOrderDetailId = orderId;
     
     content.innerHTML = '<p style="text-align:center;padding:20px;">Đang tải...</p>';
     modal.style.display = 'flex';
@@ -776,16 +810,54 @@ function closeOrderDetailModal() {
     document.getElementById('orderDetailModal').style.display = 'none';
 }
 
-// Hàm sửa ghi chú
+// Hàm sửa ghi chú (nếu có lời gọi cũ, chuyển sang modal chỉnh sửa đơn)
 function openEditNoteModal(orderId, currentNote) {
-    document.getElementById('edit-order-id').value = orderId;
-    document.getElementById('edit-note').value = currentNote;
-    document.getElementById('editNoteModal').style.display = 'flex';
+    // Mở modal chỉnh sửa đơn với note được truyền vào
+    openEditOrderModal(orderId, 'AT_COUNTER', '', currentNote);
 }
 
 function closeEditNoteModal() {
-    document.getElementById('editNoteModal').style.display = 'none';
+    closeEditOrderModal();
 }
+
+// Mở modal chỉnh sửa đơn hàng (loại, bàn, ghi chú)
+function openEditOrderModal(orderId, orderType, tableNumber, currentNote) {
+    document.getElementById('edit-order-id').value = orderId;
+    document.getElementById('edit-order-type').value = orderType || 'AT_COUNTER';
+    document.getElementById('edit-note').value = currentNote || '';
+    const tableSelect = document.getElementById('edit-table-number');
+    if (tableSelect) tableSelect.value = tableNumber || '';
+    // Show/hide table group based on order type
+    toggleEditTableGroup(orderType || 'AT_COUNTER');
+    document.getElementById('editOrderModal').style.display = 'flex';
+}
+
+function closeEditOrderModal() {
+    document.getElementById('editOrderModal').style.display = 'none';
+}
+
+function toggleEditTableGroup(orderType) {
+    const group = document.getElementById('edit-table-group');
+    const tableSelect = document.getElementById('edit-table-number');
+    if (!group) return;
+    if (orderType === 'AT_COUNTER') {
+        group.style.display = 'block';
+    } else {
+        // hide and clear
+        group.style.display = 'none';
+        if (tableSelect) tableSelect.value = '';
+    }
+}
+
+// Gán sự kiện đổi loại trong modal
+document.addEventListener('DOMContentLoaded', function() {
+    const orderTypeEl = document.getElementById('edit-order-type');
+    if (orderTypeEl) {
+        orderTypeEl.addEventListener('change', function(e) {
+            toggleEditTableGroup(e.target.value);
+        });
+    }
+});
 
 // Hàm sửa ghi chú cho từng item
 function openEditItemNoteModal(itemId, currentNote) {
@@ -859,6 +931,40 @@ window.onclick = function(event) {
 }
 </script>
 
+<script>
+// Submit edit item note via AJAX and refresh order detail modal
+function submitEditItemNote(e) {
+    e.preventDefault();
+    const form = document.getElementById('edit-item-note-form');
+    const fd = new FormData(form);
+    fetch(form.action, {
+        method: 'POST',
+        body: fd,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    }).then(r => r.json()).then(data => {
+        if (data.success) {
+            closeEditItemNoteModal();
+            // reload order detail modal content
+            if (window.currentOrderDetailId) {
+                openOrderDetail(window.currentOrderDetailId);
+            }
+            else {
+                // fallback: reload page
+                window.location.reload();
+            }
+        } else {
+            alert('Lỗi: ' + (data.message || 'Không thể cập nhật')); 
+        }
+    }).catch(err => {
+        console.error(err);
+        alert('Lỗi khi gửi yêu cầu');
+    });
+    return false;
+}
+</script>
+
 <!-- Modal Sửa ghi chú cho Item -->
 <div id="editItemNoteModal" class="modal">
     <div class="modal-content">
@@ -866,7 +972,7 @@ window.onclick = function(event) {
             <h3>Sửa ghi chú món ăn</h3>
             <button class="close-modal" onclick="closeEditItemNoteModal()">&times;</button>
         </div>
-        <form method="POST" action="/COFFEE_PHP/StaffController/updateOrderItemNote">
+        <form id="edit-item-note-form" method="POST" action="/COFFEE_PHP/StaffController/updateOrderItemNote" onsubmit="submitEditItemNote(event)">
             <input type="hidden" name="item_id" id="edit-item-id">
             <div class="form-group">
                 <label>Ghi chú món:</label>

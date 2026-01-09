@@ -31,6 +31,9 @@ function openEmployeeModal(action, employeeData = null) {
         usernameField.readOnly = false;
         document.getElementById('password').required = true;
 
+        // Set ngày hiện tại cho trường create_at
+        document.getElementById('createAt').value = new Date().toISOString().split('T')[0];
+
         submitBtn.name = 'btnThem';
         submitBtn.innerHTML = '<span>✅</span> Lưu lại';
     } else {
@@ -47,6 +50,7 @@ function openEmployeeModal(action, employeeData = null) {
         document.getElementById('address').value = employeeData.address || '';
         document.getElementById('roleId').value = employeeData.roleName;
         document.getElementById('luong').value = employeeData.luong;
+        document.getElementById('createAt').value = employeeData.createDate || '';
 
         passwordGroup.style.display = 'none';
         usernameField.readOnly = true;

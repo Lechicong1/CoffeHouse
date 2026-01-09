@@ -80,6 +80,13 @@ class EmployeeService extends Service {
         $employee->roleName = $data['roleName'];
         $employee->luong = $data['luong'];
 
+        // Xử lý create_at: Nếu có truyền vào thì dùng, không thì để mặc định
+        if (!empty($data['create_at'])) {
+            $employee->create_at = date('Y-m-d H:i:s', strtotime($data['create_at']));
+        } else {
+            $employee->create_at = date('Y-m-d H:i:s'); // Ngày hiện tại
+        }
+
         // Lưu vào database
         $result = $this->employeeRepo->create($employee);
         
@@ -108,6 +115,11 @@ class EmployeeService extends Service {
         $employee->address = trim($data['address'] ?? '');
         $employee->roleName = $data['roleName'];
         $employee->luong = $data['luong'];
+
+        // Xử lý create_at: Nếu có truyền vào thì dùng, không thì giữ nguyên
+        if (!empty($data['create_at'])) {
+            $employee->create_at = date('Y-m-d H:i:s', strtotime($data['create_at']));
+        }
 
         // Lưu vào database
         if ($this->employeeRepo->update($employee)) {

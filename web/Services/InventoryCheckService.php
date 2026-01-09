@@ -180,5 +180,26 @@ class InventoryCheckService extends Service {
 
         return $this->inventoryCheckRepo->delete($id);
     }
+
+    /**
+     * Lấy báo cáo thất thoát theo tháng (tất cả)
+     * @return array
+     */
+    public function getInventoryCheckByMonth() {
+        return $this->inventoryCheckRepo->getInventoryCheckByMonth();
+    }
+
+    /**
+     * Lấy báo cáo thất thoát theo tháng cụ thể
+     * @param int $month Tháng cần lọc (1-12)
+     * @return array
+     */
+    public function getInventoryCheckBySpecificMonth($month) {
+        if (!is_numeric($month) || $month < 1 || $month > 12) {
+            throw new Exception("Tháng không hợp lệ");
+        }
+
+        return $this->inventoryCheckRepo->getInventoryCheckBySpecificMonth($month);
+    }
 }
 ?>

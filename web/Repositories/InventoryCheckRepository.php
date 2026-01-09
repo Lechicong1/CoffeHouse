@@ -1,4 +1,8 @@
 <?php
+/**
+ * InventoryCheckRepository - Xử lý truy vấn database cho bảng inventory_checks
+ */
+include_once './web/Entity/InventoryCheckEntity.php';
 
 class InventoryCheckRepository extends ConnectDatabase {
 
@@ -224,5 +228,75 @@ class InventoryCheckRepository extends ConnectDatabase {
         mysqli_stmt_bind_param($stmt, "i", $id);
         
         return mysqli_stmt_execute($stmt);
+    }
+
+    /**
+     * Lấy báo cáo thất thoát theo tháng (tất cả tháng)
+     * @return array
+     */
+    public function getInventoryCheckByMonth() {
+        $sql = "SELECT 
+                    ingredient, 
+                    MONTH(checked_at) AS month, 
+                    SUM(theoryQuantity) AS totalTheory, 
+                    SUM(actualQuantity) AS totalActual, 
+                    SUM(difference) AS totalDifference 
+                FROM inventory_checks 
+                GROUP BY ingredient, MONTH(checked_at) 
+                ORDER BY MONTH(checked_at) DESC, ingredient";
+
+        $result = mysqli_query($this->con, $sql);
+        $data = [];
+
+        if ($result) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $entity = new InventoryCheckEntity();
+                $entity->setIngredient($row['ingredient']);
+                $entity->setMonth($row['month']);
+                $entity->setTheoryQuantity($row['totalTheory']);
+                $entity->setActualQuantity($row['totalActual']);
+                $entity->setDifference($row['totalDifference']);
+                $data[] = $entity;
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Lấy báo cáo thất thoát theo tháng cụ thể
+     * @param int $month Tháng cần lọc (1-12)
+     * @return array
+     */
+    public function getInventoryCheckBySpecificMonth($month) {
+        $sql = "SELECT 
+                    ingredient, 
+                    MONTH(checked_at) AS month, 
+                    SUM(theoryQuantity) AS totalTheory, 
+                    SUM(actualQuantity) AS totalActual, 
+                    SUM(difference) AS totalDifference 
+                FROM inventory_checks 
+                WHERE MONTH(checked_at) = ? 
+                GROUP BY ingredient, MONTH(checked_at) 
+                ORDER BY ingredient";
+
+        $stmt = mysqli_prepare($this->con, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $month);
+        mysqli_stmt_execute($stmt);
+
+        $result = mysqli_stmt_get_result($stmt);
+        $data = [];
+
+        while ($row = mysqli_fetch_assoc($result)) {
+            $entity = new InventoryCheckEntity();
+            $entity->setIngredient($row['ingredient']);
+            $entity->setMonth($row['month']);
+            $entity->setTheoryQuantity($row['totalTheory']);
+            $entity->setActualQuantity($row['totalActual']);
+            $entity->setDifference($row['totalDifference']);
+            $data[] = $entity;
+        }
+
+        return $data;
     }
 }

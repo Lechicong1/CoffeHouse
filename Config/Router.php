@@ -42,6 +42,14 @@ class Router {
                 $this->action = $arr[1];
                 unset($arr[1]);
             }
+        } else {
+            // Nếu không có action trong URL, kiểm tra action mặc định có tồn tại không
+            if (!method_exists($this->controller, $this->action)) {
+                // Nếu action mặc định không tồn tại, thử dùng 'Index'
+                if (method_exists($this->controller, 'Index')) {
+                    $this->action = 'Index';
+                }
+            }
         }
 
         // ===== XỬ LÝ PARAMETERS =====

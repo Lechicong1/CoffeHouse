@@ -10,6 +10,7 @@ class InventoryCheckEntity {
     private $difference;
     private $note;
     private $checked_at;
+    private $month;
 
     /**
      * Constructor
@@ -56,6 +57,10 @@ class InventoryCheckEntity {
         return $this->checked_at;
     }
 
+    public function getMonth() {
+        return $this->month;
+    }
+
     // Setters
     public function setId($id) {
         $this->id = $id;
@@ -85,6 +90,10 @@ class InventoryCheckEntity {
         $this->checked_at = $checked_at;
     }
 
+    public function setMonth($month) {
+        $this->month = $month;
+    }
+
     /**
      * Chuyển entity thành array
      * @return array
@@ -97,7 +106,8 @@ class InventoryCheckEntity {
             'actualQuantity' => $this->actualQuantity,
             'difference' => $this->difference,
             'note' => $this->note,
-            'checked_at' => $this->checked_at
+            'checked_at' => $this->checked_at,
+            'month' => $this->month
         ];
     }
 }

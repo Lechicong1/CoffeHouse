@@ -107,6 +107,12 @@ $currentSection = $data['section'] ?? 'dashboard';
                             <span class="menu-text">KIỂM KHO</span>
                         </a>
                     </li>
+                    <li class="menu-item <?= $currentSection === 'inventory_check_month' ? 'active' : '' ?>" data-target="inventory_check_month">
+                        <a href="http://localhost/COFFEE_PHP/InventoryCheckMonthController" class="menu-link">
+                            <span class="menu-icon">📊</span>
+                            <span class="menu-text">THẤT THOÁT</span>
+                        </a>
+                    </li>
 
                 </ul>
             </nav>

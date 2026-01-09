@@ -8,6 +8,9 @@ class VoucherController extends Controller {
     public function GetData() {
         $service = $this->service('VoucherService');
         
+        // Đồng bộ trạng thái voucher hết hạn
+        $service->syncExpiryStatuses();
+        
         // Lấy danh sách voucher
         $vouchers = $service->getAllVouchers();
         
@@ -24,6 +27,9 @@ class VoucherController extends Controller {
      */
     public function timkiem() {
         $service = $this->service('VoucherService');
+        
+        // Đồng bộ trạng thái voucher hết hạn
+        $service->syncExpiryStatuses();
         
         // Lấy từ khóa tìm kiếm
         $keyword = isset($_POST['txtTimKiem']) ? trim($_POST['txtTimKiem']) : '';

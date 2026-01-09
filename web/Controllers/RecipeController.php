@@ -10,8 +10,8 @@ class RecipeController extends Controller
         $selectedProductId = isset($_GET['product_id']) ? (int)$_GET['product_id'] : null;
 
         $products = $productService->getAllProducts();
-
-        $ingredients = $ingredientService->getAllIngredients();
+        // Lấy danh sách ingredients (chỉ lấy active)
+        $ingredients = $ingredientService->getActiveIngredients();
 
         $currentRecipe = [];
         $selectedProduct = null;
@@ -80,9 +80,9 @@ class RecipeController extends Controller
             }
 
             $recipe = new RecipeEntity();
-            $recipe->productId = $productId;
-            $recipe->ingredientId = $ingredientId;
-            $recipe->baseAmount = $quantity;
+            $recipe->product_id = $productId;
+            $recipe->ingredient_id = $ingredientId;
+            $recipe->base_amount = $quantity;
 
             try {
                 $recipeService->addRecipe($recipe);
@@ -136,9 +136,9 @@ class RecipeController extends Controller
             }
 
             $recipe = new RecipeEntity();
-            $recipe->productId = $productId;
-            $recipe->ingredientId = $ingredientId;
-            $recipe->baseAmount = $quantity;
+            $recipe->product_id = $productId;
+            $recipe->ingredient_id = $ingredientId;
+            $recipe->base_amount = $quantity;
             $recipes[] = $recipe;
         }
 
@@ -192,9 +192,9 @@ class RecipeController extends Controller
             }
 
             foreach ($recipes as $recipe) {
-                if ($recipe->ingredientId == $ingredientId) {
+                if ($recipe->ingredient_id == $ingredientId) {
                     try {
-                        $recipe->baseAmount = $quantity;
+                        $recipe->base_amount = $quantity;
                         $recipeService->updateRecipe($recipe);
                         $successCount++;
                     } catch (Exception $e) {
@@ -244,7 +244,7 @@ class RecipeController extends Controller
             $ingredientId = (int)$ingredientId;
             
             foreach ($recipes as $recipe) {
-                if ($recipe->ingredientId == $ingredientId) {
+                if ($recipe->ingredient_id == $ingredientId) {
                     $deleted = $recipeService->deleteRecipe($recipe->id);
                     if ($deleted) {
                         $successCount++;
@@ -269,12 +269,12 @@ class RecipeController extends Controller
         $result = [];
 
         foreach ($recipes as $recipe) {
-            $ingredient = $ingredientService->getIngredientById($recipe->ingredientId);
+            $ingredient = $ingredientService->getIngredientById($recipe->ingredient_id);
             
             $result[] = [
-                'ingredient_id' => $recipe->ingredientId,
+                'ingredient_id' => $recipe->ingredient_id,
                 'ingredient_name' => $ingredient ? $ingredient->name : 'Không xác định',
-                'quantity' => $recipe->baseAmount,
+                'quantity' => $recipe->base_amount,
                 'unit' => $ingredient ? $ingredient->unit : ''
             ];
         }

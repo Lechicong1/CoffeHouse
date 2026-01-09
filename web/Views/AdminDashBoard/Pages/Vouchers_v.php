@@ -109,16 +109,21 @@ $keyword = $data['keyword'] ?? '';
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <?php if ($voucher->is_active): ?>
+                                    <?php 
+                                    // Logic: Ngừng hoạt động nếu is_active=0 HOẶC đã hết hạn
+                                    $isExpiredStatus = $voucher->end_date && strtotime($voucher->end_date) < strtotime(date('Y-m-d'));
+                                    $isActive = $voucher->is_active && !$isExpiredStatus;
+                                    ?>
+                                    <?php if ($isActive): ?>
                                         <span class="badge badge-active">Hoạt động</span>
                                     <?php else: ?>
-                                        <span class="badge badge-inactive">Không hoạt động</span>
+                                        <span class="badge badge-inactive">Ngừng hoạt động</span>
                                     <?php endif; ?>
                                 </td>
                                 <td>
                                     <div class="action-buttons">
                                         <button class="btn btn-primary btn-sm" 
-                                                onclick='openEditModal(<?php echo json_encode($voucher); ?>)'>
+                                                onclick='openEditModal(<?php echo json_encode($voucher->toArray()); ?>)'>
                                             <i class="fas fa-edit"></i>
                                         </button>
                                         <button class="btn btn-danger btn-sm" 
@@ -262,8 +267,13 @@ $keyword = $data['keyword'] ?? '';
             document.getElementById('txtDiscountValue').value = voucher.discount_value;
             document.getElementById('txtMaxDiscount').value = voucher.max_discount_value || '';
             document.getElementById('txtMinBill').value = voucher.min_bill_total;
-            document.getElementById('txtStartDate').value = voucher.start_date || '';
-            document.getElementById('txtEndDate').value = voucher.end_date || '';
+            
+            // Format dates - chỉ lấy phần YYYY-MM-DD
+            var startDate = voucher.start_date ? voucher.start_date.substring(0, 10) : '';
+            var endDate = voucher.end_date ? voucher.end_date.substring(0, 10) : '';
+            document.getElementById('txtStartDate').value = startDate;
+            document.getElementById('txtEndDate').value = endDate;
+            
             document.getElementById('txtQuantity').value = voucher.quantity || '';
             document.getElementById('txtUsedCount').value = voucher.used_count;
             document.getElementById('ddlStatus').value = voucher.is_active ? '1' : '0';

@@ -4,10 +4,12 @@ include_once './web/Entity/RecipeEntity.php';
 class RecipeService extends Service
 {
     private RecipeRepository $recipeRepo;
+    private IngredientRepository $ingredientRepo;
 
     public function __construct()
     {
         $this->recipeRepo = $this->repository('RecipeRepository');
+        $this->ingredientRepo = $this->repository('IngredientRepository');
     }
 
     public function getRecipesByProductId(int $productId): array
@@ -19,7 +21,7 @@ class RecipeService extends Service
     {
         $this->validateRecipeData($recipe);
 
-        if ($this->recipeRepo->exists($recipe->productId, $recipe->ingredientId, 0)) {
+        if ($this->recipeRepo->exists($recipe->product_id, $recipe->ingredient_id, 0)) {
             throw new Exception("Công thức cho nguyên liệu này đã tồn tại!");
         }
 
@@ -37,7 +39,7 @@ class RecipeService extends Service
             throw new Exception("Dữ liệu công thức không hợp lệ!");
         }
 
-        if ($this->recipeRepo->exists($recipe->productId, $recipe->ingredientId, $recipe->id)) {
+        if ($this->recipeRepo->exists($recipe->product_id, $recipe->ingredient_id, $recipe->id)) {
             throw new Exception("Công thức bị trùng lặp với công thức khác!");
         }
 
@@ -59,10 +61,10 @@ class RecipeService extends Service
         }
 
         foreach ($recipes as $recipe) {
-            if (!$recipe->ingredientId || $recipe->ingredientId <= 0) {
+            if (!$recipe->ingredient_id || $recipe->ingredient_id <= 0) {
                 throw new Exception("Dữ liệu công thức không hợp lệ!");
             }
-            if (!$recipe->baseAmount || $recipe->baseAmount <= 0) {
+            if (!$recipe->base_amount || $recipe->base_amount <= 0) {
                 throw new Exception("Dữ liệu công thức không hợp lệ!");
             }
         }
@@ -80,16 +82,22 @@ class RecipeService extends Service
 
     private function validateRecipeData(RecipeEntity $recipe): void
     {
-        if (!$recipe->productId || $recipe->productId <= 0) {
+        if (!$recipe->product_id || $recipe->product_id <= 0) {
             throw new Exception("Dữ liệu công thức không hợp lệ!");
         }
 
-        if (!$recipe->ingredientId || $recipe->ingredientId <= 0) {
+        if (!$recipe->ingredient_id || $recipe->ingredient_id <= 0) {
             throw new Exception("Dữ liệu công thức không hợp lệ!");
         }
 
-        if ($recipe->baseAmount === null || $recipe->baseAmount <= 0) {
+        if ($recipe->base_amount === null || $recipe->base_amount <= 0) {
             throw new Exception("Dữ liệu công thức không hợp lệ!");
+        }
+
+        // Check if ingredient is active
+        $ingredient = $this->ingredientRepo->findById($recipe->ingredient_id);
+        if (!$ingredient || !$ingredient->is_active) {
+            throw new Exception("Nguyên liệu này hiện đang ngừng hoạt động hoặc đã hết hạn!");
         }
     }
 }

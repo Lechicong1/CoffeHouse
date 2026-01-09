@@ -92,14 +92,16 @@ class IngredientRepository extends ConnectDatabase {
      * @return bool
      */
     public function create($ingredient) {
-        $sql = "INSERT INTO ingredients (name, unit, stock_quantity) 
-                VALUES (?, ?, ?)";
+        $sql = "INSERT INTO ingredients (name, unit, stock_quantity, expiry_date, is_active) 
+                VALUES (?, ?, ?, ?, ?)";
 
         $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "ssd",
+        mysqli_stmt_bind_param($stmt, "ssdsi",
             $ingredient->name,
             $ingredient->unit,
-            $ingredient->stock_quantity
+            $ingredient->stock_quantity,
+            $ingredient->expiry_date,
+            $ingredient->is_active
         );
 
         return mysqli_stmt_execute($stmt);
@@ -112,14 +114,16 @@ class IngredientRepository extends ConnectDatabase {
      */
     public function update($ingredient) {
         $sql = "UPDATE ingredients 
-                SET name = ?, unit = ?, stock_quantity = ?
+                SET name = ?, unit = ?, stock_quantity = ?, expiry_date = ?, is_active = ?
                 WHERE id = ?";
 
         $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "ssdi",
+        mysqli_stmt_bind_param($stmt, "ssdsii",
             $ingredient->name,
             $ingredient->unit,
             $ingredient->stock_quantity,
+            $ingredient->expiry_date,
+            $ingredient->is_active,
             $ingredient->id
         );
 
@@ -149,6 +153,49 @@ class IngredientRepository extends ConnectDatabase {
         $row = mysqli_fetch_assoc($result);
 
         return $row['total'];
+    }
+    /**
+     * Vô hiệu hóa các nguyên liệu hết hạn
+     * @return int Số dòng bị ảnh hưởng
+     */
+    public function deactivateExpiredIngredients() {
+        $sql = "UPDATE ingredients 
+                SET is_active = 0 
+                WHERE is_active = 1 
+                AND expiry_date IS NOT NULL 
+                AND expiry_date < CURDATE()";
+        
+        mysqli_query($this->con, $sql);
+        return mysqli_affected_rows($this->con);
+    }
+
+    /**
+     * Cập nhật trạng thái kích hoạt cho một nguyên liệu
+     * @param int $id
+     * @param int $status (0 or 1)
+     * @return bool
+     */
+    public function updateStatus($id, $status) {
+        $sql = "UPDATE ingredients SET is_active = ? WHERE id = ?";
+        $stmt = mysqli_prepare($this->con, $sql);
+        mysqli_stmt_bind_param($stmt, "ii", $status, $id);
+        return mysqli_stmt_execute($stmt);
+    }
+
+    /**
+     * Lấy danh sách nguyên liệu đang hoạt động
+     * @return array
+     */
+    public function findActive() {
+        $sql = "SELECT * FROM ingredients WHERE is_active = 1 ORDER BY name ASC";
+        $result = mysqli_query($this->con, $sql);
+
+        $ingredients = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $ingredients[] = new IngredientEntity($row);
+        }
+
+        return $ingredients;
     }
 }
 ?>

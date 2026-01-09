@@ -7,6 +7,9 @@
 
 // --- DATA ---
 let menuItems = []; // Loaded từ SERVER_MENU_DATA
+let categories = []; // Loaded từ SERVER_CATEGORIES
+let currentCategoryId = null; // Track category đang active
+let categoryStartIndex = 0; // Track vị trí cuộn categories
 
 // --- STATE ---
 let cart = [];
@@ -20,13 +23,26 @@ document.addEventListener("DOMContentLoaded", () => {
   // Load menu từ dữ liệu PHP đã truyền vào
   if (typeof SERVER_MENU_DATA !== "undefined") {
     menuItems = SERVER_MENU_DATA;
-    renderMenu("coffee"); // Render default category
   } else {
     console.error("SERVER_MENU_DATA không tồn tại");
   }
 
+  // Load categories từ server
+  if (typeof SERVER_CATEGORIES !== "undefined") {
+    categories = SERVER_CATEGORIES;
+    renderCategories(); // Render categories động
+    if (categories.length > 0) {
+      currentCategoryId = categories[0].id;
+      renderMenuByCategory(currentCategoryId);
+    }
+  } else {
+    console.warn("SERVER_CATEGORIES không tồn tại, sử dụng categories mặc định");
+    renderMenu("coffee"); // Fallback
+  }
+
   updateDate();
-  setupEventListeners();
+  setupCategoryNavigation();
+  setupSearchByCategory();
   updateCartUI(); // Render initial cart
 });
 
@@ -42,28 +58,115 @@ function updateDate() {
   }
 }
 
-// setupEventListeners: gán các event cho category, search, ...
-function setupEventListeners() {
-  // Category filtering
-  const categoryCards = document.querySelectorAll(".category-card");
-  categoryCards.forEach((card) => {
-    card.addEventListener("click", () => {
-      // Remove active class from all
-      categoryCards.forEach((c) => c.classList.remove("active"));
-      // Add active class to clicked
-      card.classList.add("active");
-      // Render menu
-      const category = card.getAttribute("data-category");
-      renderMenu(category);
-    });
-  });
+// ===== CATEGORIES DYNAMIC FUNCTIONS =====
 
-  // Search functionality
+// renderCategories: render categories từ database, hiển thị tối đa 3 cards
+function renderCategories() {
+  const container = document.getElementById("categories-container");
+  if (!container) return;
+  
+  console.log("Rendering categories:", categories);
+  container.innerHTML = "";
+  const maxVisible = 3;
+  const categoriesToShow = categories.slice(categoryStartIndex, categoryStartIndex + maxVisible);
+  
+  categoriesToShow.forEach((cat, idx) => {
+    const isFirst = categoryStartIndex === 0 && idx === 0;
+    const card = document.createElement("div");
+    card.className = "category-card" + (isFirst ? " active" : "");
+    card.dataset.categoryId = cat.id;
+    card.style.minWidth = "180px";
+    card.style.flex = "0 0 auto";
+    
+    card.innerHTML = `
+      <div class="category-status">Sẵn sàng</div>
+      <div class="category-content">
+        <h3>${cat.name}</h3>
+      </div>
+    `;
+    
+    card.addEventListener("click", () => {
+      console.log("Category clicked:", cat.id, cat.name);
+      // Remove active từ tất cả
+      document.querySelectorAll(".category-card").forEach(c => c.classList.remove("active"));
+      card.classList.add("active");
+      currentCategoryId = cat.id;
+      renderMenuByCategory(cat.id);
+    });
+    
+    container.appendChild(card);
+  });
+  
+  updateNavButtons();
+}
+
+// setupCategoryNavigation: setup prev/next buttons cho categories
+function setupCategoryNavigation() {
+  const prevBtn = document.getElementById("cat-prev");
+  const nextBtn = document.getElementById("cat-next");
+  
+  if (prevBtn) {
+    prevBtn.addEventListener("click", () => {
+      if (categoryStartIndex > 0) {
+        categoryStartIndex -= 3;
+        if (categoryStartIndex < 0) categoryStartIndex = 0;
+        renderCategories();
+      }
+    });
+  }
+  
+  if (nextBtn) {
+    nextBtn.addEventListener("click", () => {
+      if (categoryStartIndex + 3 < categories.length) {
+        categoryStartIndex += 3;
+        renderCategories();
+      }
+    });
+  }
+}
+
+// updateNavButtons: enable/disable prev/next buttons dựa vào vị trí hiện tại
+function updateNavButtons() {
+  const prevBtn = document.getElementById("cat-prev");
+  const nextBtn = document.getElementById("cat-next");
+  
+  if (prevBtn) {
+    prevBtn.disabled = categoryStartIndex === 0;
+    prevBtn.style.opacity = categoryStartIndex === 0 ? "0.3" : "1";
+    prevBtn.style.cursor = categoryStartIndex === 0 ? "not-allowed" : "pointer";
+  }
+  
+  if (nextBtn) {
+    const hasMore = categoryStartIndex + 3 < categories.length;
+    nextBtn.disabled = !hasMore;
+    nextBtn.style.opacity = hasMore ? "1" : "0.3";
+    nextBtn.style.cursor = hasMore ? "pointer" : "not-allowed";
+  }
+}
+
+// renderMenuByCategory: render sản phẩm theo category_id
+function renderMenuByCategory(categoryId) {
+  console.log("Filtering by category_id:", categoryId);
+  console.log("All menu items:", menuItems);
+  const filteredItems = menuItems.filter(item => item.category_id == categoryId);
+  console.log("Filtered items:", filteredItems);
+  renderMenuGrid(filteredItems);
+}
+
+// setupSearchByCategory: tìm kiếm món trong category đang active
+function setupSearchByCategory() {
   const searchInput = document.getElementById("search-input");
   if (searchInput) {
     searchInput.addEventListener("input", (e) => {
       const searchTerm = e.target.value.toLowerCase();
-      const filteredItems = menuItems.filter((item) =>
+      let itemsToSearch = menuItems;
+      
+      // Nếu có category đang active, chỉ search trong category đó
+      if (currentCategoryId) {
+        itemsToSearch = menuItems.filter(item => item.category_id == currentCategoryId);
+      }
+      
+      const filteredItems = itemsToSearch.filter((item) =>
         item.name.toLowerCase().includes(searchTerm)
       );
       renderMenuGrid(filteredItems);
@@ -71,14 +174,7 @@ function setupEventListeners() {
   }
 }
 
-// renderMenu: lọc menu theo category và render lưới
-function renderMenu(category) {
-  let itemsToRender = menuItems;
-  if (category !== "all") {
-    itemsToRender = menuItems.filter((item) => item.category === category);
-  }
-  renderMenuGrid(itemsToRender);
-}
+// ===== END CATEGORIES DYNAMIC FUNCTIONS =====
 
 // renderMenuGrid: tạo DOM cho mỗi món và gắn nút thêm
 function renderMenuGrid(items) {
@@ -351,21 +447,18 @@ function setOrderType(type) {
     document.getElementById("btn-take-away").classList.add("active");
   }
 
-  // Toggle giữa Bàn số và Mã đơn
-  const tableBox = document.getElementById("table-box");
-  const orderIdBox = document.getElementById("order-id-box");
-
-  if (tableBox && orderIdBox) {
-    if (type === "AT_COUNTER") {
-      tableBox.style.display = "block";
-      orderIdBox.style.display = "none";
+  // Disable/enable table select based on order type
+  const tableSelect = document.getElementById('pos-table-select');
+  if (tableSelect) {
+    if (type === 'TAKEAWAY') {
+      tableSelect.disabled = true;
+      tableSelect.value = ''; // Clear selection
+      tableSelect.style.background = '#f5f5f5';
+      tableSelect.style.cursor = 'not-allowed';
     } else {
-      tableBox.style.display = "none";
-      orderIdBox.style.display = "block";
-      const orderIdInput = document.getElementById("order-id");
-      if (orderIdInput && !orderIdInput.value) {
-        orderIdInput.value = generateOrderId();
-      }
+      tableSelect.disabled = false;
+      tableSelect.style.background = 'white';
+      tableSelect.style.cursor = 'pointer';
     }
   }
 }
@@ -519,6 +612,18 @@ function processPayment() {
   // Lấy customer ID từ window.selectedCustomer (được set bởi pos-customer.js)
   const customerId = window.selectedCustomer ? window.selectedCustomer.id : "";
 
+  // Lấy table_number từ select box (Đã đổi ID để tránh conflict)
+  const tableNumberEl = document.getElementById("pos-table-select");
+  const tableNumber = tableNumberEl ? (tableNumberEl.value || "") : "";
+  
+  console.log("DEBUG - Table number:", tableNumber); 
+  
+  // Validation: Bắt buộc chọn bàn khi order type là AT_COUNTER
+  if (currentOrderType === "AT_COUNTER" && !tableNumber) {
+    alert("Vui lòng chọn số bàn!");
+    return;
+  }
+
   // Điền thông tin vào form ẩn
   document.getElementById("form-order-type").value = currentOrderType;
   document.getElementById("form-payment-method").value = selectedPaymentMethod;
@@ -529,6 +634,13 @@ function processPayment() {
   document.getElementById("form-cart-items").value =
     JSON.stringify(cartItemsFormatted);
   document.getElementById("form-note").value = "";
+  
+  const formTableNumber = document.getElementById("form-table-number");
+  if (formTableNumber) {
+    formTableNumber.value = tableNumber;
+    console.log("DEBUG - Form table number set to:", formTableNumber.value); // Debug log
+  }
+  
   // ✅ đảm bảo voucher_id luôn được set từ state trước khi submit
   const voucherInput = document.getElementById("form-voucher-id");
   if (voucherInput) {

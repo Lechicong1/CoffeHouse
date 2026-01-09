@@ -1,0 +1,640 @@
+/* Order List Page Styles */
+
+.order-container {
+    padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.order-header h2 {
+    font-size: 1.5rem;
+    color: #064528;
+    margin: 0;
+}
+
+/* Filter Bar */
+.filter-bar {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    border: 2px solid #ddd;
+    background: white;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.3s;
+    text-decoration: none;
+    color: #666;
+}
+
+.filter-btn.active {
+    background: #064528;
+    color: white;
+    border-color: #064528;
+}
+
+.filter-btn:hover {
+    border-color: #064528;
+    color: #064528;
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 2px solid #ddd;
+    border-radius: 25px;
+    font-size: 0.85rem;
+}
+
+.search-box button {
+    padding: 10px 25px;
+    background: #064528;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+/* Order Table */
+.order-table-container {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.order-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.order-table thead {
+    background: #064528;
+    color: white;
+}
+
+.order-table th {
+    padding: 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.order-table tbody tr {
+    border-bottom: 1px solid #f0f0f0;
+    transition: background 0.2s;
+}
+
+.order-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.order-table td {
+    padding: 12px;
+    vertical-align: middle;
+    font-size: 0.85rem;
+}
+
+.order-code {
+    color: #064528;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.order-code:hover {
+    color: #0a5c36;
+}
+
+.customer-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.customer-name {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.85rem;
+}
+
+.customer-phone {
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.order-type-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-top: 3px;
+}
+
+.badge-counter {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.badge-takeaway {
+    background: #fff3e0;
+    color: #f57c00;
+}
+
+.total-amount {
+    font-weight: 700;
+    color: #064528;
+    font-size: 0.9rem;
+}
+
+.payment-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.payment-paid {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.payment-unpaid {
+    background: #f5f5f5;
+    color: #666;
+}
+
+.payment-refunded {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.note-cell {
+    max-width: 200px;
+}
+
+.note-text {
+    color: #666;
+    font-style: italic;
+    font-size: 0.8rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.note-edit-btn {
+    color: #064528;
+    cursor: pointer;
+    font-size: 0.75rem;
+    text-decoration: underline;
+    margin-top: 3px;
+    display: inline-block;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-weight: 600;
+    font-size: 0.75rem;
+}
+
+.status-pending {
+    background: #fff3e0;
+    color: #e65100;
+}
+
+.status-preparing {
+    background: #fff8e1;
+    color: #f57f17;
+}
+
+.status-ready {
+    background: #e1f5fe;
+    color: #0277bd;
+}
+
+.status-shipping {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.status-completed {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.status-cancelled {
+    background: #ffebee;
+    color: #c62828;
+}
+
+/* Action Buttons */
+.action-btns {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.btn-print {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.btn-complete {
+    background: #e8f5e9;
+    color: #2e7d32;
+}
+
+.btn-cancel {
+    background: #ffebee;
+    color: #c62828;
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+/* Invoice Styles */
+.invoice-modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    align-items: center;
+    justify-content: center;
+}
+
+.invoice-content {
+    background: white;
+    padding: 0;
+    border-radius: 0;
+    width: 400px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+    animation: modalFadeIn 0.3s;
+}
+
+.invoice-body {
+    padding: 24px;
+    background: white;
+    font-family: 'Segoe UI', monospace;
+}
+
+.invoice-header {
+    text-align: center;
+    border-bottom: 2px dashed #064528;
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+}
+
+.invoice-shop-name {
+    font-size: 20px;
+    font-weight: bold;
+    color: #064528;
+    margin-bottom: 5px;
+}
+
+.invoice-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+    margin-top: 8px;
+}
+
+.invoice-info {
+    font-size: 13px;
+    color: #666;
+    margin: 4px 0;
+    text-align: center;
+}
+
+.invoice-table-pos {
+    background: #f5f5f5;
+    padding: 8px;
+    text-align: center;
+    font-weight: bold;
+    margin: 12px 0;
+    border-radius: 8px;
+}
+
+.invoice-items {
+    margin: 16px 0;
+}
+
+.invoice-item {
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #ddd;
+}
+
+.invoice-item-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.invoice-item-detail {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+}
+
+.invoice-item-note {
+    font-size: 11px;
+    color: #7b5c50;
+    font-style: italic;
+    margin-top: 4px;
+    padding-left: 8px;
+}
+
+.invoice-summary {
+    border-top: 2px dashed #064528;
+    padding-top: 12px;
+    margin-top: 12px;
+}
+
+.invoice-row {
+    display: flex;
+    justify-content: space-between;
+    margin: 6px 0;
+    font-size: 13px;
+}
+
+.invoice-row.total {
+    font-size: 16px;
+    font-weight: bold;
+    color: #064528;
+    margin-top: 12px;
+    padding-top: 8px;
+    border-top: 1px solid #ddd;
+}
+
+.invoice-footer {
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 2px dashed #064528;
+    font-size: 13px;
+    color: #666;
+}
+
+.invoice-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 16px;
+    background: #f9f9f9;
+    border-top: 1px solid #eee;
+}
+
+.invoice-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+
+.invoice-btn-print {
+    background: #2e7d32;
+    color: white;
+}
+
+.invoice-btn-print:hover {
+    background: #1b5e20;
+}
+
+.invoice-btn-close {
+    background: #e0e0e0;
+    color: #333;
+}
+
+.invoice-btn-close:hover {
+    background: #bdbdbd;
+}
+
+/* Modals */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 900px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    box-shadow: 0 5px 30px rgba(0,0,0,0.3);
+    animation: modalFadeIn 0.3s;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.modal-header h3 {
+    color: #064528;
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.close-modal {
+    background: none;
+    border: none;
+    font-size: 1.8rem;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    line-height: 1;
+}
+
+.close-modal:hover {
+    color: #c62828;
+}
+
+.items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+}
+
+.items-table thead {
+    background: #064528;
+    color: white;
+}
+
+.items-table th, .items-table td {
+    padding: 10px;
+    text-align: left;
+}
+
+.items-table tbody tr {
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.items-table tbody tr:hover {
+    background: #f9f9f9;
+}
+
+.items-table tfoot {
+    background: #f5f5f5;
+    font-weight: bold;
+}
+
+.item-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group select, .form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.modal-btn {
+    padding: 10px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.btn-save {
+    background: #064528;
+    color: white;
+}
+
+.btn-save:hover {
+    background: #053518;
+}
+
+.btn-cancel-modal {
+    background: #f0f0f0;
+    color: #666;
+}
+
+.btn-cancel-modal:hover {
+    background: #ddd;
+}
+
+.alert-text {
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    padding: 12px;
+    border-radius: 8px;
+    color: #856404;
+    margin: 10px 0;
+}

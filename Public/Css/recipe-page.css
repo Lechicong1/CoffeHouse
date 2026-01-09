@@ -1,0 +1,483 @@
+/**
+ * FILE: recipe-page.css
+ * Styling riêng cho trang Quản lý Công Thức Sản Phẩm
+ * Theo phong cách giống ingredients-page.css (Minimalist White + Matcha Green)
+ */
+
+/* ========== PAGE LAYOUT ========== */
+#recipe.content-section {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 10px;
+}
+
+/* Thêm khoảng cách giữa header và content */
+#recipe .section-header {
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+}
+
+/* ========== PRODUCT SELECT ========== */
+#recipe .filter-select,
+#recipe #productSelect {
+    min-width: 320px;
+    max-width: 420px;
+    height: 46px;
+    padding: 0 44px 0 18px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #2c3e50;
+    background-color: white;
+    border: 2px solid #B6DA9F;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    
+    /* Custom arrow */
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%237f8c8d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6,9 12,15 18,9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 16px;
+}
+
+#recipe .filter-select:hover,
+#recipe #productSelect:hover {
+    border-color: #9fc885;
+    background-color: #fafff8;
+}
+
+#recipe .filter-select:focus,
+#recipe #productSelect:focus {
+    outline: none;
+    border-color: #8bc34a;
+    box-shadow: 0 0 0 4px rgba(182, 218, 159, 0.25);
+}
+
+/* Option styling */
+#recipe #productSelect option {
+    padding: 12px 16px;
+    font-size: 14px;
+}
+
+/* Header actions layout */
+#recipe .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+/* Select group with label */
+#recipe .select-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+#recipe .select-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: #2c3e50;
+    white-space: nowrap;
+}
+
+/* ========== SIZE INFO ========== */
+.size-info {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.size-badge {
+    padding: 8px 16px;
+    background: #ecf0f1;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #7f8c8d;
+}
+
+.size-badge.active {
+    background: linear-gradient(135deg, #B6DA9F 0%, #a8d18f 100%);
+    color: white;
+}
+
+/* ========== TABLES CONTAINER ========== */
+.tables-container {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: 28px;
+    margin-bottom: 28px;
+    /* Stretch cards để tận dụng viewport */
+    min-height: calc(100vh - 380px);
+    align-items: stretch;
+}
+
+/* ========== TABLE PANEL ========== */
+.table-panel {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    /* Đảm bảo cân bằng chiều cao */
+    min-height: 450px;
+}
+
+.panel-header {
+    padding: 18px 24px;
+    background: linear-gradient(135deg, #B6DA9F 0%, #a8d18f 100%);
+    border-bottom: 2px solid #B6DA9F;
+}
+
+.panel-header h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: white;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Table wrapper stretch để fill card */
+.table-wrapper {
+    flex: 1;
+    min-height: 300px;
+    max-height: calc(100vh - 450px);
+    overflow-y: auto;
+}
+
+.panel-footer {
+    margin-top: auto; /* Đẩy xuống đáy card (flex child) */
+    padding: 14px 24px;
+    background: #f8fdf5;
+    border-top: 1px solid #e8f5e0;
+}
+
+.hint-text {
+    margin: 0;
+    font-size: 13px;
+    color: #7f8c8d;
+}
+
+/* ========== DATA TABLE ========== */
+.table-panel .data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-panel .data-table thead {
+    background: linear-gradient(135deg, #B6DA9F 0%, #a8d18f 100%);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.table-panel .data-table thead th {
+    padding: 14px 18px;
+    text-align: left;
+    font-weight: 700;
+    color: #1a1a1a;
+    text-transform: uppercase;
+    font-size: 12px;
+    letter-spacing: 0.5px;
+}
+
+.table-panel .data-table tbody tr {
+    border-bottom: 1px solid #ecf0f1;
+    transition: all 0.2s ease;
+}
+
+.table-panel .data-table tbody tr:hover {
+    background: #f8fdf5;
+}
+
+.table-panel .data-table tbody td {
+    padding: 14px 18px;
+    font-size: 14px;
+    color: #2c3e50;
+}
+
+/* ========== CHECKBOX ========== */
+.ingredient-checkbox,
+.delete-checkbox {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #B6DA9F;
+}
+
+.delete-checkbox {
+    accent-color: #e74c3c;
+}
+
+/* ========== UNIT TEXT ========== */
+.unit-text {
+    font-size: 12px;
+    color: #7f8c8d;
+    margin-left: 4px;
+}
+
+/* ========== QUANTITY INPUT ========== */
+.quantity-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 2px solid #ecf0f1;
+    border-radius: 8px;
+    font-size: 14px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.quantity-input:focus {
+    outline: none;
+    border-color: #B6DA9F;
+    box-shadow: 0 0 0 3px rgba(182, 218, 159, 0.15);
+}
+
+.quantity-input.error {
+    border-color: #e74c3c;
+    background: #fff5f5;
+}
+
+/* ========== ROW STATES ========== */
+.ingredient-row.in-recipe {
+    background: #f8fdf5;
+}
+
+.ingredient-row.selected {
+    background: #e8f5e0 !important;
+}
+
+.recipe-row {
+    cursor: pointer;
+}
+
+.recipe-row:hover {
+    background: #f0f8e8 !important;
+}
+
+.recipe-row.selected {
+    background: #e0f0d4 !important;
+    border-left: 4px solid #B6DA9F;
+}
+
+/* ========== BADGES ========== */
+.badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.badge-status-ok {
+    background: #d4edda;
+    color: #155724;
+}
+
+/* ========== ACTION BAR ========== */
+.action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 32px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    gap: 24px;
+    flex-wrap: wrap;
+}
+
+.action-group-left,
+.action-group-right {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* ========== BUTTONS ========== */
+.btn-primary {
+    padding: 14px 28px;
+    background: linear-gradient(135deg, #B6DA9F 0%, #a8d18f 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 15px rgba(182, 218, 159, 0.35);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 22px rgba(182, 218, 159, 0.5);
+}
+
+.btn-secondary {
+    padding: 14px 28px;
+    background: #ecf0f1;
+    color: #7f8c8d;
+    border: none;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.btn-secondary:hover {
+    background: #bdc3c7;
+    color: #2c3e50;
+    transform: translateY(-1px);
+}
+
+.btn-edit {
+    padding: 14px 28px;
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.btn-edit:hover {
+    background: #2980b9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(52, 152, 219, 0.4);
+}
+
+.btn-delete {
+    padding: 14px 28px;
+    background: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+.btn-delete:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(231, 76, 60, 0.4);
+}
+
+/* ========== SCROLLBAR ========== */
+.table-wrapper::-webkit-scrollbar {
+    width: 8px;
+}
+
+.table-wrapper::-webkit-scrollbar-track {
+    background: #f5f5f5;
+    border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb {
+    background: #d0d0d0;
+    border-radius: 4px;
+}
+
+.table-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #b0b0b0;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1200px) {
+    .tables-container {
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 992px) {
+    .tables-container {
+        grid-template-columns: 1fr;
+        min-height: auto;
+    }
+    
+    .table-panel {
+        min-height: 350px;
+    }
+    
+    .table-wrapper {
+        max-height: 350px;
+    }
+}
+
+@media (max-width: 768px) {
+    #recipe .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    #recipe .header-actions {
+        width: 100%;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    #recipe .filter-select,
+    #recipe #productSelect {
+        width: 100%;
+        min-width: unset;
+        max-width: unset;
+    }
+
+    .action-bar {
+        flex-direction: column;
+        padding: 20px;
+        gap: 16px;
+    }
+
+    .action-group-left,
+    .action-group-right {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-edit,
+    .btn-delete {
+        flex: 1;
+        min-width: 140px;
+        padding: 12px 20px;
+        font-size: 13px;
+    }
+}
+
+@media (max-width: 480px) {
+    .action-group-left,
+    .action-group-right {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .btn-primary,
+    .btn-secondary,
+    .btn-edit,
+    .btn-delete {
+        width: 100%;
+    }
+}

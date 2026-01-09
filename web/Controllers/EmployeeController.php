@@ -3,7 +3,7 @@
  * Employee Controller - Quản lý nhân viên
  * Theo mô hình MVC chuẩn
  */
-
+require_once __DIR__ . '/../../Config/ExcelHelper.php';
 class EmployeeController extends Controller {
     private $employeeService;
     
@@ -49,6 +49,48 @@ class EmployeeController extends Controller {
                 'keyword' => $keyword,
                 'roles' => $this->getRoles()
             ]);
+        }
+    }
+    function xuatexcel(){
+        if(isset($_POST['btnXuatexcel'])){
+            // Lấy từ khóa tìm kiếm nếu có
+            $keyword = isset($_POST['txtSearch']) ? $_POST['txtSearch'] : '';
+
+            // Lấy dữ liệu nhân viên (có thể là kết quả tìm kiếm hoặc toàn bộ)
+            if (!empty($keyword)) {
+                $employees = $this->employeeService->searchEmployees($keyword);
+            } else {
+                $employees = $this->employeeService->getAllEmployees();
+            }
+
+            // Chuyển đổi object sang array để xuất Excel
+            $data = array_map(function($employee) {
+                return [
+                    'id' => $employee->id,
+                    'username' => $employee->username,
+                    'fullname' => $employee->fullname,
+                    'roleName' => $employee->getRoleDisplayName(),
+                    'email' => $employee->email ?? '-',
+                    'phonenumber' => $employee->phonenumber,
+                    'luong' => $employee->luong,
+                    'address' => $employee->address ?? '-'
+                ];
+            }, $employees);
+
+            // Định nghĩa cấu trúc cột cho Excel
+            $headers = [
+                'id' => 'ID',
+                'username' => 'Username',
+                'fullname' => 'Họ và Tên',
+                'roleName' => 'Vai Trò',
+                'email' => 'Email',
+                'phonenumber' => 'Số Điện Thoại',
+                'luong' => 'Lương (VNĐ)',
+                'address' => 'Địa Chỉ'
+            ];
+
+            // Gọi hàm xuất Excel từ Helper
+            ExcelHelper::exportToExcel($data, $headers, 'DanhSachNhanVien');
         }
     }
 

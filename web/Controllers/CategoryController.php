@@ -3,6 +3,7 @@
  * Category Controller - Quản lý danh mục
  * Theo mô hình MVC chuẩn
  */
+require_once __DIR__ . '/../../Config/ExcelHelper.php';
 
 class CategoryController extends Controller {
     private $categoryService;
@@ -125,6 +126,44 @@ class CategoryController extends Controller {
                     'errorMessage' => $e->getMessage()
                 ]);
             }
+        }
+    }
+
+    /**
+     * Xuất Excel danh sách danh mục
+     */
+    function xuatexcel() {
+        if(isset($_POST['btnXuatexcel'])){
+            // Lấy từ khóa tìm kiếm nếu có
+            $keyword = isset($_POST['txtSearch']) ? $_POST['txtSearch'] : '';
+
+            // Lấy dữ liệu danh mục
+            if (!empty($keyword)) {
+                $categories = $this->categoryService->searchCategories($keyword);
+            } else {
+                $categories = $this->categoryService->getAllCategories();
+            }
+
+            // Chuyển đổi object sang array để xuất Excel
+            $data = array_map(function($category) {
+                return [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'description' => $category->description ?? '-',
+                    'product_count' => $category->product_count ?? 0
+                ];
+            }, $categories);
+
+            // Định nghĩa cấu trúc cột cho Excel
+            $headers = [
+                'id' => 'ID',
+                'name' => 'Tên Danh Mục',
+                'description' => 'Mô Tả',
+                'product_count' => 'Số Sản Phẩm'
+            ];
+
+            // Gọi hàm xuất Excel từ Helper
+            ExcelHelper::exportToExcel($data, $headers, 'DanhSachDanhMuc');
         }
     }
 }

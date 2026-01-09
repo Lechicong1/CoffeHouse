@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../Config/ExcelHelper.php';
 
 
 class IngredientController extends Controller {
@@ -133,6 +134,44 @@ class IngredientController extends Controller {
                 'ingredients' => $this->ingredientService->getAllIngredients(),
                 'stats' => $stats
             ]);
+        }
+    }
+
+    /**
+     * Xuất Excel danh sách nguyên liệu
+     */
+    function xuatexcel() {
+        if (isset($_POST['btnXuatexcel'])) {
+            // Lấy từ khóa tìm kiếm nếu có
+            $keyword = isset($_POST['txtSearch']) ? $_POST['txtSearch'] : '';
+
+            // Lấy dữ liệu nguyên liệu
+            if (!empty($keyword)) {
+                $ingredients = $this->ingredientService->searchIngredients($keyword);
+            } else {
+                $ingredients = $this->ingredientService->getAllIngredients();
+            }
+
+            // Chuyển đổi object sang array để xuất Excel
+            $data = array_map(function($ingredient) {
+                return [
+                    'id' => $ingredient->id,
+                    'name' => $ingredient->name,
+                    'unit' => $ingredient->unit,
+                    'stock_quantity' => $ingredient->stock_quantity ?? 0
+                ];
+            }, $ingredients);
+
+            // Định nghĩa cấu trúc cột cho Excel
+            $headers = [
+                'id' => 'ID',
+                'name' => 'Tên Nguyên Liệu',
+                'unit' => 'Đơn Vị',
+                'stock_quantity' => 'Số Lượng Tồn Kho'
+            ];
+
+            // Gọi hàm xuất Excel từ Helper
+            ExcelHelper::exportToExcel($data, $headers, 'DanhSachNguyenLieu');
         }
     }
 }

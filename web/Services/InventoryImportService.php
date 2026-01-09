@@ -150,5 +150,15 @@ class InventoryImportService {
             throw new Exception("Vui lòng chọn ngày nhập");
         }
     }
+
+    /**
+     * Lấy danh sách phiếu nhập theo khoảng thời gian (cho Report)
+     * @param string $fromDate Ngày bắt đầu (Y-m-d)
+     * @param string $toDate Ngày kết thúc (Y-m-d)
+     * @return array Danh sách phiếu nhập với thông tin nguyên liệu
+     */
+    public function getImportsByDateRange($fromDate, $toDate) {
+        return $this->inventoryImportRepository->findByDateRange($fromDate, $toDate);
+    }
 }
 ?>

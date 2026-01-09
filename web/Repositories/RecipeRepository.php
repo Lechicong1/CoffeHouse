@@ -65,9 +65,9 @@ class RecipeRepository extends ConnectDatabase
         }
         
         mysqli_stmt_bind_param($stmt, "iid", 
-            $recipe->productId,
-            $recipe->ingredientId,
-            $recipe->baseAmount
+            $recipe->product_id,
+            $recipe->ingredient_id,
+            $recipe->base_amount
         );
 
         $success = mysqli_stmt_execute($stmt);
@@ -102,9 +102,9 @@ class RecipeRepository extends ConnectDatabase
         }
         
         mysqli_stmt_bind_param($stmt, "iidi",
-            $recipe->productId,
-            $recipe->ingredientId,
-            $recipe->baseAmount,
+            $recipe->product_id,
+            $recipe->ingredient_id,
+            $recipe->base_amount,
             $recipe->id
         );
 
@@ -160,11 +160,11 @@ class RecipeRepository extends ConnectDatabase
             error_log("RecipeRepository.saveRecipeForProduct - Delete result: " . ($deleted ? 'true' : 'false'));
             
             foreach ($recipes as $recipe) {
-                $recipe->productId = $productId;
+            $recipe->product_id = $productId;
                 $result = $this->create($recipe);
-                error_log("RecipeRepository.saveRecipeForProduct - Create result: $result for ingredient_id: " . $recipe->ingredientId);
+                error_log("RecipeRepository.saveRecipeForProduct - Create result: $result for ingredient_id: " . $recipe->ingredient_id);
                 if ($result <= 0) {
-                    throw new Exception("Failed to create recipe for ingredient " . $recipe->ingredientId);
+                    throw new Exception("Failed to create recipe for ingredient " . $recipe->ingredient_id);
                 }
             }
             

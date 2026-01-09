@@ -14,6 +14,9 @@ class IngredientController extends Controller {
      * Hiển thị danh sách nguyên liệu (Method mặc định)
      */
     function GetData() {
+        // Đồng bộ trạng thái: tự động deactivate nguyên liệu hết hạn
+        $this->ingredientService->syncExpiryStatuses();
+        
         $stats = $this->ingredientService->getStats();
 
         $this->view('AdminDashBoard/MasterLayout', [
@@ -28,6 +31,9 @@ class IngredientController extends Controller {
      * Tìm kiếm nguyên liệu (GET)
      */
     function timkiem() {
+        // Đồng bộ trạng thái: tự động deactivate nguyên liệu hết hạn
+        $this->ingredientService->syncExpiryStatuses();
+        
         $keyword = $_GET['search'] ?? '';
         $kq = $this->ingredientService->searchIngredients($keyword);
         $stats = $this->ingredientService->getStats();
@@ -49,8 +55,8 @@ class IngredientController extends Controller {
             try {
                 $data = [
                     'name' => $_POST['txtName'],
-                    'unit' => $_POST['txtUnit']
-                    // Không nhận stock_quantity từ form, sẽ mặc định = 0
+                    'unit' => $_POST['txtUnit'],
+                    'expiry_date' => !empty($_POST['txtExpiryDate']) ? $_POST['txtExpiryDate'] : null
                 ];
 
                 $result = $this->ingredientService->createIngredient($data);
@@ -84,8 +90,8 @@ class IngredientController extends Controller {
 
                 $data = [
                     'name' => $_POST['txtName'],
-                    'unit' => $_POST['txtUnit']
-                    // Không nhận stock_quantity từ form, giữ nguyên giá trị cũ
+                    'unit' => $_POST['txtUnit'],
+                    'expiry_date' => !empty($_POST['txtExpiryDate']) ? $_POST['txtExpiryDate'] : null
                 ];
 
                 $result = $this->ingredientService->updateIngredient($id, $data);

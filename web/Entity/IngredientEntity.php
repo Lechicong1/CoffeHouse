@@ -12,6 +12,8 @@ class IngredientEntity
     public $name;
     public $unit;
     public $stock_quantity;
+    public $expiry_date; // Hạn sử dụng
+    public $is_active;   // Trạng thái: 1=Active, 0=Inactive
 
     /**
      * Constructor - Khởi tạo entity rỗng hoặc từ array
@@ -24,6 +26,8 @@ class IngredientEntity
             $this->name = $data['name'] ?? null;
             $this->unit = $data['unit'] ?? null;
             $this->stock_quantity = $data['stock_quantity'] ?? 0;
+            $this->expiry_date = $data['expiry_date'] ?? null;
+            $this->is_active = isset($data['is_active']) ? (int)$data['is_active'] : 1;
         }
     }
 
@@ -36,44 +40,12 @@ class IngredientEntity
             'id' => $this->id,
             'name' => $this->name,
             'unit' => $this->unit,
-            'stock_quantity' => $this->stock_quantity
+            'stock_quantity' => $this->stock_quantity,
+            'expiry_date' => $this->expiry_date,
+            'is_active' => $this->is_active
         ];
     }
-
-    /**
-     * Lấy trạng thái tồn kho
-     * @return string
-     */
-    public function getStockStatus() {
-        if ($this->stock_quantity <= 0) {
-            return 'Hết hàng';
-        } elseif ($this->stock_quantity < 10) {
-            return 'Sắp hết';
-        } else {
-            return 'Còn hàng';
-        }
-    }
-
-    /**
-     * Lấy class CSS cho trạng thái
-     * @return string
-     */
-    public function getStockStatusClass() {
-        if ($this->stock_quantity <= 0) {
-            return 'status-out';
-        } elseif ($this->stock_quantity < 10) {
-            return 'status-low';
-        } else {
-            return 'status-ok';
-        }
-    }
-
-    /**
-     * Format số lượng với đơn vị
-     * @return string
-     */
-    public function getFormattedQuantity() {
-        return number_format($this->stock_quantity, 0, ',', '.') . ' ' . $this->unit;
-    }
 }
+
+
 ?>

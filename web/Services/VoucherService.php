@@ -5,6 +5,15 @@ use web\Entity\VoucherEntity;
 class VoucherService extends Service {
 
     /**
+     * Đồng bộ trạng thái voucher dựa trên end_date
+     * Voucher hết hạn sẽ được set is_active = 0
+     */
+    public function syncExpiryStatuses() {
+        $repository = $this->repository('VoucherRepository');
+        return $repository->deactivateExpiredVouchers();
+    }
+
+    /**
      * Lấy tất cả voucher
      * @return array
      */
@@ -219,18 +228,92 @@ class VoucherService extends Service {
     ];
 }
 
-    /**
-     * Xem trước áp dụng voucher (wrapper)
-     */
     public function previewVoucher($customerId, $voucherId, $totalAmount) {
         return $this->previewApplyVoucher($customerId, $voucherId, $totalAmount);
     }
 
-    /**
-     * Xóa voucher
-     * @param int $id
-     * @return array ['success' => bool, 'message' => string]
-     */
+    public function redeemVoucher($customerId, $voucherId, $billTotal, $con = null) {
+        $voucherRepo = $this->repository('VoucherRepository');
+        $customerRepo = $this->repository('CustomerRepository');
+        
+        // Nếu có truyền connection từ ngoài, sử dụng chung để đảm bảo transaction
+        if ($con) {
+            $voucherRepo->con = $con;
+            $customerRepo->con = $con;
+        }
+
+        // 1. Lấy voucher
+        $voucher = $voucherRepo->findById($voucherId);
+        if (!$voucher) {
+            return ['success' => false, 'code' => 'VOUCHER_NOT_FOUND', 'message' => 'Không tìm thấy voucher', 'discount_amount' => 0];
+        }
+
+        // 2. Validate voucher
+        if ((int)$voucher->is_active !== 1) {
+            return ['success' => false, 'code' => 'VOUCHER_INACTIVE', 'message' => 'Voucher không còn hoạt động', 'discount_amount' => 0];
+        }
+
+        $today = date('Y-m-d');
+        if ($voucher->start_date && strtotime($today) < strtotime($voucher->start_date)) {
+            return ['success' => false, 'code' => 'VOUCHER_NOT_STARTED', 'message' => 'Voucher chưa bắt đầu', 'discount_amount' => 0];
+        }
+        if ($voucher->end_date && strtotime($today) > strtotime($voucher->end_date)) {
+            return ['success' => false, 'code' => 'VOUCHER_EXPIRED', 'message' => 'Voucher đã hết hạn', 'discount_amount' => 0];
+        }
+
+        if (!is_null($voucher->quantity) && $voucher->used_count >= $voucher->quantity) {
+            return ['success' => false, 'code' => 'VOUCHER_OUT_OF_STOCK', 'message' => 'Voucher đã hết lượt sử dụng', 'discount_amount' => 0];
+        }
+
+        if ($billTotal < $voucher->min_bill_total) {
+            $minBill = number_format($voucher->min_bill_total, 0, ',', '.');
+            return ['success' => false, 'code' => 'MIN_BILL_NOT_MET', 'message' => "Đơn hàng tối thiểu {$minBill}đ", 'discount_amount' => 0];
+        }
+
+        // 3. Check customer points
+        $pointsUsed = (int)$voucher->point_cost;
+        $customerPoints = 0;
+        $customer = null;
+        
+        if ($customerId) {
+            $customer = $customerRepo->findById($customerId);
+            if ($customer) {
+                $customerPoints = (int)$customer->points;
+            }
+        }
+
+        if ($pointsUsed > 0 && $customerPoints < $pointsUsed) {
+            return ['success' => false, 'code' => 'NOT_ENOUGH_POINTS', 'message' => 'Không đủ điểm để đổi voucher', 'discount_amount' => 0];
+        }
+
+        // 4. Calculate discount
+        $discountAmount = $this->calculateDiscount($voucher, $billTotal);
+
+        // 5. Update voucher.used_count
+        $voucher->used_count = (int)$voucher->used_count + 1;
+        if (!$voucherRepo->update($voucher)) {
+            return ['success' => false, 'code' => 'UPDATE_VOUCHER_FAILED', 'message' => 'Không thể cập nhật voucher', 'discount_amount' => 0];
+        }
+
+        // 6. Deduct customer points (nếu có)
+        if ($pointsUsed > 0 && $customer) {
+            $newPoints = max(0, $customerPoints - $pointsUsed);
+            if (!$customerRepo->updatePoints($customerId, $newPoints)) {
+                return ['success' => false, 'code' => 'UPDATE_POINTS_FAILED', 'message' => 'Không thể cập nhật điểm khách hàng', 'discount_amount' => 0];
+            }
+        }
+
+        // 7. Return success
+        return [
+            'success' => true,
+            'code' => 'OK',
+            'message' => 'Đổi voucher thành công',
+            'discount_amount' => (float)$discountAmount,
+            'voucher_name' => $voucher->name,
+            'points_used' => $pointsUsed
+        ];
+    }
+
     public function deleteVoucher($id) {
         $repository = $this->repository('VoucherRepository');
 
@@ -259,23 +342,6 @@ class VoucherService extends Service {
         }
     }
 
-
-
-    /**
-     * Lấy voucher đang còn hiệu lực
-     * @return array
-     */
-    public function getActiveVouchers() {
-        $repository = $this->repository('VoucherRepository');
-        return $repository->findActiveVouchers();
-    }
-
-    /**
-     * Lấy voucher đủ điều kiện cho customer và bill total
-     * @param int|null $customerId
-     * @param float $billTotal
-     * @return array VoucherEntity[]
-     */
     public function getEligibleVouchers($customerId = null, $billTotal = 0) {
         $voucherRepo = $this->repository('VoucherRepository');
         $vouchers = $voucherRepo->findActiveVouchers();
@@ -297,12 +363,6 @@ class VoucherService extends Service {
         return $eligible;
     }
 
-    /**
-     * Tính discount amount theo voucher và bill total
-    * @param VoucherEntity $v
-    * @param float $billTotal
-    * @return int Số tiền giảm (đơn vị nhỏ nhất, VND)
-     */
     public function calculateDiscount($v, $billTotal) {
         // Kiểm tra bill total có đạt yêu cầu tối thiểu không
         if ($billTotal < $v->min_bill_total) {

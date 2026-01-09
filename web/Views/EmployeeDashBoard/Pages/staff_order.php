@@ -53,15 +53,14 @@
                 <div class="category-status">Sẵn sàng</div>
                 <div class="category-content">
                     <h3>Cà Phê</h3>
-                    <span>50 món</span>
+
                 </div>
                 <i class="fas fa-coffee fa-5x category-img" style="color: rgba(255,255,255,0.2);"></i>
             </div>
             <div class="category-card" data-category="tea">
                 <div class="category-status">Sẵn sàng</div>
                 <div class="category-content">
-                    <h3>Trà</h3>
-                    <span>20 món</span>
+                    <h3>Trà Sữa</h3>
                 </div>
                 <i class="fas fa-leaf fa-5x category-img" style="color: #eee;"></i>
             </div>

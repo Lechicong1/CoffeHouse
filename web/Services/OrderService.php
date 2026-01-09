@@ -27,6 +27,13 @@ class OrderService {
     }
 
     /**
+     * Lấy OrderRepository instance (dùng cho các trường hợp đặc biệt)
+     */
+    public function getOrderRepo() {
+        return $this->orderRepo;
+    }
+
+    /**
      * Tạo đơn hàng từ checkout
      */
     public function createOrderFromCheckout($customerId, $data) {
@@ -216,6 +223,10 @@ class OrderService {
         // Quy ước: orders.total_amount lưu `sub_total` (trước khi trừ voucher/giảm giá)
         $order->total_amount = $sub_total;
         $order->note = $data['note'] ?? '';
+        $order->table_number = $data['table_number'] ?? null;
+        
+        // Debug log
+        error_log("DEBUG OrderService - table_number: " . ($order->table_number ?? 'NULL'));
         
         // Thông tin shipping nếu có (Mang về)
         if ($order->order_type === 'ONLINE_DELIVERY' || $order->order_type === 'TAKE_AWAY') {
@@ -444,6 +455,41 @@ class OrderService {
             }
 
             return ['success' => false, 'message' => 'Lỗi khi cập nhật'];
+
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Cập nhật chi tiết đơn hàng: loại đơn, số bàn, ghi chú (chỉ khi PENDING)
+     */
+    public function updateOrderDetails($orderId, $orderType, $tableNumber, $note) {
+        try {
+            $order = $this->orderRepo->findById($orderId);
+            if (!$order) {
+                return ['success' => false, 'message' => 'Không tìm thấy đơn hàng'];
+            }
+
+            if ($order->status !== 'PENDING') {
+                return ['success' => false, 'message' => 'Chỉ có thể sửa đơn khi đang chờ xác nhận'];
+            }
+
+            // Nếu chọn mang về, xóa số bàn
+            if ($orderType === 'TAKEAWAY') {
+                $order->table_number = null;
+            } else {
+                $order->table_number = $tableNumber ?: null;
+            }
+
+            $order->order_type = $orderType;
+            $order->note = trim($note);
+
+            if ($this->orderRepo->update($order)) {
+                return ['success' => true, 'message' => 'Cập nhật đơn hàng thành công'];
+            }
+
+            return ['success' => false, 'message' => 'Lỗi khi cập nhật đơn hàng'];
 
         } catch (Exception $e) {
             return ['success' => false, 'message' => $e->getMessage()];

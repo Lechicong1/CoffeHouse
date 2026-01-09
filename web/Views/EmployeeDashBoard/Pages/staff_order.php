@@ -101,9 +101,6 @@
                     <option value="20">Bàn 20</option>
                 </select>
             </div>
-            <div id="order-id-box" style="flex: 1; display: none;">
-                <input type="text" id="order-id" readonly placeholder="Mã Đơn" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; background: #f5f5f5;">
-            </div>
         </div>
 
         <!-- Hàng 2: Buttons Chọn khách và Voucher -->

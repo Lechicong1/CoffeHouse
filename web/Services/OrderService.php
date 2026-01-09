@@ -27,6 +27,13 @@ class OrderService {
     }
 
     /**
+     * Lấy OrderRepository instance (dùng cho các trường hợp đặc biệt)
+     */
+    public function getOrderRepo() {
+        return $this->orderRepo;
+    }
+
+    /**
      * Tạo đơn hàng từ checkout
      */
     public function createOrderFromCheckout($customerId, $data) {

@@ -8,6 +8,7 @@ require_once './web/Services/ProductService.php';
 require_once './web/Services/OrderService.php';
 require_once './web/Services/CustomerService.php';
 require_once './web/Services/CategoryService.php';
+require_once __DIR__ . '/../../Config/ExcelHelper.php';
 
 class StaffController extends Controller {
     private $productService;
@@ -353,6 +354,100 @@ class StaffController extends Controller {
     }
 
     /**
+     * Xuất Excel danh sách đơn hàng
+     */
+    public function xuatexcel() {
+        if(isset($_POST['btnXuatexcel'])){
+            try {
+                // Lấy filter từ POST
+                $filters = [];
+                if (isset($_POST['status']) && !empty($_POST['status'])) {
+                    $filters['status'] = $_POST['status'];
+                }
+                if (isset($_POST['search']) && !empty($_POST['search'])) {
+                    $filters['search'] = trim($_POST['search']);
+                }
+                
+                // Chỉ lấy đơn hàng tại quầy
+                $filters['order_type'] = 'AT_COUNTER';
+
+                // Lấy danh sách đơn hàng
+                $orders = $this->orderService->getOrders($filters);
+
+                // Chuyển đổi array sang format Excel
+                $data = array_map(function($order) {
+                    // Format status
+                    $statusText = '';
+                    switch($order['status']) {
+                        case 'PENDING': $statusText = 'Chờ xác nhận'; break;
+                        case 'PREPARING': $statusText = 'Đang chuẩn bị'; break;
+                        case 'READY': $statusText = 'Sẵn sàng'; break;
+                        case 'SHIPPING': $statusText = 'Đang giao'; break;
+                        case 'COMPLETED': $statusText = 'Hoàn thành'; break;
+                        case 'CANCELLED': $statusText = 'Đã hủy'; break;
+                        default: $statusText = $order['status'];
+                    }
+
+                    // Format payment status
+                    $paymentText = '';
+                    switch($order['payment_status']) {
+                        case 'PAID': $paymentText = 'Đã thanh toán'; break;
+                        case 'UNPAID': $paymentText = 'Chưa thanh toán'; break;
+                        case 'REFUNDED': $paymentText = 'Đã hoàn tiền'; break;
+                        default: $paymentText = $order['payment_status'];
+                    }
+
+                    // Format order type
+                    $orderTypeText = $order['order_type'] === 'AT_COUNTER' ? 'Tại quầy' : 'Mang về';
+
+                    // Format payment method
+                    $paymentMethodText = $order['payment_method'] === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản';
+
+                    return [
+                        'id' => $order['id'],
+                        'order_code' => $order['order_code'] ?? '-',
+                        'customer_name' => $order['customer_name'] ?? 'Khách lẻ',
+                        'customer_phone' => $order['customer_phone'] ?? '-',
+                        'table_number' => $order['table_number'] ?? '-',
+                        'order_type' => $orderTypeText,
+                        'total_amount' => number_format($order['total_amount'], 0, ',', '.') . ' ₫',
+                        'payment_method' => $paymentMethodText,
+                        'payment_status' => $paymentText,
+                        'status' => $statusText,
+                        'note' => $order['note'] ?? '-',
+                        'created_at' => date('d/m/Y H:i', strtotime($order['created_at']))
+                    ];
+                }, $orders);
+
+                // Định nghĩa cấu trúc cột cho Excel
+                $headers = [
+                    'id' => 'ID',
+                    'order_code' => 'Mã Đơn',
+                    'customer_name' => 'Khách Hàng',
+                    'customer_phone' => 'SĐT',
+                    'table_number' => 'Bàn Số',
+                    'order_type' => 'Loại Đơn',
+                    'total_amount' => 'Tổng Tiền',
+                    'payment_method' => 'Phương Thức TT',
+                    'payment_status' => 'Trạng Thái TT',
+                    'status' => 'Trạng Thái',
+                    'note' => 'Ghi Chú',
+                    'created_at' => 'Ngày Tạo'
+                ];
+
+                // Gọi hàm xuất Excel từ Helper
+                ExcelHelper::exportToExcel($data, $headers, 'DanhSachDonHang');
+
+            } catch (Exception $e) {
+                echo "<script>
+                    alert('Lỗi xuất Excel: " . addslashes($e->getMessage()) . "');
+                    window.history.back();
+                </script>";
+            }
+        }
+    }
+
+    /**
      * Cập nhật trạng thái đơn hàng (POST)
      * URL: http://localhost/COFFEE_PHP/StaffController/updateOrderStatus
      */
@@ -513,6 +608,53 @@ class StaffController extends Controller {
         try {
             $items = $this->orderService->getOrderItems($orderId);
             echo json_encode(['success' => true, 'items' => $items]);
+        } catch (Exception $e) {
+            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+        }
+        exit;
+    }
+
+    /**
+     * Lấy dữ liệu đầy đủ cho hóa đơn (order + items)
+     * URL: http://localhost/COFFEE_PHP/StaffController/getOrderInvoiceData
+     */
+    function getOrderInvoiceData() {
+        header('Content-Type: application/json');
+
+        $orderId = isset($_GET['order_id']) ? (int)$_GET['order_id'] : 0;
+
+        if (!$orderId) {
+            echo json_encode(['success' => false, 'message' => 'Thiếu order_id']);
+            exit;
+        }
+
+        try {
+            // Lấy thông tin order và items
+            $orderRepo = $this->orderService->getOrderRepo();
+            
+            // Lấy order với customer info từ findAllWithFilters
+            $allOrders = $orderRepo->findAllWithFilters([]);
+            $orderData = null;
+            foreach ($allOrders as $ord) {
+                if ($ord['id'] == $orderId) {
+                    $orderData = $ord;
+                    break;
+                }
+            }
+            
+            if (!$orderData) {
+                echo json_encode(['success' => false, 'message' => 'Không tìm thấy đơn hàng']);
+                exit;
+            }
+
+            // Lấy items
+            $items = $this->orderService->getOrderItems($orderId);
+
+            echo json_encode([
+                'success' => true, 
+                'order' => $orderData,
+                'items' => $items
+            ]);
         } catch (Exception $e) {
             echo json_encode(['success' => false, 'message' => $e->getMessage()]);
         }

@@ -447,21 +447,18 @@ function setOrderType(type) {
     document.getElementById("btn-take-away").classList.add("active");
   }
 
-  // Toggle giữa Bàn số và Mã đơn
-  const tableBox = document.getElementById("table-box");
-  const orderIdBox = document.getElementById("order-id-box");
-
-  if (tableBox && orderIdBox) {
-    if (type === "AT_COUNTER") {
-      tableBox.style.display = "block";
-      orderIdBox.style.display = "none";
+  // Disable/enable table select based on order type
+  const tableSelect = document.getElementById('pos-table-select');
+  if (tableSelect) {
+    if (type === 'TAKEAWAY') {
+      tableSelect.disabled = true;
+      tableSelect.value = ''; // Clear selection
+      tableSelect.style.background = '#f5f5f5';
+      tableSelect.style.cursor = 'not-allowed';
     } else {
-      tableBox.style.display = "none";
-      orderIdBox.style.display = "block";
-      const orderIdInput = document.getElementById("order-id");
-      if (orderIdInput && !orderIdInput.value) {
-        orderIdInput.value = generateOrderId();
-      }
+      tableSelect.disabled = false;
+      tableSelect.style.background = 'white';
+      tableSelect.style.cursor = 'pointer';
     }
   }
 }

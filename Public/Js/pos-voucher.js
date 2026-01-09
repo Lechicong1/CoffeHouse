@@ -202,6 +202,28 @@ function clearSelectedVoucher() {
   if (voucherInput) voucherInput.value = "";
   const sel = document.getElementById("pos-selected-voucher");
   if (sel) sel.textContent = "Không có voucher";
+  
+  // Ẩn dòng giảm giá và reset về subtotal
+  const discountRow = document.getElementById("discount-row");
+  if (discountRow) discountRow.style.display = "none";
+  
+  // Reset total về subtotal (không còn giảm giá)
+  const subtotalEl = document.getElementById("subtotal-price");
+  const totalEl = document.getElementById("total-price");
+  const btnTotalEl = document.getElementById("btn-total");
+  const modalTotalEl = document.getElementById("modal-total");
+  
+  if (subtotalEl && totalEl) {
+    const subtotal = parseVND(subtotalEl.textContent);
+    totalEl.textContent = formatCurrency(subtotal);
+    if (btnTotalEl) btnTotalEl.textContent = formatCurrency(subtotal);
+    if (modalTotalEl) modalTotalEl.textContent = formatCurrency(subtotal);
+    
+    // Update form total
+    const formTotal = document.getElementById("form-total-amount");
+    if (formTotal) formTotal.value = String(Math.round(subtotal));
+  }
+  
   if (typeof updateCartUI === "function") updateCartUI();
   closeVoucherModal();
 }
@@ -262,11 +284,24 @@ function applyTotalsFromPreview(discount, totalAfter) {
   const totalEl = document.getElementById("total-price");
   const btnTotalEl = document.getElementById("btn-total");
 
-  // (tuỳ bạn) nếu muốn hiện 1 dòng giảm giá thì phải có element trong HTML,
-  // còn hiện tại staff_order.php chưa có #discount-price
-  const discountEl = document.getElementById("discount-price"); // có thì update, không có thì thôi
+  // Discount row elements
+  const discountEl = document.getElementById("discount-price");
+  const discountRow = document.getElementById("discount-row");
+  const discountVoucherName = document.getElementById("discount-voucher-name");
 
-  if (discountEl) discountEl.textContent = formatCurrency(discount);
+  // Hiển thị hoặc ẩn dòng giảm giá
+  if (discount > 0 && discountRow) {
+    discountRow.style.display = "flex";
+    if (discountEl) discountEl.textContent = `-${formatCurrency(discount)}`;
+    
+    // Cập nhật tên voucher nếu có
+    if (discountVoucherName && window.currentOrder?.voucher?.name) {
+      discountVoucherName.textContent = window.currentOrder.voucher.name;
+    }
+  } else if (discountRow) {
+    discountRow.style.display = "none";
+  }
+
   if (totalEl) totalEl.textContent = formatCurrency(totalAfter);
   if (btnTotalEl) btnTotalEl.textContent = formatCurrency(totalAfter);
 

@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../Config/ExcelHelper.php';
 
 class CustomerController extends Controller {
 
@@ -216,6 +217,50 @@ class CustomerController extends Controller {
             } else {
                 echo 'Lỗi: ' . $result['message'];
             }
+        }
+    }
+
+    /**
+     * Xuất Excel danh sách khách hàng
+     */
+    public function xuatexcel() {
+        if(isset($_POST['btnXuatexcel'])){
+            $service = $this->service('CustomerService');
+
+            // Lấy từ khóa tìm kiếm nếu có
+            $keyword = isset($_POST['txtSearch']) ? trim($_POST['txtSearch']) : '';
+
+            // Lấy dữ liệu khách hàng
+            if (!empty($keyword)) {
+                $customers = $service->searchCustomers($keyword);
+            } else {
+                $customers = $service->getAllCustomers();
+            }
+
+            // Chuyển đổi object sang array để xuất Excel
+            $data = array_map(function($customer) {
+                return [
+                    'id' => $customer->id,
+                    'full_name' => $customer->full_name,
+                    'phone' => $customer->phone,
+                    'email' => $customer->email ?? '-',
+                    'points' => $customer->points ?? 0,
+                    'status' => $customer->status ? 'Hoạt động' : 'Vô hiệu hóa'
+                ];
+            }, $customers);
+
+            // Định nghĩa cấu trúc cột cho Excel
+            $headers = [
+                'id' => 'ID',
+                'full_name' => 'Họ và Tên',
+                'phone' => 'Số Điện Thoại',
+                'email' => 'Email',
+                'points' => 'Điểm Tích Lũy',
+                'status' => 'Trạng Thái'
+            ];
+
+            // Gọi hàm xuất Excel từ Helper
+            ExcelHelper::exportToExcel($data, $headers, 'DanhSachKhachHang');
         }
     }
 }

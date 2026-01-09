@@ -52,7 +52,7 @@
         </div>
 
         <!-- Products Grid -->
-        <div class="products-grid">
+        <div class="menu-grid">
             <?php if (isset($products) && !empty($products)): ?>
                 <?php foreach ($products as $product):
                     // Lấy giá nhỏ nhất từ các size
@@ -62,22 +62,22 @@
                         $minPrice = min($prices);
                     }
                 ?>
-                <div class="product-card">
+                <div class="menu-card">
                     <a href="/COFFEE_PHP/User/productDetail?id=<?= $product->id ?>" style="text-decoration: none; color: inherit;">
-                        <div class="product-image">
+                        <div class="menu-card-image">
                             <?php if (!empty($product->image_url)): ?>
                                 <img src="/COFFEE_PHP/<?= htmlspecialchars($product->image_url) ?>" alt="<?= htmlspecialchars($product->name) ?>">
                             <?php else: ?>
                                 <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500" alt="<?= htmlspecialchars($product->name) ?>">
                             <?php endif; ?>
                             <?php if (isset($product->created_at) && $product->created_at && strtotime($product->created_at) > strtotime('-7 days')): ?>
-                                <span class="product-badge">Mới</span>
+                                <span class="menu-badge">Mới</span>
                             <?php endif; ?>
                         </div>
-                        <div class="product-content">
+                        <div class="menu-card-content">
                             <h3><?= strtoupper(htmlspecialchars($product->name)) ?></h3>
                             <p><?= htmlspecialchars(substr($product->description, 0, 80)) . (strlen($product->description) > 80 ? '...' : '') ?></p>
-                            <div class="product-footer">
+                            <div class="menu-card-footer">
                                 <span class="price">
                                     <?php if ($minPrice): ?>
                                         Từ <?= number_format($minPrice, 0, ',', '.') ?>đ
@@ -85,7 +85,7 @@
                                         Liên hệ
                                     <?php endif; ?>
                                 </span>
-                                <button class="btn-view" onclick="event.preventDefault(); event.stopPropagation(); window.location.href='/COFFEE_PHP/User/productDetail?id=<?= $product->id ?>'">
+                                <button class="btn-add">
                                     Xem chi tiết
                                 </button>
                             </div>

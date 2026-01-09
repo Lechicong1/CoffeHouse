@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../../Config/ExcelHelper.php';
 
 class VoucherController extends Controller {
 
@@ -15,9 +16,7 @@ class VoucherController extends Controller {
         $this->view('AdminDashBoard/MasterLayout', [
             'section' => 'vouchers',
             'page' => 'Vouchers_v',
-            'vouchers' => $vouchers,
-            'totalVouchers' => $service->countVouchers(),
-            'activeVouchers' => $service->countActiveVouchers()
+            'vouchers' => $vouchers
         ]);
     }
 
@@ -43,9 +42,7 @@ class VoucherController extends Controller {
             'section' => 'vouchers',
             'page' => 'Vouchers_v',
             'vouchers' => $vouchers,
-            'keyword' => $keyword,
-            'totalVouchers' => count($vouchers),
-            'activeVouchers' => $service->countActiveVouchers()
+            'keyword' => $keyword
         ]);
     }
 
@@ -255,6 +252,56 @@ class VoucherController extends Controller {
 
         echo '<span id="pv" data-ok="1" data-discount="'.$res['discount_amount'].'" data-total-after="'.$res['total_after'].'"></span>';
         exit;
+    }
+
+    /**
+     * Xuất Excel danh sách voucher
+     */
+    public function xuatexcel() {
+        if(isset($_POST['btnXuatexcel'])){
+            $service = $this->service('VoucherService');
+
+            // Lấy từ khóa tìm kiếm nếu có
+            $keyword = isset($_POST['txtSearch']) ? trim($_POST['txtSearch']) : '';
+
+            // Lấy dữ liệu voucher
+            if (!empty($keyword)) {
+                $vouchers = $service->searchVouchers($keyword);
+            } else {
+                $vouchers = $service->getAllVouchers();
+            }
+
+            // Chuyển đổi object sang array để xuất Excel
+            $data = array_map(function($voucher) {
+                return [
+                    'id' => $voucher->id,
+                    'name' => $voucher->name,
+                    'point_cost' => $voucher->point_cost,
+                    'discount_type' => $voucher->discount_type == 'FIXED' ? 'Giảm cố định' : 'Giảm %',
+                    'discount_value' => $voucher->discount_value,
+                    'min_bill_total' => $voucher->min_bill_total,
+                    'quantity' => $voucher->quantity ?? 'Không giới hạn',
+                    'used_count' => $voucher->used_count,
+                    'is_active' => $voucher->is_active ? 'Hoạt động' : 'Vô hiệu hóa'
+                ];
+            }, $vouchers);
+
+            // Định nghĩa cấu trúc cột cho Excel
+            $headers = [
+                'id' => 'ID',
+                'name' => 'Tên Voucher',
+                'point_cost' => 'Điểm đổi',
+                'discount_type' => 'Loại giảm giá',
+                'discount_value' => 'Giá trị giảm',
+                'min_bill_total' => 'Đơn tối thiểu',
+                'quantity' => 'Số lượng',
+                'used_count' => 'Đã sử dụng',
+                'is_active' => 'Trạng thái'
+            ];
+
+            // Gọi hàm xuất Excel từ Helper
+            ExcelHelper::exportToExcel($data, $headers, 'DanhSachVoucher');
+        }
     }
 
 }

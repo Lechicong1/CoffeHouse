@@ -18,16 +18,14 @@ $keyword = $data['keyword'] ?? '';
 
 <section id="customers" class="content-section">
     <div class="customer-management">
-        <!-- Page Header -->
-        <div class="page-header">
-            <h2><i class="fas fa-users"></i> Quản Lý Khách Hàng</h2>
-        </div>
-
-        <!-- Stats Cards -->
-        <div class="stats-cards">
-            <div class="stat-card">
-                <h3>Tổng Khách Hàng</h3>
-                <div class="number"><?php echo $totalCustomers; ?></div>
+        <!-- Section Header (match Employees UI) -->
+        <div class="section-header">
+            <div class="header-title">
+                <h2><i class="fas fa-users"></i> Quản Lý Khách Hàng</h2>
+                <p class="subtitle">Tổng số: <strong><?php echo $totalCustomers; ?></strong> khách hàng</p>
+            </div>
+            <div class="header-actions">
+                <!-- reserved for actions (filters / add) -->
             </div>
         </div>
 
@@ -42,6 +40,15 @@ $keyword = $data['keyword'] ?? '';
                     </button>
                 </form>
             </div>
+
+            <!-- Button Xuất Excel -->
+            <form method="POST" action="/COFFEE_PHP/CustomerController/xuatexcel" style="display: inline-block; margin: 0 10px;">
+                <input type="hidden" name="txtSearch" value="<?= htmlspecialchars($keyword) ?>">
+                <button type="submit" name="btnXuatexcel" class="btn btn-success">
+                    <i class="fas fa-file-excel"></i> Xuất Excel
+                </button>
+            </form>
+
             <?php if (isset($keyword) && !empty($keyword)): ?>
                 <a href="/COFFEE_PHP/CustomerController/GetData" class="btn btn-warning">
                     <i class="fas fa-redo"></i> Xem tất cả

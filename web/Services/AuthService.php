@@ -111,7 +111,7 @@ class AuthService extends Service {
                 case 'ORDER':
                     return '/COFFEE_PHP/Staff/pos';
                 case 'BARTENDER':
-                    return '/COFFEE_PHP/Staff/orders';
+                    return '/COFFEE_PHP/BaristaController';
                 case 'SHIPPER':
                     return '/COFFEE_PHP/ShipperController';
                 case 'ADMIN':

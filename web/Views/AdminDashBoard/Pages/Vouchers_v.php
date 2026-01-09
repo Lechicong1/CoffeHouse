@@ -6,9 +6,8 @@
 
 // Lấy dữ liệu từ Controller (đã truyền qua $data)
 $vouchers = $data['vouchers'] ?? [];
-$totalVouchers = $data['totalVouchers'] ?? 0;
-$activeVouchers = $data['activeVouchers'] ?? 0;
 $keyword = $data['keyword'] ?? '';
+
 ?>
 
 <!-- Import Font Awesome -->
@@ -27,21 +26,7 @@ $keyword = $data['keyword'] ?? '';
             </button>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="stats-cards">
-            <div class="stat-card stat-card-primary">
-                <h3>Tổng Voucher</h3>
-                <div class="number"><?php echo $totalVouchers; ?></div>
-            </div>
-            <div class="stat-card stat-card-success">
-                <h3>Đang Hoạt Động</h3>
-                <div class="number"><?php echo $activeVouchers; ?></div>
-            </div>
-            <div class="stat-card stat-card-warning">
-                <h3>Không Hoạt Động</h3>
-                <div class="number"><?php echo $totalVouchers - $activeVouchers; ?></div>
-            </div>
-        </div>
+        <!-- Stats Cards removed per request -->
 
         <!-- Action Bar -->
         <div class="action-bar">
@@ -54,6 +39,15 @@ $keyword = $data['keyword'] ?? '';
                     </button>
                 </form>
             </div>
+
+            <!-- Button Xuất Excel -->
+            <form method="POST" action="/COFFEE_PHP/VoucherController/xuatexcel" style="display: inline-block; margin: 0 10px;">
+                <input type="hidden" name="txtSearch" value="<?= htmlspecialchars($keyword) ?>">
+                <button type="submit" name="btnXuatexcel" class="btn btn-success">
+                    <i class="fas fa-file-excel"></i> Xuất Excel
+                </button>
+            </form>
+
             <?php if (isset($keyword) && !empty($keyword)): ?>
                 <a href="/COFFEE_PHP/VoucherController/GetData" class="btn btn-warning">
                     <i class="fas fa-redo"></i> Xem tất cả

@@ -159,27 +159,7 @@ class VoucherRepository extends ConnectDatabase {
         return mysqli_stmt_execute($stmt);
     }
 
-    /**
-     * Đếm tổng số voucher
-     * @return int
-     */
-    public function countAll() {
-        $sql = "SELECT COUNT(*) as total FROM vouchers";
-        $result = mysqli_query($this->con, $sql);
-        $row = mysqli_fetch_assoc($result);
-        return (int)$row['total'];
-    }
 
-    /**
-     * Đếm voucher đang hoạt động
-     * @return int
-     */
-    public function countActive() {
-        $sql = "SELECT COUNT(*) as total FROM vouchers WHERE is_active = 1";
-        $result = mysqli_query($this->con, $sql);
-        $row = mysqli_fetch_assoc($result);
-        return (int)$row['total'];
-    }
 
     /**
      * Lấy voucher đang còn hiệu lực

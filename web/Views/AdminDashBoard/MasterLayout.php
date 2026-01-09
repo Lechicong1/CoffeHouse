@@ -95,10 +95,10 @@ $currentSection = $data['section'] ?? 'dashboard';
                             <span class="menu-text">KHUYẾN MÃI</span>
                         </a>
                     </li>
-                    <li class="menu-item <?= $currentSection === 'reports' ? 'active' : '' ?>" data-target="reports">
-                        <a href="/COFFEE_PHP/admin/reports" class="menu-link">
-                            <span class="menu-icon">📈</span>
-                            <span class="menu-text">BÁO CÁO</span>
+                    <li class="menu-item <?= $currentSection === 'report' ? 'active' : '' ?>" data-target="report">
+                        <a href="http://localhost/COFFEE_PHP/ReportController" class="menu-link">
+                            <span class="menu-icon">📊</span>
+                            <span class="menu-text">BÁO CÁO THU CHI</span>
                         </a>
                     </li>
 
@@ -213,4 +213,3 @@ $currentSection = $data['section'] ?? 'dashboard';
     </script>
 </body>
 </html>
-

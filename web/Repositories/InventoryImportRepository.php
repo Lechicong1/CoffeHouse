@@ -107,5 +107,27 @@ class InventoryImportRepository extends ConnectDatabase {
 
         return $imports;
     }
+
+    /**
+     * Lấy phiếu nhập theo khoảng thời gian (cho Report)
+     */
+    public function findByDateRange($fromDate, $toDate) {
+        $sql = "SELECT ii.*, ing.name as ingredient_name, ing.unit 
+                FROM inventory_imports ii 
+                JOIN ingredients ing ON ii.ingredient_id = ing.id 
+                WHERE ii.import_date BETWEEN ? AND ? 
+                ORDER BY ii.import_date DESC";
+        $stmt = mysqli_prepare($this->con, $sql);
+        mysqli_stmt_bind_param($stmt, "ss", $fromDate, $toDate);
+        mysqli_stmt_execute($stmt);
+
+        $result = mysqli_stmt_get_result($stmt);
+        $imports = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $imports[] = $row;
+        }
+
+        return $imports;
+    }
 }
 ?>

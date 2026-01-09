@@ -72,7 +72,7 @@ $roles = $data['roles'] ?? [
                     <th>Email</th>
                     <th>Số điện thoại</th>
                     <th>Lương</th>
-                    <th>Thao tác</th>
+                    <th>Ngày vào làm</th>
                 </tr>
             </thead>
             <tbody>

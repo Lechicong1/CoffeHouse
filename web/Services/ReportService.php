@@ -33,6 +33,20 @@ class ReportService extends Service {
     }
 
     /**
+     * Lấy tổng doanh thu từ đơn hàng (Tổng Thu thực tế)
+     */
+    public function getTotalRevenue($fromDate, $toDate) {
+        return $this->reportRepo->getTotalExpenseProduct($fromDate, $toDate);
+    }
+
+    /**
+     * Lấy chi tiết doanh thu theo sản phẩm
+     */
+    public function getRevenueDetails($fromDate, $toDate) {
+        return $this->reportRepo->getDetailRevenue($fromDate, $toDate);
+    }
+
+    /**
      * Lấy chi tiết nhân viên và lương (cho modal)
      */
     public function getEmployeeDetails() {
@@ -59,8 +73,8 @@ class ReportService extends Service {
         // Tổng chi
         $totalExpense = $totalSalary + $totalInventory;
 
-        // Tổng thu (hardcode tạm thời như yêu cầu)
-        $totalRevenue = 31000000; // 31 triệu VNĐ
+        // Tổng thu từ đơn hàng (không hardcode nữa)
+        $totalRevenue = $this->getTotalRevenue($fromDate, $toDate);
 
         // Lợi nhuận
         $profit = $totalRevenue - $totalExpense;
@@ -75,4 +89,3 @@ class ReportService extends Service {
     }
 }
 ?>
-

@@ -43,16 +43,28 @@ $showInventoryDetails = isset($_GET['show_inventory']);
                 🔄 Làm mới
             </button>
         </form>
+
+        <!-- Nút Xuất Excel Báo Cáo Tổng Hợp -->
+        <form method="POST" action="ReportController/xuatexcel" style="display: inline-block; margin-left: 10px;">
+            <input type="hidden" name="from_date" value="<?= $fromDate ?>">
+            <input type="hidden" name="to_date" value="<?= $toDate ?>">
+            <button type="submit" name="btnXuatexcel" class="btn-primary" style="background: #27ae60;">
+                📊 Xuất Excel Tổng Hợp
+            </button>
+        </form>
     </div>
 
     <!-- Statistics Cards -->
     <div class="stats-cards-container">
-        <!-- Card 1: Tổng Thu -->
+        <!-- Card 1: Tổng Thu (Clickable) -->
         <div class="stat-card card-revenue">
             <div class="card-icon">📥</div>
             <div class="card-content">
                 <h3>Tổng Thu</h3>
                 <p class="card-value"><?= number_format($report['total_revenue'] ?? 0, 0, ',', ',') ?> VNĐ</p>
+                <a href="?url=ReportController&from_date=<?= $fromDate ?>&to_date=<?= $toDate ?>&show_revenue=1" class="card-hint">
+                    👆 Nhấn để xem chi tiết
+                </a>
             </div>
         </div>
 
@@ -99,12 +111,88 @@ $showInventoryDetails = isset($_GET['show_inventory']);
         </div>
     </div>
 
+    <!-- Chi Tiết Doanh Thu Theo Sản Phẩm -->
+    <?php if (isset($_GET['show_revenue'])): ?>
+    <div class="detail-section">
+        <div class="section-title">
+            <h3>💰 Chi Tiết Doanh Thu Theo Sản Phẩm</h3>
+            <div style="display: flex; gap: 10px;">
+                <!-- Nút Xuất Excel Chi Tiết Doanh Thu -->
+                <form method="POST" action="ReportController/xuatexcelRevenue" style="display: inline-block;">
+                    <input type="hidden" name="from_date" value="<?= $fromDate ?>">
+                    <input type="hidden" name="to_date" value="<?= $toDate ?>">
+                    <button type="submit" name="btnXuatexcelRevenue" class="btn-primary" style="background: #27ae60; padding: 8px 16px;">
+                        📊 Xuất Excel
+                    </button>
+                </form>
+                <a href="?url=ReportController&from_date=<?= $fromDate ?>&to_date=<?= $toDate ?>" class="btn-close">✖ Đóng</a>
+            </div>
+        </div>
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Tên sản phẩm</th>
+                        <th>Danh mục</th>
+                        <th>Số lượng bán</th>
+                        <th>Tổng doanh thu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $revenueDetails = $data['revenue_details'] ?? [];
+                    if (empty($revenueDetails)):
+                    ?>
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 20px; color: #95a5a6;">
+                                📭 Không có dữ liệu doanh thu trong khoảng thời gian này
+                            </td>
+                        </tr>
+                    <?php else:
+                        $stt = 1;
+                        foreach ($revenueDetails as $item):
+                    ?>
+                        <tr>
+                            <td><strong><?= $stt++ ?></strong></td>
+                            <td style="font-weight: 600;"><?= htmlspecialchars($item['productName'] ?? 'N/A') ?></td>
+                            <td>
+                                <span style="background: #3498db; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">
+                                    <?= htmlspecialchars($item['categoryName'] ?? 'N/A') ?>
+                                </span>
+                            </td>
+                            <td style="font-weight: 600; color: #e67e22;">
+                                <?= number_format($item['totalQuantitySold'], 0, ',', ',') ?>
+                            </td>
+                            <td style="font-weight: 700; color: #27ae60; font-size: 16px;">
+                                <?= number_format($item['totalRevenue'], 0, ',', ',') ?> VNĐ
+                            </td>
+                        </tr>
+                    <?php endforeach; endif; ?>
+                </tbody>
+            </table>
+            <div class="modal-total">
+                <strong>Tổng doanh thu:</strong>
+                <span><?= number_format($report['total_revenue'] ?? 0, 0, ',', ',') ?> VNĐ</span>
+            </div>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <!-- Chi Tiết Nhân Viên & Lương -->
     <?php if ($showEmployeeDetails): ?>
     <div class="detail-section">
         <div class="section-title">
             <h3>📋 Danh Sách Nhân Viên & Lương</h3>
-            <a href="?url=ReportController&from_date=<?= $fromDate ?>&to_date=<?= $toDate ?>" class="btn-close">✖ Đóng</a>
+            <div style="display: flex; gap: 10px;">
+                <!-- Nút Xuất Excel Chi Tiết Nhân Viên -->
+                <form method="POST" action="ReportController/xuatexcelEmployee" style="display: inline-block;">
+                    <button type="submit" name="btnXuatexcelEmployee" class="btn-primary" style="background: #27ae60; padding: 8px 16px;">
+                        📊 Xuất Excel
+                    </button>
+                </form>
+                <a href="?url=ReportController&from_date=<?= $fromDate ?>&to_date=<?= $toDate ?>" class="btn-close">✖ Đóng</a>
+            </div>
         </div>
         <div class="table-container">
             <table class="data-table">
@@ -163,7 +251,17 @@ $showInventoryDetails = isset($_GET['show_inventory']);
     <div class="detail-section">
         <div class="section-title">
             <h3>📦 Chi Tiết Nhập Nguyên Liệu</h3>
-            <a href="?url=ReportController&from_date=<?= $fromDate ?>&to_date=<?= $toDate ?>" class="btn-close">✖ Đóng</a>
+            <div style="display: flex; gap: 10px;">
+                <!-- Nút Xuất Excel Chi Tiết Nhập Kho -->
+                <form method="POST" action="ReportController/xuatexcelInventory" style="display: inline-block;">
+                    <input type="hidden" name="from_date" value="<?= $fromDate ?>">
+                    <input type="hidden" name="to_date" value="<?= $toDate ?>">
+                    <button type="submit" name="btnXuatexcelInventory" class="btn-primary" style="background: #27ae60; padding: 8px 16px;">
+                        📊 Xuất Excel
+                    </button>
+                </form>
+                <a href="?url=ReportController&from_date=<?= $fromDate ?>&to_date=<?= $toDate ?>" class="btn-close">✖ Đóng</a>
+            </div>
         </div>
         <div class="table-container">
             <table class="data-table">

@@ -120,7 +120,8 @@ class EmployeeController extends Controller {
                     'phonenumber' => $_POST['txtPhonenumber'],
                     'address' => $_POST['txtAddress'] ?? null,
                     'roleName' => $_POST['ddlRoleName'],
-                    'luong' => (float)$_POST['txtLuong']
+                    'luong' => (float)$_POST['txtLuong'],
+                    'create_at' => $_POST['txtCreateAt'] ?? date('Y-m-d')
                 ];
                 
                 $result = $this->employeeService->createEmployee($data);
@@ -168,7 +169,8 @@ class EmployeeController extends Controller {
                     'phonenumber' => $_POST['txtPhonenumber'],
                     'address' => $_POST['txtAddress'] ?? null,
                     'roleName' => $_POST['ddlRoleName'],
-                    'luong' => (float)$_POST['txtLuong']
+                    'luong' => (float)$_POST['txtLuong'],
+                    'create_at' => $_POST['txtCreateAt'] ?? null
                 ];
                 
                 // Nếu có password mới

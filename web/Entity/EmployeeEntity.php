@@ -16,6 +16,7 @@ class EmployeeEntity {
     public $address;
     public $roleName;
     public $luong;
+    public $create_at;
 
     /**
      * Constructor - Khởi tạo entity từ array
@@ -32,6 +33,7 @@ class EmployeeEntity {
             $this->address = $data['address'] ?? null;
             $this->roleName = $data['roleName'] ?? null;
             $this->luong = $data['luong'] ?? null;
+            $this->create_at = $data['create_at'] ?? null;
         }
     }
 
@@ -62,6 +64,26 @@ class EmployeeEntity {
     }
 
     /**
+     * Format ngày vào làm
+     */
+    public function getFormattedCreateAt() {
+        if (empty($this->create_at)) {
+            return '-';
+        }
+        return date('d/m/Y H:i', strtotime($this->create_at));
+    }
+
+    /**
+     * Lấy ngày vào làm (chỉ ngày)
+     */
+    public function getCreateDate() {
+        if (empty($this->create_at)) {
+            return '';
+        }
+        return date('Y-m-d', strtotime($this->create_at));
+    }
+
+    /**
      * Chuyển entity thành array
      */
     public function toArray() {
@@ -75,7 +97,10 @@ class EmployeeEntity {
             'roleName' => $this->roleName,
             'roleDisplayName' => $this->getRoleDisplayName(),
             'luong' => $this->luong,
-            'formattedSalary' => $this->getFormattedSalary()
+            'formattedSalary' => $this->getFormattedSalary(),
+            'create_at' => $this->create_at,
+            'formattedCreateAt' => $this->getFormattedCreateAt(),
+            'createDate' => $this->getCreateDate()
         ];
     }
 }

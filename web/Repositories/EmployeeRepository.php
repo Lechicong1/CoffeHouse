@@ -126,11 +126,15 @@ class EmployeeRepository extends ConnectDatabase {
      * @return bool
      */
     public function create($employee) {
-        $sql = "INSERT INTO employee (username, password, fullname, email, phonenumber, address, roleName, luong) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        $sql = "INSERT INTO employee (username, password, fullname, email, phonenumber, address, roleName, luong, create_at) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "sssssssi",
+
+        // Nếu không có create_at, sử dụng thời gian hiện tại
+        $createAt = $employee->create_at ?? date('Y-m-d H:i:s');
+
+        mysqli_stmt_bind_param($stmt, "sssssssss",
             $employee->username,
             $employee->password,
             $employee->fullname,
@@ -138,7 +142,8 @@ class EmployeeRepository extends ConnectDatabase {
             $employee->phonenumber,
             $employee->address,
             $employee->roleName,
-            $employee->luong
+            $employee->luong,
+            $createAt
         );
 
         return mysqli_stmt_execute($stmt);
@@ -151,17 +156,18 @@ class EmployeeRepository extends ConnectDatabase {
      */
     public function update($employee) {
         $sql = "UPDATE employee 
-                SET fullname = ?, email = ?, phonenumber = ?, address = ?, roleName = ?, luong = ?
+                SET fullname = ?, email = ?, phonenumber = ?, address = ?, roleName = ?, luong = ?, create_at = ?
                 WHERE id = ?";
 
         $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "sssssii",
+        mysqli_stmt_bind_param($stmt, "sssssisi",
             $employee->fullname,
             $employee->email,
             $employee->phonenumber,
             $employee->address,
             $employee->roleName,
             $employee->luong,
+            $employee->create_at,
             $employee->id
         );
 

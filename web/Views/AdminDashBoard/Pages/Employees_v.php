@@ -110,6 +110,11 @@ $roles = $data['roles'] ?? [
                                 <?= $employee->getFormattedSalary() ?>
                             </td>
                             <td>
+                                <span style="color: #7f8c8d; font-size: 0.9em;">
+                                    <?= $employee->getFormattedCreateAt() ?>
+                                </span>
+                            </td>
+                            <td>
                                 <button class="btn-edit" onclick='openEmployeeModal("edit", <?= htmlspecialchars(json_encode($employee->toArray())) ?>)' title="Sửa">
                                     ✏️ Sửa
                                 </button>
@@ -186,7 +191,7 @@ $roles = $data['roles'] ?? [
                 </div>
             </div>
 
-            <!-- Row 4: Salary + Address -->
+            <!-- Row 4: Salary + Create At -->
             <div class="form-grid">
                 <div class="form-group">
                     <label><span class="label-icon">💰</span> Lương (VNĐ)</label>
@@ -194,9 +199,16 @@ $roles = $data['roles'] ?? [
                 </div>
 
                 <div class="form-group">
-                    <label><span class="label-icon">📍</span> Địa chỉ</label>
-                    <input type="text" id="address" name="txtAddress" placeholder="Nhập địa chỉ (không bắt buộc)">
+                    <label><span class="label-icon">📅</span> Ngày vào làm</label>
+                    <input type="date" id="createAt" name="txtCreateAt" placeholder="Chọn ngày vào làm">
+                    <small>Để trống sẽ lấy ngày hiện tại</small>
                 </div>
+            </div>
+
+            <!-- Row 5: Address -->
+            <div class="form-group">
+                <label><span class="label-icon">📍</span> Địa chỉ</label>
+                <input type="text" id="address" name="txtAddress" placeholder="Nhập địa chỉ (không bắt buộc)">
             </div>
 
             <div class="form-actions">

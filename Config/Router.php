@@ -4,9 +4,9 @@
  * Xử lý URL và gọi Controller -> Action tương ứng
  */
 class Router {
-    protected $controller = "EmployeeController";  // Controller mặc định
-    protected $action = "GetData";                // Action mặc định
-    protected $params = [];                     // Mảng parameters
+    protected $controller = "UserController";  // Controller mặc định (User trang chủ)
+    protected $action = "index";               // Action mặc định
+    protected $params = [];                    // Mảng parameters
 
     /**
      * Constructor - Khởi tạo và xử lý routing
@@ -15,7 +15,7 @@ class Router {
         $arr = $this->processURL();
 
         // ===== XỬ LÝ CONTROLLER =====
-        if ($arr != null) {
+        if ($arr != null && !empty($arr[0])) {
             $controllerName = $arr[0];
 
             // Nếu đã có đuôi "Controller", giữ nguyên
@@ -36,19 +36,20 @@ class Router {
         $this->controller = new $this->controller;
 
         // ===== XỬ LÝ ACTION (METHOD) =====
-        if (isset($arr[1])) {
+        if (isset($arr[1]) && !empty($arr[1])) {
             // Kiểm tra method có tồn tại trong Controller không
             if (method_exists($this->controller, $arr[1])) {
                 $this->action = $arr[1];
                 unset($arr[1]);
             }
         } else {
-            // Nếu không có action trong URL, kiểm tra action mặc định có tồn tại không
-            if (!method_exists($this->controller, $this->action)) {
-                // Nếu action mặc định không tồn tại, thử dùng 'Index'
-                if (method_exists($this->controller, 'Index')) {
-                    $this->action = 'Index';
-                }
+            // Nếu không có action trong URL, tìm action mặc định
+            if (method_exists($this->controller, 'index')) {
+                $this->action = 'index';
+            } elseif (method_exists($this->controller, 'Index')) {
+                $this->action = 'Index';
+            } elseif (method_exists($this->controller, 'GetData')) {
+                $this->action = 'GetData';
             }
         }
 

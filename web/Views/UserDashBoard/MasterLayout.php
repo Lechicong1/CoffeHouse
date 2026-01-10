@@ -158,50 +158,11 @@ $currentPage = $data['currentPage'] ?? $currentSection;
         </div>
     </footer>
 
-    <!-- ========== JAVASCRIPT ========== -->
-    <script src="Public/Js/user-main.js"></script>
+    <!-- ========== JAVASCRIPT - CHỈ DÙNG KHI CẦN ========== -->
     <?php if (isset($data['additionalJS'])): ?>
         <?php foreach ($data['additionalJS'] as $js): ?>
             <script src="<?= $js ?>"></script>
         <?php endforeach; ?>
     <?php endif; ?>
-    
-    <script>
-        // Truyền section hiện tại vào JavaScript
-        window.CURRENT_SECTION = '<?= $currentSection ?>';
-        
-        // Tự động ẩn thông báo sau 3 giây
-        setTimeout(() => {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                alert.style.display = 'none';
-            });
-        }, 3000);
-    </script>
-
-    <style>
-    @keyframes slideIn {
-        from {
-            transform: translateX(100%);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-
-    .alert {
-        animation: slideIn 0.3s ease, fadeOut 0.3s ease 2.7s;
-    }
-
-    @keyframes fadeOut {
-        to {
-            opacity: 0;
-            transform: translateX(100%);
-        }
-    }
-    </style>
 </body>
 </html>
-

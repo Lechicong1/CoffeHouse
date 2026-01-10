@@ -26,15 +26,16 @@
                 <div class="category-text">
                     <h2><?= strtoupper(htmlspecialchars($category->name)) ?></h2>
                     <p><?= htmlspecialchars($category->description) ?></p>
-                    <button class="btn-discover" onclick="window.location.href='/COFFEE_PHP/User/categoryProducts?id=<?= $category->id ?>'">
+                    <!-- Link đến trang sản phẩm theo category -->
+                    <a href="?url=UserController/categoryProducts&id=<?= $category->id ?>" class="btn-discover">
                         KHÁM PHÁ THÊM
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
         <?php endforeach; ?>
     <?php else: ?>
-        <div style="text-align: center; padding: 60px 20px; color: var(--text-light);">
+        <div style="text-align: center; padding: 60px 20px; color: #666;">
             <h3>Hiện tại chưa có danh mục nào</h3>
             <p>Vui lòng quay lại sau để khám phá thực đơn của chúng tôi!</p>
         </div>

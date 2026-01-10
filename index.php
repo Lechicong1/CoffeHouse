@@ -1,23 +1,32 @@
 <?php
 /**
  * INDEX.PHP - Entry point chính của ứng dụng (Root level)
- * File này có thể được dùng thay cho public/index.php
  */
+
+// BẬT HIỂN THỊ LỖI ĐỂ DEBUG
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
 // Bật output buffering và session
 ob_start();
 session_start();
 
-// Include các file Core/Config (tương đương MVC/Core cũ)
-include_once './Config/ConnectDatabase.php';      // Thay ./MVC/Core/connectDB.php
-include_once './Config/Controller.php';    // Thay ./MVC/Core/controller.php
-include_once './Config/Router.php';        // Thay ./MVC/Core/app.php
-include  './Config/Service.php';       // Thay ./MVC/Core/service.php
+// Include các file Core/Config
+include_once './Config/ConnectDatabase.php';
+include_once './Config/Controller.php';
+include_once './Config/Router.php';
+include './Config/Service.php';
 
 include_once './web/brigde.php';
 
-// Khởi tạo ứng dụng (Router sẽ tự động xử lý routing)
-$myapp = new Router();
+try {
+    // Khởi tạo ứng dụng
+    $myapp = new Router();
+} catch (Exception $e) {
+    echo "<h1>Lỗi hệ thống:</h1>";
+    echo "<pre>" . $e->getMessage() . "</pre>";
+    echo "<pre>" . $e->getTraceAsString() . "</pre>";
+}
 
 // Kết thúc output buffering
 ob_end_flush();

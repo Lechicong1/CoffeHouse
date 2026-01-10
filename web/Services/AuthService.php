@@ -3,15 +3,7 @@ require_once __DIR__ . '/../Entity/CustomerEntity.php';
 use web\Entity\CustomerEntity;
 
 class AuthService extends Service {
-
-    /**
-     * Xác thực đăng nhập
-     * @param string $username
-     * @param string $password
-     * @return array ['success' => bool, 'message' => string, 'user' => object|null, 'userType' => string]
-     */
     public function authenticateUser($username, $password, $userType = null) {
-        // Validate đầu vào
         if (empty($username) || empty($password)) {
             return [
                 'success' => false,
@@ -21,8 +13,6 @@ class AuthService extends Service {
             ];
         }
 
-
-        // Nếu userType được truyền vào thì chỉ query bảng tương ứng
         $custRepo = $this->repository('CustomerRepository');
         $empRepo = $this->repository('EmployeeRepository');
 
@@ -34,7 +24,6 @@ class AuthService extends Service {
             $user = $custRepo->findByUsername($username);
             $userType = 'customer';
         } else {
-            // Mặc định: tìm trong customers rồi employee
             $user = $custRepo->findByUsername($username);
             $userType = 'customer';
             if (!$user) {
@@ -43,7 +32,6 @@ class AuthService extends Service {
             }
         }
 
-        // Kiểm tra tồn tại
         if (!$user) {
             return [
                 'success' => false,
@@ -115,7 +103,7 @@ class AuthService extends Service {
                 case 'SHIPPER':
                     return '/COFFEE_PHP/ShipperController';
                 case 'ADMIN':
-                    return '/COFFEE_PHP/admin/dashboard';
+                    return '/COFFEE_PHP/ProductController/GetData';
                 default:
                     return '/COFFEE_PHP/EmployeeController/GetData';
             }

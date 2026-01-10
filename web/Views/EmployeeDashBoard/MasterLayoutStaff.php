@@ -68,21 +68,7 @@ $currentSection = $data['section'] ?? 'pos';
                         </a>
                     </li>
 
-                    <!-- Khách Hàng -->
-                    <li class="menu-item <?= $currentSection === 'customers' ? 'active' : '' ?>">
-                        <a href="http://localhost/COFFEE_PHP/StaffController/customers" class="menu-link">
-                            <span class="menu-icon"><i class="fa-solid fa-users"></i></span>
-                            <span class="menu-text">KHÁCH HÀNG</span>
-                        </a>
-                    </li>
-
-                    <!-- Cá Nhân -->
-                    <li class="menu-item <?= $currentSection === 'profile' ? 'active' : '' ?>">
-                        <a href="http://localhost/COFFEE_PHP/StaffController/profile" class="menu-link">
-                            <span class="menu-icon"><i class="fa-solid fa-user-gear"></i></span>
-                            <span class="menu-text">CÁ NHÂN</span>
-                        </a>
-                    </li>
+                    <!-- (Removed: Khách Hàng & Cá Nhân per request) -->
                 </ul>
             </nav>
 

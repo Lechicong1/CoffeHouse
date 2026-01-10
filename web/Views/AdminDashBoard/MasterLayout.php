@@ -107,6 +107,12 @@ $currentSection = $data['section'] ?? 'dashboard';
                             <span class="menu-text">BÁO CÁO THU CHI</span>
                         </a>
                     </li>
+                    <li class="menu-item <?= $currentSection === 'product_report' ? 'active' : '' ?>" data-target="product_report">
+                        <a href="http://localhost/COFFEE_PHP/ProductReportController/index" class="menu-link">
+                            <span class="menu-icon">📈</span>
+                            <span class="menu-text">PHÂN TÍCH SẢN PHẨM</span>
+                        </a>
+                    </li>
                     <li class="menu-item <?= $currentSection === 'inventory_check' ? 'active' : '' ?>" data-target="inventory_check">
                         <a href="http://localhost/COFFEE_PHP/InventoryCheckController" class="menu-link">
                             <span class="menu-icon">📋</span>

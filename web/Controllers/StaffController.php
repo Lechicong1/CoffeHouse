@@ -137,65 +137,21 @@ class StaffController extends Controller {
             session_start();
         }
         $staffId = $_SESSION['user']['id'] ?? null;
+        // Delegate full POS order creation to service (service will parse/validate)
+        $postData = $_POST;
+        $postData['staff_id'] = $staffId;
 
-        try {
-            // Validate dữ liệu
-            $requiredFields = ['order_type', 'payment_method', 'total_amount'];
-            foreach ($requiredFields as $field) {
-                if (!isset($_POST[$field])) {
-                    throw new Exception("Thiếu thông tin: $field");
-                }
-            }
+        $result = $this->orderService->createOrderFromPOS($postData);
 
-            // Validate items
-            if (empty($_POST['cart_items'])) {
-                throw new Exception("Giỏ hàng trống");
-            }
-
-            // Parse cart items từ JSON string
-            $cartItems = json_decode($_POST['cart_items'], true);
-            if (!$cartItems || !is_array($cartItems)) {
-                throw new Exception("Dữ liệu giỏ hàng không hợp lệ");
-            }
-
-            // Chuẩn bị dữ liệu đơn hàng
-            $tableNumber = !empty($_POST['table_number']) ? trim($_POST['table_number']) : null;
-            error_log("DEBUG StaffController: " . json_encode($_POST)); // Debug full POST
-
-            $orderData = [
-                'staff_id' => $staffId,
-                'customer_id' => !empty($_POST['customer_id']) ? (int)$_POST['customer_id'] : null,
-                'order_type' => $_POST['order_type'],
-                'payment_method' => $_POST['payment_method'],
-                'total_amount' => (float)$_POST['total_amount'],
-                'note' => trim($_POST['note'] ?? ''),
-                'table_number' => $tableNumber,
-                'items' => $cartItems
-            ];
-
-            // Thêm thông tin voucher nếu có (GIỮ NGUYÊN LOGIC VOUCHER)
-            if (!empty($_POST['voucher_id'])) {
-                $orderData['voucher'] = [
-                    'voucher_id' => (int)$_POST['voucher_id']
-                ];
-            }
-
-            // Tạo đơn hàng thông qua Service
-            $result = $this->orderService->createOrder($orderData);
-
-            if ($result['success']) {
-                echo "<script>
-                    alert('Đặt hàng thành công! Mã đơn: {$result['order_code']}');
-                    window.location.href = '/COFFEE_PHP/StaffController/GetData';
-                </script>";
-                exit;
-            } else {
-                throw new Exception($result['message']);
-            }
-
-        } catch (Exception $e) {
+        if ($result['success']) {
             echo "<script>
-                alert('Lỗi: " . addslashes($e->getMessage()) . "');
+                alert('Đặt hàng thành công! Mã đơn: {$result['order_code']}');
+                window.location.href = '/COFFEE_PHP/StaffController/GetData';
+            </script>";
+            exit;
+        } else {
+            echo "<script>
+                alert('Lỗi: " . addslashes($result['message']) . "');
                 window.history.back();
             </script>";
             exit;
@@ -384,8 +340,8 @@ class StaffController extends Controller {
                 $filters['search'] = trim($_GET['search']);
             }
             
-            // Chỉ hiển thị đơn hàng tại quầy (AT_COUNTER)
-            $filters['order_type'] = 'AT_COUNTER';
+            // NOTE: Không gán filter order_type ở Controller theo MVC
+            // Service sẽ áp dụng filter mặc định phù hợp (ví dụ: AT_COUNTER và TAKEAWAY)
 
             // Lấy danh sách đơn hàng
             $orders = $this->orderService->getOrders($filters);
@@ -660,12 +616,9 @@ class StaffController extends Controller {
             exit;
         }
 
-        try {
-            $items = $this->orderService->getOrderItems($orderId);
-            echo json_encode(['success' => true, 'items' => $items]);
-        } catch (Exception $e) {
-            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
-        }
+        // Delegate to service
+        $items = $this->orderService->getOrderItems($orderId);
+        echo json_encode(['success' => true, 'items' => $items]);
         exit;
     }
 
@@ -674,44 +627,29 @@ class StaffController extends Controller {
      * URL: http://localhost/COFFEE_PHP/StaffController/getOrderInvoiceData
      */
     function getOrderInvoiceData() {
-        header('Content-Type: application/json');
+        // Enforce GET method for this endpoint (consistent with other StaffController handlers)
+        if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
+            header('Location: /COFFEE_PHP/StaffController/GetData');
+            exit;
+        }
+
+        // Keep response consistent with other StaffController endpoints (plain text responses)
+        header('Content-Type: text/plain; charset=utf-8');
 
         $orderId = isset($_GET['order_id']) ? (int)$_GET['order_id'] : 0;
 
         if (!$orderId) {
-            echo json_encode(['success' => false, 'message' => 'Thiếu order_id']);
+            echo "ERROR|Thiếu order_id";
             exit;
         }
 
         try {
-            // Lấy thông tin order và items
-            $orderRepo = $this->orderService->getOrderRepo();
-            
-            // Lấy order với customer info từ findAllWithFilters
-            $allOrders = $orderRepo->findAllWithFilters([]);
-            $orderData = null;
-            foreach ($allOrders as $ord) {
-                if ($ord['id'] == $orderId) {
-                    $orderData = $ord;
-                    break;
-                }
-            }
-            
-            if (!$orderData) {
-                echo json_encode(['success' => false, 'message' => 'Không tìm thấy đơn hàng']);
-                exit;
-            }
-
-            // Lấy items
-            $items = $this->orderService->getOrderItems($orderId);
-
-            echo json_encode([
-                'success' => true, 
-                'order' => $orderData,
-                'items' => $items
-            ]);
+            // Delegate to service to get order + items
+            $res = $this->orderService->getOrderInvoiceData($orderId);
+            // Return payload as JSON string but with plain/text content-type for compatibility
+            echo json_encode($res);
         } catch (Exception $e) {
-            echo json_encode(['success' => false, 'message' => $e->getMessage()]);
+            echo 'ERROR|' . $e->getMessage();
         }
         exit;
     }

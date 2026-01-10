@@ -1,9 +1,3 @@
-<!-- ===================================
-     FILE: CartPage.php
-     MÔ TẢ: Trang giỏ hàng
-     Nội dung chính - Được include vào MasterLayout
-     =================================== -->
-
 <section class="cart-section">
     <h1 class="cart-title">Giỏ hàng của bạn</h1>
 
@@ -39,7 +33,7 @@
                             <!-- Điều chỉnh số lượng -->
                             <div class="quantity-controls">
                                 <!-- Giảm số lượng -->
-                                <form method="POST" action="/COFFEE_PHP/Cart/upd">
+                                <form method="POST" action="/COFFEE_PHP/Cart/upd" style="display: inline;">
                                     <input type="hidden" name="txtCartItemId" value="<?= $item->id ?>">
                                     <input type="hidden" name="txtQuantity" value="<?= $item->quantity - 1 ?>">
                                     <button type="submit" name="btnCapnhat" class="quantity-btn" <?= $item->quantity <= 1 ? 'disabled' : '' ?>>-</button>
@@ -48,7 +42,7 @@
                                 <span class="quantity-value"><?= $item->quantity ?></span>
 
                                 <!-- Tăng số lượng -->
-                                <form method="POST" action="/COFFEE_PHP/Cart/upd">
+                                <form method="POST" action="/COFFEE_PHP/Cart/upd" style="display: inline;">
                                     <input type="hidden" name="txtCartItemId" value="<?= $item->id ?>">
                                     <input type="hidden" name="txtQuantity" value="<?= $item->quantity + 1 ?>">
                                     <button type="submit" name="btnCapnhat" class="quantity-btn">+</button>
@@ -56,10 +50,14 @@
                             </div>
 
                             <!-- Xóa sản phẩm -->
-                            <form method="POST" action="/COFFEE_PHP/Cart/del">
+                            <form method="POST" action="/COFFEE_PHP/Cart/del" style="display: inline;">
                                 <input type="hidden" name="txtCartItemId" value="<?= $item->id ?>">
                                 <button type="submit" name="btnXoa" class="remove-btn" onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?')">Xóa</button>
                             </form>
+                        </div>
+
+                        <div class="cart-item-subtotal">
+                            <?= number_format($item->price * $item->quantity, 0, ',', '.') ?>đ
                         </div>
                     </div>
                 <?php endforeach; ?>
@@ -67,7 +65,15 @@
 
             <!-- Tóm tắt giỏ hàng -->
             <div class="cart-summary">
-                <h3>Tóm tắt đơn hàng</h3>
+                <div class="cart-summary-header">
+                    <h3>Tóm tắt đơn hàng</h3>
+                    <!-- Form xóa tất cả sản phẩm - di chuyển lên đây -->
+                    <form method="POST" action="/COFFEE_PHP/Cart/clear" style="display: inline;">
+                        <button type="submit" name="btnXoaTatCa" class="clear-cart-btn-small" onclick="return confirm('Bạn có chắc muốn xóa tất cả sản phẩm khỏi giỏ hàng?')">
+                            🗑️ Xóa tất cả
+                        </button>
+                    </form>
+                </div>
 
                 <div class="summary-row">
                     <span>Số lượng sản phẩm:</span>
@@ -89,11 +95,12 @@
                     <span><?= number_format($data['total'], 0, ',', '.') ?>đ</span>
                 </div>
 
-                <a href="/COFFEE_PHP/Checkout/GetData">
-                    <button class="checkout-btn">Thanh toán</button>
-                </a>
+                <!-- Form checkout toàn bộ giỏ hàng -->
+                <form method="POST" action="/COFFEE_PHP/Checkout/GetData" style="margin-top: 20px;">
+                    <button type="submit" class="checkout-btn">💳 Thanh toán</button>
+                </form>
 
-                <a href="/COFFEE_PHP/User/menu" class="continue-shopping" style="display: block; text-align: center; margin-top: 15px; color: var(--primary-color); text-decoration: none;">
+                <a href="/COFFEE_PHP/User/menu" class="continue-shopping-link">
                     ← Tiếp tục mua hàng
                 </a>
             </div>

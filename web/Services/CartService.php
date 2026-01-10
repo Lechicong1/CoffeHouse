@@ -18,10 +18,7 @@ class CartService extends Service {
         $this->cartRepository = new CartRepository();
     }
 
-    /**
-     * Thêm sản phẩm vào giỏ hàng
-     * LOGIC: Validate -> Kiểm tra tồn tại -> Thêm mới hoặc cập nhật
-     */
+
     public function addToCart($customerId, $productSizeId, $quantity) {
         try {
             // VALIDATION - Logic ở Service, không phải Controller
@@ -76,9 +73,7 @@ class CartService extends Service {
         }
     }
 
-    /**
-     * Lấy giỏ hàng của customer
-     */
+
     public function getCart($customerId) {
         try {
             $items = $this->cartRepository->findCartByCustomerId($customerId);
@@ -102,7 +97,7 @@ class CartService extends Service {
      * Cập nhật số lượng sản phẩm
      * LOGIC: Validate -> Kiểm tra quyền sở hữu -> Cập nhật hoặc xóa
      */
-    public function updateQuantity($customerId, $cartItemId, $quantity) {
+    public function updateQuantity( $cartItemId, $quantity) {
         try {
             // VALIDATION
             if (!$cartItemId) {
@@ -112,14 +107,7 @@ class CartService extends Service {
                 ];
             }
 
-            // BUSINESS LOGIC: Kiểm tra quyền sở hữu
-            $cartItem = $this->cartRepository->findById($cartItemId);
-            if (!$cartItem || $cartItem->customer_id != $customerId) {
-                return [
-                    'success' => false,
-                    'message' => 'Không tìm thấy sản phẩm trong giỏ hàng của bạn'
-                ];
-            }
+
 
             // Nếu số lượng <= 0 thì xóa item
             if ($quantity <= 0) {
@@ -145,26 +133,14 @@ class CartService extends Service {
         }
     }
 
-    /**
-     * Xóa sản phẩm khỏi giỏ hàng
-     * LOGIC: Validate -> Kiểm tra quyền sở hữu -> Xóa
-     */
-    public function removeItem($customerId, $cartItemId) {
+
+    public function removeItem( $cartItemId) {
         try {
             // VALIDATION
             if (!$cartItemId) {
                 return [
                     'success' => false,
                     'message' => 'Thiếu thông tin sản phẩm'
-                ];
-            }
-
-            // BUSINESS LOGIC: Kiểm tra quyền sở hữu
-            $cartItem = $this->cartRepository->findById($cartItemId);
-            if (!$cartItem || $cartItem->customer_id != $customerId) {
-                return [
-                    'success' => false,
-                    'message' => 'Không tìm thấy sản phẩm trong giỏ hàng của bạn'
                 ];
             }
 
@@ -183,9 +159,7 @@ class CartService extends Service {
         }
     }
 
-    /**
-     * Xóa toàn bộ giỏ hàng
-     */
+
     public function clearCart($customerId) {
         try {
             $this->cartRepository->clearCart($customerId);

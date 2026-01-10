@@ -1,8 +1,3 @@
-<!-- ===================================
-     FILE: CheckoutPage.php
-     MÔ TẢ: Trang thanh toán
-     Nội dung chính - Được include vào MasterLayout
-     =================================== -->
 <main class="checkout-container">
     <div class="checkout-wrapper">
         <h1 class="checkout-title">THANH TOÁN</h1>
@@ -118,19 +113,12 @@
     </div>
 </main>
 <script>
-const TOTAL_AMOUNT = <?php echo $data['total']; ?>;
-const ORDER_CODE = 'ORD' + Date.now();
-document.getElementById('checkoutForm')?.addEventListener('submit', function() {
-    document.querySelector('.btn-place-order').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-    document.querySelector('.btn-place-order').disabled = true;
-});
 document.querySelectorAll('input[name="payment_method"]').forEach(option => {
     option.addEventListener('change', function() {
         const qrSection = document.getElementById('qrSection');
         if (this.value === 'BANK_TRANSFER') {
             qrSection.style.display = 'block';
-            const vietQRUrl = `https://img.vietqr.io/image/MB-88221020056868-compact2.png?amount=${TOTAL_AMOUNT}&addInfo=${encodeURIComponent('Thanh toan ' + ORDER_CODE)}&accountName=COFFEE%20HOUSE`;
-            document.getElementById('qrImage').src = vietQRUrl;
+            document.getElementById('qrImage').src = `https://img.vietqr.io/image/MB-88221020056868-compact2.png?amount=<?php echo $data['total']; ?>&addInfo=Thanh%20toan%20don%20hang&accountName=COFFEE%20HOUSE`;
         } else {
             qrSection.style.display = 'none';
         }

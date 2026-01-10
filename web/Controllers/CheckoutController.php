@@ -4,10 +4,7 @@
  * Theo mô hình MVC chuẩn
  */
 
-require_once './web/Services/CartService.php';
-require_once './web/Services/CustomerService.php';
-require_once './web/Services/OrderService.php';
-require_once './web/Services/ProductService.php';
+
 
 class CheckoutController extends Controller {
     private $cartService;
@@ -16,10 +13,10 @@ class CheckoutController extends Controller {
     private $productService;
 
     public function __construct() {
-        $this->cartService = new CartService();
-        $this->customerService = new CustomerService();
-        $this->orderService = new OrderService();
-        $this->productService = new ProductService();
+        $this->cartService = $this->service('CartService');
+        $this->customerService = $this->service('CustomerService');
+        $this->orderService =$this->service('OrderService');
+        $this->productService = $this->service('ProductService');
     }
 
     /**

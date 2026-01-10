@@ -79,23 +79,11 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) 
                         </td>
                     </tr>
                 <?php else: ?>
-                    <?php
-                    $i = 1;
-                    foreach ($imports as $import):
-                        $ingredientName = 'N/A';
-                        $unit = '';
-                        foreach ($ingredients as $ing) {
-                            if ($ing->id == $import->ingredient_id) {
-                                $ingredientName = $ing->name;
-                                $unit = $ing->unit;
-                                break;
-                            }
-                        }
-                    ?>
+                    <?php $i = 1; foreach ($imports as $import): ?>
                         <tr>
                             <td><?= $i++ ?></td>
-                            <td><strong><?= htmlspecialchars($ingredientName) ?></strong></td>
-                            <td><?= htmlspecialchars($import->import_quantity) ?> <?= htmlspecialchars($unit) ?></td>
+                            <td><strong><?= htmlspecialchars($import->ingredient_name) ?></strong></td>
+                            <td><?= htmlspecialchars($import->import_quantity) ?> <?= htmlspecialchars($import->unit) ?></td>
                             <td style="color: #2563eb; font-weight: 600;">
                                 <?= number_format($import->total_cost, 0, ',', '.') ?> đ
                             </td>

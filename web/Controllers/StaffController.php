@@ -217,11 +217,11 @@ class StaffController extends Controller {
             session_start();
         }
 
-        header("Content-Type: text/plain; charset=utf-8");
-
-        $phone = $_REQUEST['phone'] ?? '';
-        if (!$phone) {
-            echo "ERROR|Vui lòng nhập số điện thoại";
+        $phone = trim($_POST['phone'] ?? '');
+        
+        if (empty($phone)) {
+            $_SESSION['flash_error'] = 'Vui lòng nhập số điện thoại';
+            header('Location: /COFFEE_PHP/StaffController/GetData');
             exit;
         }
 
@@ -229,28 +229,18 @@ class StaffController extends Controller {
             $customer = $this->customerService->getCustomerByPhone($phone);
             
             if ($customer) {
-                // Trả về trang với thông tin khách hàng
+                // Lưu thông tin khách hàng vào session và redirect
                 $_SESSION['pos_customer_search'] = $customer->toArray();
-                header('Location: /COFFEE_PHP/StaffController/GetData');
-                exit;
+                $_SESSION['flash_success'] = 'Đã tìm thấy khách hàng: ' . $customer->full_name;
             } else {
-                echo "<script>
-                    alert('Không tìm thấy khách hàng với số điện thoại: $phone');
-                    window.history.back();
-                </script>";
-                exit;
+                $_SESSION['flash_error'] = 'Không tìm thấy khách hàng với số điện thoại: ' . $phone;
             }
 
         } catch (Exception $e) {
-            echo "<script>
-                alert('Lỗi: " . addslashes($e->getMessage()) . "');
-                window.history.back();
-            </script>";
-            exit;
+            $_SESSION['flash_error'] = 'Lỗi: ' . $e->getMessage();
         }
 
-        // OK|id|name|phone|points
-        echo "OK|{$c->id}|{$c->full_name}|{$c->phone}|{$c->points}";
+        header('Location: /COFFEE_PHP/StaffController/GetData');
         exit;
     }
 
@@ -308,6 +298,71 @@ class StaffController extends Controller {
         }
     }
 
+    /**
+     * AJAX: Tìm khách hàng theo SĐT (cho POS modal)
+     * URL: /COFFEE_PHP/Staff/searchCustomerPos
+     * Response: OK|id|name|phone|points hoặc ERROR|message
+     */
+    function searchCustomerPos() {
+        header("Content-Type: text/plain; charset=utf-8");
+        
+        $phone = trim($_POST['phone'] ?? '');
+        if (empty($phone)) {
+            echo "ERROR|Vui lòng nhập số điện thoại";
+            exit;
+        }
+
+        try {
+            $customer = $this->customerService->getCustomerByPhone($phone);
+            
+            if ($customer) {
+                echo "OK|{$customer->id}|{$customer->full_name}|{$customer->phone}|{$customer->points}";
+            } else {
+                echo "ERROR|Không tìm thấy khách hàng với SĐT: {$phone}";
+            }
+        } catch (Exception $e) {
+            echo "ERROR|" . $e->getMessage();
+        }
+        exit;
+    }
+
+    /**
+     * AJAX: Tạo/Dùng khách hàng (cho POS modal)
+     * URL: /COFFEE_PHP/Staff/upsertCustomerPos
+     * Response: OK|id|name|phone|points hoặc ERROR|message
+     */
+    function upsertCustomerPos() {
+        header("Content-Type: text/plain; charset=utf-8");
+        
+        $phone = trim($_POST['phone'] ?? '');
+        $fullname = trim($_POST['fullname'] ?? 'Khách lẻ');
+        $email = trim($_POST['email'] ?? '');
+        $pointsToAdd = (int)($_POST['pointsToAdd'] ?? 0);
+
+        if (empty($phone)) {
+            echo "ERROR|Vui lòng nhập số điện thoại";
+            exit;
+        }
+
+        try {
+            $result = $this->customerService->posUpsertCustomer([
+                'phone' => $phone,
+                'fullname' => $fullname,
+                'email' => $email,
+                'pointsToAdd' => $pointsToAdd
+            ]);
+
+            if ($result['success'] && $result['customer']) {
+                $c = $result['customer'];
+                echo "OK|{$c->id}|{$c->full_name}|{$c->phone}|{$c->points}";
+            } else {
+                echo "ERROR|" . ($result['message'] ?? 'Không thể tạo khách hàng');
+            }
+        } catch (Exception $e) {
+            echo "ERROR|" . $e->getMessage();
+        }
+        exit;
+    }
 
     /**
      * Orders Management Page

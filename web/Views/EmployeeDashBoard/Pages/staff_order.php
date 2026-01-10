@@ -1,5 +1,6 @@
 <!-- Link CSS riêng cho POS -->
 <link rel="stylesheet" href="Public/Css/pos-style.css">
+<link rel="stylesheet" href="Public/Css/voucher-page.css">
 
 <!-- Small POS layout tweaks for compact customer+voucher and voucher highlight -->
 <style>
@@ -192,6 +193,7 @@
 <!-- Logic JS riêng cho POS (cache-bust để luôn load phiên bản mới) -->
 <script src="Public/Js/pos-logic.js?v=<?php echo time(); ?>"></script>
 <script src="Public/Js/pos-customer.js?v=<?php echo time(); ?>"></script>
+<script src="Public/Js/voucher-utils.js"></script>
 <script src="Public/Js/pos-voucher.js?v=<?php echo time(); ?>"></script>
 
 <!-- Customer Modal -->

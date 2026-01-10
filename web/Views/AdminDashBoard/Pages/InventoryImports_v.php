@@ -26,10 +26,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) 
             <p class="subtitle">Tổng số: <strong><?= count($imports) ?></strong> phiếu nhập</p>
         </div>
         <div class="header-actions">
-            <!--
-                XUẤT EXCEL: POST → InventoryImportController/xuatexcel
-                Router sẽ gọi: InventoryImportController->xuatexcel()
-            -->
+
             <form method="POST" action="?url=InventoryImportController/xuatexcel" style="display: inline;">
                 <input type="hidden" name="txtSearch" value="<?= htmlspecialchars($keyword) ?>">
                 <button type="submit" name="btnXuatexcel" class="btn-primary">📊 Xuất Excel</button>
@@ -43,10 +40,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) 
         </div>
     </div>
 
-    <!--
-        TÌM KIẾM: POST → InventoryImportController/timkiem
-        Router sẽ gọi: InventoryImportController->timkiem()
-    -->
     <form method="POST" action="?url=InventoryImportController/timkiem" class="search-form">
         <input type="text" name="txtSearch" class="search-input"
                placeholder="🔍 Tìm kiếm theo tên nguyên liệu hoặc ghi chú..."
@@ -92,17 +85,10 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) 
                                 <?= htmlspecialchars(mb_strimwidth($import->note, 0, 50, "...")) ?>
                             </td>
                             <td>
-                                <!--
-                                    SỬA: GET với param action=edit&id=X
-                                    Sẽ reload trang và hiện modal form sửa với dữ liệu của phiếu nhập id=X
-                                -->
+
                                 <a href="?url=InventoryImportController/GetData&action=edit&id=<?= $import->id ?>"
                                    class="btn-edit">✏️ Sửa</a>
 
-                                <!--
-                                    XÓA: POST → InventoryImportController/delete
-                                    Router sẽ gọi: InventoryImportController->delete()
-                                -->
                                 <form method="POST" action="?url=InventoryImportController/delete"
                                       style="display: inline;"
                                       onsubmit="return confirm('Bạn có chắc chắn muốn xóa phiếu nhập này không?')">
@@ -133,17 +119,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) 
             <a href="?url=InventoryImportController/GetData" class="close">&times;</a>
         </div>
 
-        <!--
-            FORM SUBMIT: POST → InventoryImportController/store hoặc update
-            - Nếu action=add: POST đến InventoryImportController/store
-            - Nếu action=edit: POST đến InventoryImportController/update
-
-            Router sẽ tự động:
-            1. Cắt URL: InventoryImportController/store
-            2. Gọi: new InventoryImportController()
-            3. Gọi method: store() với dữ liệu POST
-            4. Controller xử lý xong sẽ redirect về GetData (đóng modal)
-        -->
         <form method="POST" action="?url=InventoryImportController/<?= $_GET['action'] === 'add' ? 'store' : 'update' ?>">
             <div class="modal-body">
                 <?php if (isset($_GET['action']) && $_GET['action'] === 'edit'): ?>
@@ -192,13 +167,6 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) 
 
             <div class="modal-footer">
                 <a href="?url=InventoryImportController/GetData" class="btn-secondary">Hủy bỏ</a>
-                <!--
-                    Khi click button này:
-                    1. Form submit với method POST
-                    2. Gửi đến action đã định nghĩa ở thẻ <form>
-                    3. Router nhận request và gọi Controller->Action
-                    4. KHÔNG CÓ JS NÀO CHẶN - Hoạt động như form tìm kiếm
-                -->
                 <button type="submit" class="btn-primary">💾 Lưu lại</button>
             </div>
         </form>

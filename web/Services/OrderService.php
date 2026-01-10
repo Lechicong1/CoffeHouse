@@ -3,10 +3,13 @@ include_once './web/Repositories/OrderRepository.php';
 include_once './web/Repositories/OrderItemRepository.php';
 include_once './web/Repositories/CartRepository.php';
 include_once './web/Repositories/ProductSizeRepository.php';
+include_once './web/Repositories/RecipeRepository.php';
+include_once './web/Repositories/IngredientRepository.php';
 include_once './web/Entity/OrderEntity.php';
 include_once './web/Entity/OrderItemEntity.php';
 include_once './web/Services/VoucherService.php';
 include_once './web/Repositories/CustomerRepository.php';
+include_once './Enums/size.enum.php';
 
 use web\Entity\OrderEntity;
 use web\Entity\OrderItemEntity;
@@ -17,6 +20,8 @@ class OrderService {
     private $cartRepo;
     private $productSizeRepo;
     private $voucherService;
+    private $recipeRepo;
+    private $ingredientRepo;
 
     public function __construct() {
         $this->orderRepo = new OrderRepository();
@@ -24,6 +29,8 @@ class OrderService {
         $this->cartRepo = new CartRepository();
         $this->productSizeRepo = new ProductSizeRepository();
         $this->voucherService = new VoucherService();
+        $this->recipeRepo = new RecipeRepository();
+        $this->ingredientRepo = new IngredientRepository();
     }
 
     /**
@@ -31,6 +38,36 @@ class OrderService {
      */
     public function getOrderRepo() {
         return $this->orderRepo;
+    }
+
+    /**
+     * Validate số lượng nguyên liệu trước khi đặt hàng
+     */
+    private function validateIngredientStock($orderItems) {
+        foreach ($orderItems as $item) {
+            $productSizeId = is_array($item) ? $item['product_size_id'] : $item->product_size_id;
+            $quantity = is_array($item) ? $item['quantity'] : $item->quantity;
+
+            $productSize = $this->productSizeRepo->findById($productSizeId);
+
+            if ($productSize) {
+                $multiplier = SizeEnum::getMultiplier($productSize->size_name);
+                $recipes = $this->recipeRepo->getByProductId($productSize->product_id);
+
+                foreach ($recipes as $recipe) {
+                    $ingredient = $this->ingredientRepo->findById($recipe->ingredient_id);
+                    if ($ingredient) {
+                        $quantityNeeded = $recipe->base_amount * $multiplier * $quantity;
+
+                        if ($ingredient->stock_quantity < $quantityNeeded) {
+                            return ['success' => false, 'message' => 'Không đủ nguyên liệu để đặt hàng'];
+                        }
+                    }
+                }
+            }
+        }
+
+        return ['success' => true];
     }
 
     /**
@@ -45,7 +82,13 @@ class OrderService {
                 throw new Exception('Giỏ hàng trống');
             }
 
-            // 2. Tạo Order Entity
+            // 2. Validate số lượng nguyên liệu trước khi đặt hàng
+            $validateResult = $this->validateIngredientStock($cartItems);
+            if (!$validateResult['success']) {
+                return $validateResult;
+            }
+
+            // 3. Tạo Order Entity
             $order = new OrderEntity();
             $order->order_code = $this->generateOrderCode();
             $order->customer_id = $customerId;
@@ -66,7 +109,11 @@ class OrderService {
             $order->receiver_phone = $data['customer_phone'];
             $order->shipping_fee = 0;
             $order->note = $data['note'] ?? '';
+
+            // 4. Tạo đơn hàng
             $orderId = $this->orderRepo->create($order);
+
+            // 5. Tạo order items
             foreach ($cartItems as $cartItem) {
                 $item = new OrderItemEntity();
                 $item->order_id = $orderId;
@@ -78,6 +125,7 @@ class OrderService {
                 $this->orderItemRepo->create($item);
             }
 
+            // 6. Xử lý voucher (nếu có)
             $discountAmount = 0.0;
             if (!empty($data['voucher']) && !empty($order->customer_id)) {
                 $voucherId = isset($data['voucher']['voucher_id']) ? (int)$data['voucher']['voucher_id'] : null;
@@ -94,6 +142,8 @@ class OrderService {
                     $discountAmount = $redeemResult['discount_amount'];
                 }
             }
+
+            // 7. Xóa giỏ hàng
             $this->cartRepo->clearCart($customerId);
 
             $final_total = $order->total_amount - (float)$discountAmount;
@@ -226,6 +276,13 @@ class OrderService {
 
             $final_total = $order->total_amount - (float)$discountAmount;
             if ($final_total < 0) $final_total = 0.0;
+
+            // Nếu có discount, update lại total_amount trong DB
+            if ($discountAmount > 0) {
+                $order->id = $orderId;
+                $order->total_amount = $final_total;
+                $this->orderRepo->update($order);
+            }
 
             // Cộng điểm cho khách hàng (POS: cộng ngay khi thanh toán)
             $pointsAwarded = $this->awardLoyaltyPoints($order->customer_id, $order->total_amount);

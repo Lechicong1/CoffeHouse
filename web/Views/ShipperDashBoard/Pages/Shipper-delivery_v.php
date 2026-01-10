@@ -96,8 +96,8 @@
                     </div>
                     <div class="order-body">
                         <div class="order-info">
-                            <div class="info-label">Khách hàng</div>
-                            <div class="info-value"><?php echo $order->receiver_name; ?></div>
+                            <div class="info-label">Người nhận</div>
+                            <div class="info-value"><?php echo $order->customer_name; ?></div>
                         </div>
                         <div class="order-info">
                             <div class="info-label">Số điện thoại</div>

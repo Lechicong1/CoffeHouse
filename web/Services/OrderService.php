@@ -149,12 +149,18 @@ class OrderService {
             $final_total = $order->total_amount - (float)$discountAmount;
             if ($final_total < 0) $final_total = 0.0;
 
+            if ($discountAmount > 0) {
+                $order->id = $orderId;
+                $order->total_amount = $final_total;
+                $this->orderRepo->update($order);
+            }
+
             return [
                 'success' => true,
                 'order_id' => $orderId,
                 'order_code' => $order->order_code,
                 'message' => 'Đặt hàng thành công',
-                'sub_total' => $order->total_amount,
+                'sub_total' => $sub_total,
                 'discount_amount' => (float)$discountAmount,
                 'final_total' => $final_total
             ];
@@ -469,6 +475,11 @@ class OrderService {
             // Nếu hủy đơn đã thanh toán -> Đánh dấu hoàn tiền
             if ($newStatus === 'CANCELLED' && $order->payment_status === 'PAID') {
                 $order->payment_status = 'REFUNDED';
+            }
+
+            // Khi giao hàng xong (COMPLETED) -> Đánh dấu đã thanh toán (COD)
+            if ($newStatus === 'COMPLETED' && $order->payment_status !== 'PAID') {
+                $order->payment_status = 'PAID';
             }
 
             $order->status = $newStatus;

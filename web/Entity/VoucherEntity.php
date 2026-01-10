@@ -1,18 +1,10 @@
 <?php
-/**
- * FILE: VoucherEntity.php
- * DESCRIPTION: Entity Voucher - Chứa properties từ bảng vouchers
- * TABLE: vouchers
- * AUTHOR: Coffee House System
- */
 namespace web\Entity;
-class VoucherEntity
-{
-    // Properties từ bảng vouchers
+class VoucherEntity{
     public $id;
     public $name;
     public $point_cost;
-    public $discount_type;          // FIXED | PERCENT
+    public $discount_type;          
     public $discount_value;
     public $max_discount_value;
     public $min_bill_total;
@@ -23,10 +15,6 @@ class VoucherEntity
     public $is_active;
     public $created_at;
 
-    /**
-     * Constructor - Khởi tạo entity rỗng hoặc từ array
-     * @param array $data - Dữ liệu từ database (optional)
-     */
     public function __construct($data = [])
     {
         if (!empty($data)) {
@@ -46,10 +34,6 @@ class VoucherEntity
         }
     }
 
-    /**
-     * Chuyển entity thành mảng
-     * @return array
-     */
     public function toArray() {
         return [
             'id' => $this->id,

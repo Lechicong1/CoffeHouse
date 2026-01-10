@@ -1,8 +1,3 @@
-/**
- * pos-voucher.js
- * Modal voucher cho POS - sử dụng voucher-utils.js
- * Requires: voucher-utils.js (phải load trước)
- */
 document.addEventListener("DOMContentLoaded", function () {
   const btn = document.getElementById("open-voucher-modal");
   if (btn) btn.addEventListener("click", openVoucherModal);

@@ -71,10 +71,10 @@ if (!empty($inventoryData)) {
                                             $theory = $ingredient['stock_quantity'];
                                             $actual = $check['actualQuantity'];
                                             $percentDiff = $theory != 0 ? abs(($actual - $theory) / $theory * 100) : 0;
-                                            
+
                                             $badgeClass = 'badge-success';
                                             $statusText = 'CHÍNH XÁC';
-                                            
+
                                             if ($percentDiff >= 1 && $percentDiff <= 2) {
                                                 $badgeClass = 'badge-success';
                                                 $statusText = 'CHÍNH XÁC';
@@ -145,10 +145,6 @@ if (!empty($inventoryData)) {
                     </div>
 
                     <div class="form-actions">
-                        <button type="button" class="btn btn-info" id="calculateBtn">
-                            <span class="btn-icon">🔵</span>
-                            <span class="btn-text">TÍNH TOÁN</span>
-                        </button>
                         <button type="submit" class="btn btn-success" name="btnSave">
                             <span class="btn-icon">✅</span>
                             <span class="btn-text">LƯU MỚI</span>

@@ -50,6 +50,15 @@ class InventoryCheckController extends Controller {
                     exit();
                 }
 
+                // CHECK: Kiểm tra xem đã có dữ liệu hôm nay chưa (qua Repository)
+                require_once './web/Repositories/InventoryCheckRepository.php';
+                $inventoryCheckRepo = new InventoryCheckRepository();
+
+                if ($inventoryCheckRepo->checkExistsTodayByIngredient($ingredientName)) {
+                    echo "<script>alert('⚠️ Nguyên liệu này đã được kiểm kho hôm nay!\\n\\nVui lòng sử dụng nút SỬA để cập nhật.'); window.history.back();</script>";
+                    exit();
+                }
+
                 // LẤY SỐ LƯỢNG LÝ THUYẾT TỪ DATABASE
                 require_once './web/Repositories/IngredientRepository.php';
                 $ingredientRepo = new IngredientRepository();
@@ -114,18 +123,18 @@ class InventoryCheckController extends Controller {
                 $result = $this->inventoryCheckService->calculateCheck($theoryQuantity, $actualQuantity);
 
                 echo "<script>alert('Đã tính toán và cập nhật báo cáo thành công!')</script>";
-                
+
                 // Lưu kết quả vào session hoặc truyền qua view
                 $_SESSION['calculated_result'] = $result;
-                
+
             } catch (Exception $e) {
                 echo "<script>alert('Lỗi: " . $e->getMessage() . "')</script>";
             }
-            
+
             // Reload lại trang
             $date = $_POST['currentDate'] ?? date('Y-m-d');
             $inventoryData = $this->inventoryCheckService->getInventoryCheckByDate($date);
-            
+
             $this->view('AdminDashBoard/MasterLayout', [
                 'page' => 'InventoryCheck_v',
                 'section' => 'inventory-check',

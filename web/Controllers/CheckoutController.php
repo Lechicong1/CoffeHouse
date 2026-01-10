@@ -47,7 +47,8 @@ class CheckoutController extends Controller {
             $cartData = $this->cartService->getCart($customerId);
 
             if (!$cartData['success'] || empty($cartData['items'])) {
-                echo "<script>alert('Giỏ hàng trống!'); window.location.href='/COFFEE_PHP/Cart/index';</script>";
+                $_SESSION['error_message'] = 'Giỏ hàng trống!';
+                header('Location: /COFFEE_PHP/Cart/GetData');
                 exit;
             }
 
@@ -55,9 +56,14 @@ class CheckoutController extends Controller {
             $customer = $this->customerService->getCustomerById($customerId);
             $customerAddress = $this->customerService->getCustomerAddress($customerId);
 
-            // Render view
-            $this->view('UserDashBoard/Pages/CheckoutPage', [
+            // Render view - Sử dụng MasterLayout
+            $this->view('UserDashBoard/MasterLayout', [
                 'title' => 'Thanh Toán - Coffee House',
+                'page' => 'CheckoutPage',
+                'currentPage' => 'checkout',
+                'additionalCSS' => [
+                    'Public/Css/checkout-page.css'
+                ],
                 'cartItems' => $cartData['items'],
                 'total' => $cartData['total'],
                 'customer' => $customer,
@@ -65,7 +71,8 @@ class CheckoutController extends Controller {
             ]);
 
         } catch (Exception $e) {
-            echo "<script>alert('Lỗi: " . addslashes($e->getMessage()) . "'); window.location.href='/COFFEE_PHP/Cart/index';</script>";
+            $_SESSION['error_message'] = 'Lỗi: ' . $e->getMessage();
+            header('Location: /COFFEE_PHP/Cart/GetData');
             exit;
         }
     }
@@ -173,9 +180,14 @@ class CheckoutController extends Controller {
             $description = urlencode('Thanh toan don hang ' . $orderCode);
             $vietQRUrl = "https://img.vietqr.io/image/{$bankId}-{$accountNo}-compact2.png?amount={$amount}&addInfo={$description}&accountName={$accountName}";
 
-            // Render view
-            $this->view('UserDashBoard/Pages/PaymentPage', [
+            // Render view - Sử dụng MasterLayout
+            $this->view('UserDashBoard/MasterLayout', [
                 'title' => 'Thanh Toán Chuyển Khoản - Coffee House',
+                'page' => 'PaymentPage',
+                'currentPage' => 'payment',
+                'additionalCSS' => [
+                    'Public/Css/payment-page.css'
+                ],
                 'order' => $order,
                 'qrUrl' => $vietQRUrl,
                 'bankInfo' => [
@@ -188,10 +200,8 @@ class CheckoutController extends Controller {
             ]);
 
         } catch (Exception $e) {
-            echo "<script>
-                alert('Lỗi: " . addslashes($e->getMessage()) . "');
-                window.location.href = '/COFFEE_PHP/User/index';
-            </script>";
+            $_SESSION['error_message'] = 'Lỗi: ' . $e->getMessage();
+            header('Location: /COFFEE_PHP/User/index');
             exit;
         }
     }
@@ -213,17 +223,20 @@ class CheckoutController extends Controller {
             // Lấy thông tin đơn hàng
             $order = $this->orderService->getOrderById($orderId);
 
-            // Render view
-            $this->view('UserDashBoard/Pages/OrderSuccessPage', [
+            // Render view - Sử dụng MasterLayout
+            $this->view('UserDashBoard/MasterLayout', [
                 'title' => 'Đặt Hàng Thành Công - Coffee House',
+                'page' => 'OrderSuccessPage',
+                'currentPage' => 'orderSuccess',
+                'additionalCSS' => [
+                    'Public/Css/order-success.css'
+                ],
                 'order' => $order
             ]);
 
         } catch (Exception $e) {
-            echo "<script>
-                alert('Lỗi: " . addslashes($e->getMessage()) . "');
-                window.location.href = '/COFFEE_PHP/User/index';
-            </script>";
+            $_SESSION['error_message'] = 'Lỗi: ' . $e->getMessage();
+            header('Location: /COFFEE_PHP/User/index');
             exit;
         }
     }

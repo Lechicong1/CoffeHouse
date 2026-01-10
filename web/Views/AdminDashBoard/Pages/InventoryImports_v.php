@@ -2,9 +2,20 @@
 $imports = $data['imports'] ?? [];
 $ingredients = $data['ingredients'] ?? [];
 $keyword = $data['keyword'] ?? '';
+$showModal = isset($_GET['action']) && in_array($_GET['action'], ['add', 'edit']);
+$editImport = null;
+
+// Lấy dữ liệu cho modal edit
+if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) {
+    foreach ($imports as $import) {
+        if ($import->id == $_GET['id']) {
+            $editImport = $import;
+            break;
+        }
+    }
+}
 ?>
 
-<!-- Import CSS riêng cho trang Inventory Imports -->
 <link rel="stylesheet" href="Public/Css/inventory-imports-page.css">
 
 <section id="inventory-imports" class="content-section">
@@ -15,30 +26,38 @@ $keyword = $data['keyword'] ?? '';
             <p class="subtitle">Tổng số: <strong><?= count($imports) ?></strong> phiếu nhập</p>
         </div>
         <div class="header-actions">
-            <!-- Button Xuất Excel -->
-            <form method="POST" action="InventoryImportController/xuatexcel" style="display: inline-block; margin-right: 10px;">
+            <!--
+                XUẤT EXCEL: POST → InventoryImportController/xuatexcel
+                Router sẽ gọi: InventoryImportController->xuatexcel()
+            -->
+            <form method="POST" action="?url=InventoryImportController/xuatexcel" style="display: inline;">
                 <input type="hidden" name="txtSearch" value="<?= htmlspecialchars($keyword) ?>">
-                <button type="submit" name="btnXuatexcel" class="btn-primary" style="background: #27ae60;">
-                    📊 Xuất Excel
-                </button>
+                <button type="submit" name="btnXuatexcel" class="btn-primary">📊 Xuất Excel</button>
             </form>
 
-            <!-- Button Thêm mới -->
-            <button class="btn-primary" onclick="openImportModal('add')">
-                ➕ Tạo phiếu nhập
-            </button>
+            <!--
+                THÊM MỚI: GET với param action=add
+                Sẽ reload trang và hiện modal form thêm mới
+            -->
+            <a href="?url=InventoryImportController/GetData&action=add" class="btn-primary">➕ Tạo phiếu nhập</a>
         </div>
     </div>
 
-    <!-- Search Bar -->
-    <div style="margin-bottom: 24px;">
-        <form method="POST" action="?url=InventoryImportController/timkiem" class="search-form">
-            <input type="text" name="txtSearch" class="search-input" placeholder="🔍 Tìm kiếm theo tên nguyên liệu hoặc ghi chú..." value="<?= htmlspecialchars($keyword) ?>">
-            <button type="submit" class="btn-primary">🔍 Tìm kiếm</button>
-        </form>
-    </div>
+    <!--
+        TÌM KIẾM: POST → InventoryImportController/timkiem
+        Router sẽ gọi: InventoryImportController->timkiem()
+    -->
+    <form method="POST" action="?url=InventoryImportController/timkiem" class="search-form">
+        <input type="text" name="txtSearch" class="search-input"
+               placeholder="🔍 Tìm kiếm theo tên nguyên liệu hoặc ghi chú..."
+               value="<?= htmlspecialchars($keyword) ?>">
+        <button type="submit" class="btn-primary">Tìm kiếm</button>
+        <?php if ($keyword): ?>
+            <a href="?url=InventoryImportController/GetData" class="btn-secondary">Xóa bộ lọc</a>
+        <?php endif; ?>
+    </form>
 
-    <!-- Imports Table -->
+    <!-- Table -->
     <div class="table-container">
         <table class="data-table">
             <thead>
@@ -75,30 +94,30 @@ $keyword = $data['keyword'] ?? '';
                     ?>
                         <tr>
                             <td><?= $i++ ?></td>
-                            <td>
-                                <strong><?= htmlspecialchars($ingredientName) ?></strong>
+                            <td><strong><?= htmlspecialchars($ingredientName) ?></strong></td>
+                            <td><?= htmlspecialchars($import->import_quantity) ?> <?= htmlspecialchars($unit) ?></td>
+                            <td style="color: #2563eb; font-weight: 600;">
+                                <?= number_format($import->total_cost, 0, ',', '.') ?> đ
+                            </td>
+                            <td><?= date('d/m/Y', strtotime($import->import_date)) ?></td>
+                            <td style="color: #777; font-size: 13px;">
+                                <?= htmlspecialchars(mb_strimwidth($import->note, 0, 50, "...")) ?>
                             </td>
                             <td>
-                                <?= htmlspecialchars($import->import_quantity) ?> <?= htmlspecialchars($unit) ?>
-                            </td>
-                            <td>
-                                <span style="color: #2563eb; font-weight: 600;">
-                                    <?= number_format($import->total_cost, 0, ',', '.') ?> đ
-                                </span>
-                            </td>
-                            <td>
-                                <?= date('d/m/Y', strtotime($import->import_date)) ?>
-                            </td>
-                            <td>
-                                <span style="color: #777; font-size: 0.95em;">
-                                    <?= htmlspecialchars(mb_strimwidth($import->note, 0, 50, "...")) ?>
-                                </span>
-                            </td>
-                            <td>
-                                <button class="btn-edit" onclick='openImportModal("edit", <?= json_encode($import) ?>)' title="Sửa">
-                                    ✏️ Sửa
-                                </button>
-                                <form method="POST" action="?url=InventoryImportController/delete" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa phiếu nhập này không?')">
+                                <!--
+                                    SỬA: GET với param action=edit&id=X
+                                    Sẽ reload trang và hiện modal form sửa với dữ liệu của phiếu nhập id=X
+                                -->
+                                <a href="?url=InventoryImportController/GetData&action=edit&id=<?= $import->id ?>"
+                                   class="btn-edit">✏️ Sửa</a>
+
+                                <!--
+                                    XÓA: POST → InventoryImportController/delete
+                                    Router sẽ gọi: InventoryImportController->delete()
+                                -->
+                                <form method="POST" action="?url=InventoryImportController/delete"
+                                      style="display: inline;"
+                                      onsubmit="return confirm('Bạn có chắc chắn muốn xóa phiếu nhập này không?')">
                                     <input type="hidden" name="id" value="<?= $import->id ?>">
                                     <button type="submit" class="btn-delete">🗑️ Xóa</button>
                                 </form>
@@ -111,56 +130,93 @@ $keyword = $data['keyword'] ?? '';
     </div>
 </section>
 
-<!-- Modal Form Thêm/Sửa Phiếu Nhập -->
-<div id="importModal" class="modal">
+<!--
+    MODAL FORM - Hiển thị bằng PHP thuần túy (KHÔNG DÙNG JS)
+    - Chỉ hiện khi URL có ?action=add hoặc ?action=edit
+    - Form submit TRỰC TIẾP đến Controller thông qua action attribute
+-->
+<?php if ($showModal): ?>
+<div class="modal active" id="importModal">
     <div class="modal-content">
         <div class="modal-header">
             <div class="modal-title-wrapper">
-                <div class="modal-icon">📥</div>
-                <h3 id="modalTitle">Tạo phiếu nhập mới</h3>
+                <h3><?= $_GET['action'] === 'add' ? 'Tạo phiếu nhập mới' : 'Cập nhật phiếu nhập' ?></h3>
             </div>
-            <span class="close" onclick="closeImportModal()">&times;</span>
+            <a href="?url=InventoryImportController/GetData" class="close">&times;</a>
         </div>
-        <form id="importForm" method="POST" action="?url=InventoryImportController/store">
+
+        <!--
+            FORM SUBMIT: POST → InventoryImportController/store hoặc update
+            - Nếu action=add: POST đến InventoryImportController/store
+            - Nếu action=edit: POST đến InventoryImportController/update
+
+            Router sẽ tự động:
+            1. Cắt URL: InventoryImportController/store
+            2. Gọi: new InventoryImportController()
+            3. Gọi method: store() với dữ liệu POST
+            4. Controller xử lý xong sẽ redirect về GetData (đóng modal)
+        -->
+        <form method="POST" action="?url=InventoryImportController/<?= $_GET['action'] === 'add' ? 'store' : 'update' ?>">
             <div class="modal-body">
-                <input type="hidden" id="importId" name="id">
-                
+                <?php if (isset($_GET['action']) && $_GET['action'] === 'edit'): ?>
+                    <input type="hidden" name="id" value="<?= $editImport ? $editImport->id : '' ?>">
+                <?php endif; ?>
+
                 <div class="form-group">
                     <label for="ingredientId">Nguyên liệu <span class="required">*</span></label>
-                    <select id="ingredientId" name="ingredient_id" required class="custom-select">
+                    <select name="ingredient_id" required>
                         <option value="">-- Chọn nguyên liệu --</option>
                         <?php foreach ($ingredients as $ing): ?>
-                            <option value="<?= $ing->id ?>"><?= htmlspecialchars($ing->name) ?> (<?= htmlspecialchars($ing->unit) ?>)</option>
+                            <option value="<?= $ing->id ?>"
+                                    <?= ($editImport && $editImport->ingredient_id == $ing->id) ? 'selected' : '' ?>>
+                                <?= htmlspecialchars($ing->name) ?> (<?= htmlspecialchars($ing->unit) ?>)
+                            </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label for="importQuantity">Số lượng nhập <span class="required">*</span></label>
-                    <input type="number" id="importQuantity" name="import_quantity" required placeholder="Nhập số lượng" step="0.01">
+                    <input type="number" name="import_quantity" required step="0.01"
+                           placeholder="Nhập số lượng"
+                           value="<?= $editImport ? htmlspecialchars($editImport->import_quantity) : '' ?>">
                 </div>
 
                 <div class="form-group">
                     <label for="totalCost">Tổng tiền (VNĐ) <span class="required">*</span></label>
-                    <input type="number" id="totalCost" name="total_cost" required placeholder="Nhập tổng tiền">
+                    <input type="number" name="total_cost" required
+                           placeholder="Nhập tổng tiền"
+                           value="<?= $editImport ? htmlspecialchars($editImport->total_cost) : '' ?>">
                 </div>
 
                 <div class="form-group">
                     <label for="importDate">Ngày nhập <span class="required">*</span></label>
-                    <input type="date" id="importDate" name="import_date" required value="<?= date('Y-m-d') ?>">
+                    <input type="date" name="import_date" required
+                           value="<?= $editImport ? date('Y-m-d', strtotime($editImport->import_date)) : date('Y-m-d') ?>">
                 </div>
 
                 <div class="form-group">
                     <label for="note">Ghi chú</label>
-                    <textarea id="note" name="note" rows="2" placeholder="Nhập ghi chú (nếu có)"></textarea>
+                    <textarea name="note" rows="2"
+                              placeholder="Nhập ghi chú (nếu có)"><?= $editImport ? htmlspecialchars($editImport->note) : '' ?></textarea>
                 </div>
             </div>
+
             <div class="modal-footer">
-                <button type="button" class="btn-secondary" onclick="closeImportModal()">Hủy bỏ</button>
-                <button type="submit" class="btn-primary" id="btnSave">Lưu lại</button>
+                <a href="?url=InventoryImportController/GetData" class="btn-secondary">Hủy bỏ</a>
+                <!--
+                    Khi click button này:
+                    1. Form submit với method POST
+                    2. Gửi đến action đã định nghĩa ở thẻ <form>
+                    3. Router nhận request và gọi Controller->Action
+                    4. KHÔNG CÓ JS NÀO CHẶN - Hoạt động như form tìm kiếm
+                -->
+                <button type="submit" class="btn-primary">💾 Lưu lại</button>
             </div>
         </form>
     </div>
 </div>
+<?php endif; ?>
 
+<!-- JS chỉ để validation TRƯỚC KHI submit, KHÔNG ngăn submit -->
 <script src="Public/Js/inventory-imports-page.js"></script>

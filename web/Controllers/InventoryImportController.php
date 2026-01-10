@@ -11,31 +11,25 @@ class InventoryImportController extends Controller {
         $this->ingredientService = $this->service('IngredientService');
     }
 
+    /**
+     * Hiển thị trang chính với danh sách phiếu nhập
+     */
     public function GetData($message = null) {
-        if ($message) {
-            if ($message['success']) {
-                echo "<script>alert('" . addslashes($message['message']) . "')</script>";
-            } else {
-                echo "<script>alert('Lỗi: " . addslashes($message['message']) . "')</script>";
-            }
-        }
+        // Hiển thị thông báo nếu có
+        $this->showMessage($message);
 
         $imports = $this->inventoryImportService->getAllImports();
         $ingredients = $this->ingredientService->getAllIngredients();
 
-        $this->view('AdminDashBoard/MasterLayout', [
-            'page' => 'InventoryImports_v',
-            'imports' => $imports,
-            'ingredients' => $ingredients,
-            'section' => 'inventory_imports',
-            'keyword' => '',
-            'message' => $message
-        ]);
+        $this->renderView($imports, $ingredients, '');
     }
 
+    /**
+     * Tìm kiếm phiếu nhập
+     */
     public function timkiem() {
-        $keyword = isset($_POST['txtSearch']) ? $_POST['txtSearch'] : '';
-        
+        $keyword = trim($_POST['txtSearch'] ?? '');
+
         if ($keyword) {
             $imports = $this->inventoryImportService->searchImports($keyword);
         } else {
@@ -43,45 +37,54 @@ class InventoryImportController extends Controller {
         }
 
         $ingredients = $this->ingredientService->getAllIngredients();
-
-        $this->view('AdminDashBoard/MasterLayout', [
-            'page' => 'InventoryImports_v',
-            'imports' => $imports,
-            'ingredients' => $ingredients,
-            'section' => 'inventory_imports',
-            'keyword' => $keyword
-        ]);
+        $this->renderView($imports, $ingredients, $keyword);
     }
 
+    /**
+     * Tạo phiếu nhập mới
+     */
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $result = $this->inventoryImportService->createImport($_POST);
-            $this->GetData($result);
+            // Sau khi tạo thành công, redirect về trang chính
+            header('Location: ?url=InventoryImportController/GetData');
+            exit();
         }
     }
 
+    /**
+     * Cập nhật phiếu nhập
+     */
     public function update() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $result = $this->inventoryImportService->updateImport($_POST);
-            $this->GetData($result);
+            // Sau khi cập nhật thành công, redirect về trang chính
+            header('Location: ?url=InventoryImportController/GetData');
+            exit();
         }
     }
 
+    /**
+     * Xóa phiếu nhập
+     */
     public function delete() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $id = $_POST['id'];
-            $result = $this->inventoryImportService->deleteImport($id);
-            $this->GetData($result);
+            $id = $_POST['id'] ?? 0;
+            if ($id > 0) {
+                $result = $this->inventoryImportService->deleteImport($id);
+                // Sau khi xóa, redirect về trang chính
+                header('Location: ?url=InventoryImportController/GetData');
+                exit();
+            }
         }
     }
 
     /**
      * Xuất Excel danh sách phiếu nhập kho
      */
-    function xuatexcel() {
-        if (isset($_POST['btnXuatexcel'])) {
-            // Lấy từ khóa tìm kiếm nếu có
-            $keyword = isset($_POST['txtSearch']) ? $_POST['txtSearch'] : '';
+    public function xuatexcel() {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['btnXuatexcel'])) {
+            $keyword = trim($_POST['txtSearch'] ?? '');
 
             // Lấy dữ liệu phiếu nhập
             if (!empty($keyword)) {
@@ -92,26 +95,10 @@ class InventoryImportController extends Controller {
 
             // Lấy danh sách nguyên liệu để map tên
             $ingredients = $this->ingredientService->getAllIngredients();
-            $ingredientMap = [];
-            foreach ($ingredients as $ingredient) {
-                $ingredientMap[$ingredient->id] = $ingredient->name;
-            }
+            $ingredientMap = $this->createIngredientMap($ingredients);
 
-            // Chuyển đổi object sang array để xuất Excel
-            $data = array_map(function($import) use ($ingredientMap) {
-                $ingredientName = isset($ingredientMap[$import->ingredient_id])
-                    ? $ingredientMap[$import->ingredient_id]
-                    : 'N/A';
-
-                return [
-                    'id' => $import->id,
-                    'ingredient_name' => $ingredientName,
-                    'import_quantity' => $import->import_quantity,
-                    'total_cost' => number_format($import->total_cost, 0, ',', '.'),
-                    'import_date' => date('d/m/Y H:i', strtotime($import->import_date)),
-                    'note' => $import->note ?? '-'
-                ];
-            }, $imports);
+            // Chuyển đổi dữ liệu để xuất Excel
+            $data = $this->prepareExcelData($imports, $ingredientMap);
 
             // Định nghĩa cấu trúc cột cho Excel
             $headers = [
@@ -126,6 +113,64 @@ class InventoryImportController extends Controller {
             // Gọi hàm xuất Excel từ Helper
             ExcelHelper::exportToExcel($data, $headers, 'DanhSachPhieuNhapKho');
         }
+    }
+
+    // ========== PRIVATE HELPER METHODS ==========
+
+    /**
+     * Hiển thị thông báo
+     */
+    private function showMessage($message) {
+        if ($message) {
+            $messageText = addslashes($message['message']);
+            if ($message['success']) {
+                echo "<script>alert('$messageText')</script>";
+            } else {
+                echo "<script>alert('Lỗi: $messageText')</script>";
+            }
+        }
+    }
+
+    /**
+     * Render view với dữ liệu
+     */
+    private function renderView($imports, $ingredients, $keyword) {
+        $this->view('AdminDashBoard/MasterLayout', [
+            'page' => 'InventoryImports_v',
+            'imports' => $imports,
+            'ingredients' => $ingredients,
+            'section' => 'inventory_imports',
+            'keyword' => $keyword
+        ]);
+    }
+
+    /**
+     * Tạo map nguyên liệu để tối ưu việc tìm kiếm
+     */
+    private function createIngredientMap($ingredients) {
+        $ingredientMap = [];
+        foreach ($ingredients as $ingredient) {
+            $ingredientMap[$ingredient->id] = $ingredient->name;
+        }
+        return $ingredientMap;
+    }
+
+    /**
+     * Chuẩn bị dữ liệu để xuất Excel
+     */
+    private function prepareExcelData($imports, $ingredientMap) {
+        return array_map(function($import) use ($ingredientMap) {
+            $ingredientName = $ingredientMap[$import->ingredient_id] ?? 'N/A';
+
+            return [
+                'id' => $import->id,
+                'ingredient_name' => $ingredientName,
+                'import_quantity' => $import->import_quantity,
+                'total_cost' => number_format($import->total_cost, 0, ',', '.'),
+                'import_date' => date('d/m/Y H:i', strtotime($import->import_date)),
+                'note' => $import->note ?? '-'
+            ];
+        }, $imports);
     }
 }
 ?>

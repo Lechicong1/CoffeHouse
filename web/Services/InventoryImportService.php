@@ -4,13 +4,13 @@ include_once './web/Repositories/IngredientRepository.php';
 include_once './web/Entity/InventoryImportEntity.php';
 use web\Entity\InventoryImportEntity;
 
-class InventoryImportService {
+class InventoryImportService extends  Service {
+
     private $inventoryImportRepository;
     private $ingredientRepository;
-
     public function __construct() {
-        $this->inventoryImportRepository = new InventoryImportRepository();
-        $this->ingredientRepository = new IngredientRepository();
+        $this->inventoryImportRepository = $this->repository('InventoryImportRepository');
+        $this->ingredientRepository = $this->repository('IngredientRepository');
     }
 
     public function getAllImports() {

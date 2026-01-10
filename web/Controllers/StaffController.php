@@ -380,7 +380,7 @@ class StaffController extends Controller {
                 }
                 
                 // Chỉ lấy đơn hàng tại quầy
-                $filters['order_type'] = 'AT_COUNTER';
+                $filters['order_type'] = ['AT_COUNTER', 'TAKEAWAY'];
 
                 // Lấy danh sách đơn hàng
                 $orders = $this->orderService->getOrders($filters);

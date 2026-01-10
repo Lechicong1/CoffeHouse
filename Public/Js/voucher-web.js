@@ -1,8 +1,3 @@
-/**
- * voucher-web.js
- * Modal voucher cho trang Checkout - sử dụng voucher-utils.js
- * Requires: voucher-utils.js (phải load trước)
- */
 (function () {
   function getSubtotalFromPage(fallback) {
     const subtotalEl =
@@ -156,7 +151,6 @@
     init();
   }
 
-  // Export for manual use
   window.openVoucherList = openVoucherList;
   window.previewAndApplyVoucher = previewAndApplyVoucher;
 })();

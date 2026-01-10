@@ -125,13 +125,8 @@ class AuthService extends Service {
         return '/COFFEE_PHP/User/index';
     }
 
-    /**
-     * Validate dữ liệu đăng ký
-     * @param array $data
-     * @return array ['valid' => bool, 'message' => string]
-     */
+    //Đăng ký
     public function validateRegistration($data) {
-        // Kiểm tra các trường bắt buộc
         if (empty($data['fullname']) || empty($data['phone']) || 
             empty($data['username']) || empty($data['password'])) {
             return [
@@ -140,7 +135,6 @@ class AuthService extends Service {
             ];
         }
 
-        // Validate họ tên
         if (strlen($data['fullname']) < 2) {
             return [
                 'valid' => false,
@@ -148,7 +142,6 @@ class AuthService extends Service {
             ];
         }
 
-        // Validate username
         if (strlen($data['username']) < 3) {
             return [
                 'valid' => false,
@@ -156,7 +149,6 @@ class AuthService extends Service {
             ];
         }
 
-        // Validate phone
         if (!preg_match('/^[0-9]{10,11}$/', $data['phone'])) {
             return [
                 'valid' => false,
@@ -164,7 +156,6 @@ class AuthService extends Service {
             ];
         }
 
-        // Validate password
         if (strlen($data['password']) < 6) {
             return [
                 'valid' => false,
@@ -172,7 +163,6 @@ class AuthService extends Service {
             ];
         }
 
-        // Validate confirm password
         if ($data['password'] !== $data['confirmPassword']) {
             return [
                 'valid' => false,
@@ -180,7 +170,6 @@ class AuthService extends Service {
             ];
         }
 
-        // Validate email format (nếu có)
         if (!empty($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
             return [
                 'valid' => false,
@@ -191,11 +180,6 @@ class AuthService extends Service {
         return ['valid' => true, 'message' => ''];
     }
 
-    /**
-     * Kiểm tra username đã tồn tại
-     * @param string $username
-     * @return array ['exists' => bool, 'message' => string]
-     */
     public function checkUsernameExists($username) {
         $custRepo = $this->repository('CustomerRepository');
         $empRepo = $this->repository('EmployeeRepository');
@@ -210,11 +194,6 @@ class AuthService extends Service {
         return ['exists' => false, 'message' => ''];
     }
 
-    /**
-     * Kiểm tra phone đã tồn tại
-     * @param string $phone
-     * @return array ['exists' => bool, 'message' => string]
-     */
     public function checkPhoneExists($phone) {
         $custRepo = $this->repository('CustomerRepository');
 
@@ -228,11 +207,6 @@ class AuthService extends Service {
         return ['exists' => false, 'message' => ''];
     }
 
-    /**
-     * Kiểm tra email đã tồn tại
-     * @param string $email
-     * @return array ['exists' => bool, 'message' => string]
-     */
     public function checkEmailExists($email) {
         if (empty($email)) {
             return ['exists' => false, 'message' => ''];
@@ -250,13 +224,7 @@ class AuthService extends Service {
         return ['exists' => false, 'message' => ''];
     }
 
-    /**
-     * Đăng ký customer mới
-     * @param array $data
-     * @return array ['success' => bool, 'message' => string]
-     */
     public function registerCustomer($data) {
-        // Validate
         $validation = $this->validateRegistration($data);
         if (!$validation['valid']) {
             return [
@@ -265,7 +233,6 @@ class AuthService extends Service {
             ];
         }
 
-        // Kiểm tra username đã tồn tại
         $usernameCheck = $this->checkUsernameExists($data['username']);
         if ($usernameCheck['exists']) {
             return [
@@ -274,80 +241,42 @@ class AuthService extends Service {
             ];
         }
 
-        // Kiểm tra phone đã tồn tại
         $custRepo = $this->repository('CustomerRepository');
         $existingCustomer = $custRepo->findByPhone($data['phone']);
         
         if ($existingCustomer) {
-            // Nếu là tài khoản GUEST_POS, cho phép upgrade lên WEB
             if ($existingCustomer->account_type === 'GUEST_POS') {
-                // Kiểm tra username mới có bị trùng không
-                $usernameCheckForUpgrade = $this->checkUsernameExists($data['username']);
-                if ($usernameCheckForUpgrade['exists']) {
-                    return [
-                        'success' => false,
-                        'message' => 'Tên đăng nhập đã tồn tại! Vui lòng chọn tên đăng nhập khác.'
-                    ];
-                }
-                
-                // Kiểm tra email mới có bị trùng không (nếu có), loại trừ customer hiện tại
                 if (!empty($data['email'])) {
                     $emailExists = $custRepo->findByEmail($data['email'], $existingCustomer->id);
                     if ($emailExists) {
-                        return [
-                            'success' => false,
-                            'message' => 'Email đã được sử dụng! Vui lòng sử dụng email khác.'
-                        ];
+                        return ['success' => false, 'message' => 'Email đã được sử dụng! Vui lòng sử dụng email khác.'];
                     }
                 }
                 
-                // Upgrade tài khoản GUEST_POS thành WEB
-                $plainPassword = $data['password'];
                 $result = $custRepo->upgradeToWebAccount(
                     $existingCustomer->id,
                     $data['username'],
-                    $plainPassword,
+                    $data['password'],
                     $data['address'] ?? null,
                     $data['email'] ?? null,
                     $data['fullname'] ?? null
                 );
                 
-                if ($result) {
-                    return [
-                        'success' => true,
-                        'message' => 'Đăng ký thành công! Tài khoản của bạn đã được nâng cấp.'
-                    ];
-                } else {
-                    return [
-                        'success' => false,
-                        'message' => 'Có lỗi xảy ra khi nâng cấp tài khoản!'
-                    ];
-                }
-            } else {
-                // Nếu không phải GUEST_POS, báo lỗi trùng số điện thoại
-                return [
-                    'success' => false,
-                    'message' => 'Số điện thoại đã được sử dụng!'
-                ];
+                return $result 
+                    ? ['success' => true, 'message' => 'Đăng ký thành công! Tài khoản của bạn đã được nâng cấp.']
+                    : ['success' => false, 'message' => 'Có lỗi xảy ra khi nâng cấp tài khoản!'];
             }
+            return ['success' => false, 'message' => 'Số điện thoại đã được sử dụng!'];
         }
 
-        // Kiểm tra email đã tồn tại (nếu có)
         $emailCheck = $this->checkEmailExists($data['email'] ?? '');
         if ($emailCheck['exists']) {
-            return [
-                'success' => false,
-                'message' => $emailCheck['message']
-            ];
+            return ['success' => false, 'message' => $emailCheck['message']];
         }
 
-        // Lưu mật khẩu nguyên bản (plain-text) theo yêu cầu
-        $plainPassword = $data['password'];
-        
-        // Tạo entity
         $customer = new CustomerEntity([
             'username' => $data['username'],
-            'password' => $plainPassword,
+            'password' => $data['password'],
             'full_name' => $data['fullname'],
             'phone' => $data['phone'],
             'email' => $data['email'] ?? '',
@@ -357,22 +286,14 @@ class AuthService extends Service {
             'status' => 1
         ]);
 
-        // Lưu vào database
         $result = $custRepo->create($customer);
 
         if ($result) {
-            return [
-                'success' => true,
-                'message' => 'Đăng ký thành công!'
-            ];
-        } else {
-            // Lấy lỗi MySQL để debug
-            $error = mysqli_error($custRepo->con);
-            return [
-                'success' => false,
-                'message' => 'Đăng ký thất bại! Lỗi: ' . $error
-            ];
+            return ['success' => true, 'message' => 'Đăng ký thành công!'];
         }
+        
+        $error = mysqli_error($custRepo->con);
+        return ['success' => false, 'message' => 'Đăng ký thất bại! Lỗi: ' . $error];
     }
 }
 ?>

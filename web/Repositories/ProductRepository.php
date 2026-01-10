@@ -192,6 +192,27 @@ class ProductRepository extends ConnectDatabase {
         mysqli_stmt_bind_param($stmt, "i", $productId);
         return mysqli_stmt_execute($stmt);
     }
+
+    /**
+     * Lấy thông tin product_size để tạo item cho Buy Now
+     * @param int $productSizeId
+     * @return object|null
+     */
+    public function getProductSizeInfo($productSizeId) {
+        $sql = "SELECT ps.*, p.name as product_name, p.image_url
+                FROM product_sizes ps
+                JOIN products p ON ps.product_id = p.id
+                WHERE ps.id = ?";
+
+        $stmt = mysqli_prepare($this->con, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $productSizeId);
+        mysqli_stmt_execute($stmt);
+
+        $result = mysqli_stmt_get_result($stmt);
+        $data = mysqli_fetch_assoc($result);
+
+        return $data ? (object)$data : null;
+    }
 }
 
 ?>

@@ -1,10 +1,4 @@
 <?php
-/**
- * FILE: CartController.php
- * DESCRIPTION: Controller xử lý các request liên quan đến giỏ hàng
- * CHUẨN MVC: Controller chỉ nhận request, gọi Service, trả response
- * AUTHOR: Coffee House System
- */
 
 include_once './web/Services/CartService.php';
 
@@ -15,10 +9,7 @@ class CartController extends Controller {
         $this->cartService = new CartService();
     }
 
-    /**
-     * Kiểm tra đăng nhập
-     * @return int Customer ID nếu đã đăng nhập
-     */
+
     private function checkAuth() {
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
@@ -67,37 +58,20 @@ class CartController extends Controller {
      * Thêm sản phẩm vào giỏ hàng (POST)
      */
     public function ins() {
-        // Kiểm tra method POST
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['btnThemGioHang'])) {
-            header('Location: /COFFEE_PHP/User/menu');
-            exit();
-        }
-
         $customerId = $this->checkAuth();
 
         try {
-            // Lấy dữ liệu từ request - KHÔNG validate ở đây
             $productSizeId = $_POST['txtProductSizeId'] ?? null;
             $quantity = (int)($_POST['txtQuantity'] ?? 1);
-            $buyNow = $_POST['buy_now'] ?? '0';
 
-            // Gọi Service xử lý - Service sẽ validate và xử lý logic
             $result = $this->cartService->addToCart($customerId, $productSizeId, $quantity);
 
-            // Xử lý kết quả từ Service
-            if ($result['success']) {
-                $_SESSION['success_message'] = $result['message'];
+            // Set message
+            $_SESSION[$result['success'] ? 'success_message' : 'error_message'] = $result['message'];
 
-                // Redirect theo hành động
-                if ($buyNow === '1') {
-                    header('Location: /COFFEE_PHP/Checkout/GetData');
-                } else {
-                    header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/COFFEE_PHP/Cart/GetData'));
-                }
-            } else {
-                $_SESSION['error_message'] = $result['message'];
-                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/COFFEE_PHP/User/menu'));
-            }
+            // Redirect về trang trước hoặc giỏ hàng
+            $redirectUrl = $_SERVER['HTTP_REFERER'] ?? '/COFFEE_PHP/Cart/GetData';
+            header('Location: ' . $redirectUrl);
         } catch (Exception $e) {
             $_SESSION['error_message'] = 'Có lỗi xảy ra: ' . $e->getMessage();
             header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/COFFEE_PHP/User/menu'));
@@ -123,14 +97,10 @@ class CartController extends Controller {
             $quantity = (int)($_POST['txtQuantity'] ?? 0);
 
             // Gọi Service xử lý - Service sẽ validate
-            $result = $this->cartService->updateQuantity($customerId, $cartItemId, $quantity);
+            $result = $this->cartService->updateQuantity( $cartItemId, $quantity);
 
-            // Set message từ Service
-            if ($result['success']) {
-                $_SESSION['success_message'] = $result['message'];
-            } else {
-                $_SESSION['error_message'] = $result['message'];
-            }
+            // Set message
+            $_SESSION[$result['success'] ? 'success_message' : 'error_message'] = $result['message'];
 
         } catch (Exception $e) {
             $_SESSION['error_message'] = 'Có lỗi xảy ra: ' . $e->getMessage();
@@ -158,14 +128,10 @@ class CartController extends Controller {
             $cartItemId = $_POST['txtCartItemId'] ?? null;
 
             // Gọi Service xử lý
-            $result = $this->cartService->removeItem($customerId, $cartItemId);
+            $result = $this->cartService->removeItem( $cartItemId);
 
-            // Set message từ Service
-            if ($result['success']) {
-                $_SESSION['success_message'] = $result['message'];
-            } else {
-                $_SESSION['error_message'] = $result['message'];
-            }
+            // Set message
+            $_SESSION[$result['success'] ? 'success_message' : 'error_message'] = $result['message'];
 
         } catch (Exception $e) {
             $_SESSION['error_message'] = 'Có lỗi xảy ra: ' . $e->getMessage();
@@ -192,12 +158,8 @@ class CartController extends Controller {
             // Gọi Service xử lý
             $result = $this->cartService->clearCart($customerId);
 
-            // Set message từ Service
-            if ($result['success']) {
-                $_SESSION['success_message'] = $result['message'];
-            } else {
-                $_SESSION['error_message'] = $result['message'];
-            }
+            // Set message
+            $_SESSION[$result['success'] ? 'success_message' : 'error_message'] = $result['message'];
 
         } catch (Exception $e) {
             $_SESSION['error_message'] = 'Có lỗi xảy ra: ' . $e->getMessage();

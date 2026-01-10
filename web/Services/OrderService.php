@@ -293,7 +293,23 @@ class OrderService {
      * @return array
      */
     public function getOrders($filters = []) {
-        return $this->orderRepo->findAllWithFilters($filters);
+        // Normalize filters and apply default order_type for staff POS listing
+        $normalized = [];
+        if (!empty($filters['status'])) {
+            $normalized['status'] = $filters['status'];
+        }
+        if (!empty($filters['search'])) {
+            $normalized['search'] = trim($filters['search']);
+        }
+
+        // Nếu controller không cung cấp order_type, mặc định chỉ lấy AT_COUNTER và TAKEAWAY
+        if (isset($filters['order_type']) && !empty($filters['order_type'])) {
+            $normalized['order_type'] = $filters['order_type'];
+        } else {
+            $normalized['order_type'] = ['AT_COUNTER', 'TAKEAWAY'];
+        }
+
+        return $this->orderRepo->findAllWithFilters($normalized);
     }
 
     /**
@@ -303,6 +319,74 @@ class OrderService {
      */
     public function getOrderItems($orderId) {
         return $this->orderItemRepo->findByOrderId($orderId);
+    }
+
+    /**
+     * Tạo đơn hàng từ POS (POST raw data) - Service xử lý parsing và validation
+     * @param array $postData Raw POST data từ controller
+     * @return array
+     */
+    public function createOrderFromPOS($postData) {
+        try {
+            // Validate required fields minimally here; deep validation in createOrder()
+            $data = [];
+            $data['staff_id'] = $postData['staff_id'] ?? null;
+            $data['customer_id'] = !empty($postData['customer_id']) ? (int)$postData['customer_id'] : null;
+            $data['order_type'] = $postData['order_type'] ?? 'AT_COUNTER';
+            $data['payment_method'] = $postData['payment_method'] ?? 'CASH';
+            $data['total_amount'] = isset($postData['total_amount']) ? (float)$postData['total_amount'] : 0.0;
+            $data['note'] = trim($postData['note'] ?? '');
+            $data['table_number'] = !empty($postData['table_number']) ? trim($postData['table_number']) : null;
+
+            // Parse cart items which may be JSON string
+            $items = $postData['cart_items'] ?? [];
+            if (is_string($items)) {
+                $decoded = json_decode($items, true);
+                if ($decoded && is_array($decoded)) {
+                    $items = $decoded;
+                } else {
+                    $items = [];
+                }
+            }
+            $data['items'] = $items;
+
+            // Voucher
+            if (!empty($postData['voucher_id'])) {
+                $data['voucher'] = ['voucher_id' => (int)$postData['voucher_id']];
+            }
+
+            return $this->createOrder($data);
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Lấy dữ liệu order + items dùng cho hóa đơn (service helper)
+     * @param int $orderId
+     * @return array ['success'=>bool,'order'=>array,'items'=>array]
+     */
+    public function getOrderInvoiceData($orderId) {
+        try {
+            if (!$orderId) return ['success' => false, 'message' => 'Thiếu order_id'];
+
+            // Lấy order (có customer info) bằng cách dùng repository findAllWithFilters và tìm id
+            $all = $this->orderRepo->findAllWithFilters([]);
+            $orderData = null;
+            foreach ($all as $o) {
+                if ((int)$o['id'] === (int)$orderId) {
+                    $orderData = $o;
+                    break;
+                }
+            }
+
+            if (!$orderData) return ['success' => false, 'message' => 'Không tìm thấy đơn hàng'];
+
+            $items = $this->getOrderItems($orderId);
+            return ['success' => true, 'order' => $orderData, 'items' => $items];
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
     }
 
     /**

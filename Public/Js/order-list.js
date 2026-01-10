@@ -24,7 +24,7 @@ function openOrderDetail(orderId) {
                     
                     const imagePath = item.product_image ? `/COFFEE_PHP/${item.product_image}` : '/COFFEE_PHP/Public/Assets/default-product.jpg';
                     const itemNote = item.note ? item.note : '';
-                    const noteDisplay = itemNote ? `<div style="font-size:0.85rem;color:#666;margin-top:5px;">📝 ${itemNote}</div>` : '';
+                    const noteDisplay = itemNote ? `<div style="font-size:0.85rem;color:#666;margin-top:5px;">Ghi chú: ${itemNote}</div>` : '';
                     
                     html += `<tr>
                         <td>
@@ -41,7 +41,9 @@ function openOrderDetail(orderId) {
                         <td>${new Intl.NumberFormat('vi-VN').format(item.price_at_purchase)} ₫</td>
                         <td><strong>${new Intl.NumberFormat('vi-VN').format(subtotal)} ₫</strong></td>
                         <td>
-                            <button class="action-btn" onclick="openEditItemNoteModal(${item.id}, '${itemNote.replace(/'/g, "\\'")}')">✏️</button>
+                            <button class="action-btn" onclick="openEditItemNoteModal(${item.id}, '${itemNote.replace(/'/g, "\\'")}')">
+                                Sửa
+                            </button>
                         </td>
                     </tr>`;
                 });
@@ -92,12 +94,16 @@ function toggleEditTableGroup(orderType) {
     const group = document.getElementById('edit-table-group');
     const tableSelect = document.getElementById('edit-table-number');
     if (!group) return;
+    
     if (orderType === 'AT_COUNTER') {
+        // Hiển thị nhóm số bàn khi là "Tại quầy"
         group.style.display = 'block';
     } else {
-        // hide and clear
+        // Ẩn và xóa giá trị số bàn khi là "Mang về"
         group.style.display = 'none';
-        if (tableSelect) tableSelect.value = '';
+        if (tableSelect) {
+            tableSelect.value = '';
+        }
     }
 }
 
@@ -266,7 +272,7 @@ function generateInvoiceHTML(order, items) {
                 </div>`;
         
         if (item.note) {
-            html += `<div class="invoice-item-note">📝 ${item.note}</div>`;
+            html += `<div class="invoice-item-note">Ghi chú: ${item.note}</div>`;
         }
         
         html += `</div>`;

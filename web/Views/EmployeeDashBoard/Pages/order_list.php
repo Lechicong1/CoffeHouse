@@ -13,13 +13,18 @@ $currentSearch = $currentFilter['search'] ?? '';
 <div class="order-container">
     <!-- Header -->
     <div class="order-header">
-        <h2>📋 Quản Lý Đơn Hàng</h2>        <form method="POST" action="/COFFEE_PHP/StaffController/xuatexcel" style="margin: 0;">
+        <h2>Quản Lý Đơn Hàng</h2>
+        <div style="display:flex;gap:8px;align-items:center;">
+            <button type="button" class="filter-btn" onclick="window.location.reload();" style="background: #fff; color: #064528; border-color: #064528;">Làm mới</button>
+            <form method="POST" action="/COFFEE_PHP/StaffController/xuatexcel" style="margin: 0;">
             <input type="hidden" name="status" value="<?php echo isset($data['currentFilter']['status']) ? $data['currentFilter']['status'] : ''; ?>">
             <input type="hidden" name="search" value="<?php echo isset($data['currentFilter']['search']) ? $data['currentFilter']['search'] : ''; ?>">
             <button type="submit" name="btnXuatexcel" class="filter-btn" style="background: #2e7d32; color: white; border-color: #2e7d32;">
-                <i class="fas fa-file-excel"></i> Xuất Excel
+                Xuất Excel
             </button>
-        </form>    </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Filter Bar -->
     <div class="filter-bar">
@@ -28,13 +33,16 @@ $currentSearch = $currentFilter['search'] ?? '';
                 Tất cả
             </a>
             <a href="/COFFEE_PHP/StaffController/orders?status=PROCESSING" class="filter-btn <?php echo $currentStatus === 'PROCESSING' ? 'active' : ''; ?>">
-                ⏳ Đang pha chế
+                Đang pha chế
+            </a>
+            <a href="/COFFEE_PHP/StaffController/orders?status=READY" class="filter-btn <?php echo $currentStatus === 'READY' ? 'active' : ''; ?>">
+                Pha chế xong
             </a>
             <a href="/COFFEE_PHP/StaffController/orders?status=COMPLETED" class="filter-btn <?php echo $currentStatus === 'COMPLETED' ? 'active' : ''; ?>">
-                ✅ Hoàn thành
+                Hoàn thành
             </a>
             <a href="/COFFEE_PHP/StaffController/orders?status=CANCELLED" class="filter-btn <?php echo $currentStatus === 'CANCELLED' ? 'active' : ''; ?>">
-                ❌ Đã hủy
+                Đã hủy
             </a>
         </div>
 
@@ -43,7 +51,7 @@ $currentSearch = $currentFilter['search'] ?? '';
                 <input type="hidden" name="status" value="<?php echo htmlspecialchars($currentStatus); ?>">
             <?php endif; ?>
             <input type="text" name="search" placeholder="Tìm theo mã đơn hoặc SĐT..." value="<?php echo htmlspecialchars($currentSearch); ?>">
-            <button type="submit">🔍 Tìm kiếm</button>
+            <button type="submit">Tìm kiếm</button>
         </form>
     </div>
 
@@ -54,6 +62,7 @@ $currentSearch = $currentFilter['search'] ?? '';
                 <tr>
                     <th>Mã đơn</th>
                     <th>Khách hàng</th>
+                    <th>Loại đơn</th>
                     <th>Số bàn</th>
                     <th>Tổng tiền</th>
                     <th>Thanh toán</th>
@@ -65,12 +74,13 @@ $currentSearch = $currentFilter['search'] ?? '';
             <tbody>
                 <?php if (empty($orders)): ?>
                     <tr>
-                        <td colspan="8" style="text-align: center; padding: 40px; color: #999;">
+                        <td colspan="9" style="text-align: center; padding: 40px; color: #999;">
                             Không có đơn hàng nào
                         </td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($orders as $order): ?>
+                        <?php if (!in_array(($order['order_type'] ?? ''), ['AT_COUNTER', 'TAKEAWAY'])) continue; ?>
                         <tr>
                             <!-- Mã đơn -->
                             <td>
@@ -88,15 +98,19 @@ $currentSearch = $currentFilter['search'] ?? '';
                                     <span class="customer-phone">
                                         <?php echo htmlspecialchars($order['customer_phone'] ?? $order['receiver_phone'] ?? ''); ?>
                                     </span>
-                                    <span class="order-type-badge <?php echo $order['order_type'] === 'AT_COUNTER' ? 'badge-counter' : 'badge-takeaway'; ?>">
-                                        <?php echo $order['order_type'] === 'AT_COUNTER' ? 'Tại quầy' : 'Mang về'; ?>
-                                    </span>
                                 </div>
+                            </td>
+
+                            <!-- Loại đơn -->
+                            <td>
+                                <span class="order-type-badge <?php echo $order['order_type'] === 'AT_COUNTER' ? 'badge-counter' : 'badge-takeaway'; ?>">
+                                    <?php echo $order['order_type'] === 'AT_COUNTER' ? 'Tại quầy' : 'Mang về'; ?>
+                                </span>
                             </td>
 
                             <!-- Số bàn -->
                             <td>
-                                <?php if (!empty($order['table_number'])): ?>
+                                <?php if ($order['order_type'] === 'AT_COUNTER' && !empty($order['table_number'])): ?>
                                     <span style="font-weight: 600; color: #064528; display: inline-flex; align-items: center; gap: 4px;">
                                         Bàn <?php echo htmlspecialchars($order['table_number']); ?>
                                     </span>
@@ -117,20 +131,17 @@ $currentSearch = $currentFilter['search'] ?? '';
                                 <?php
                                 $paymentClass = 'payment-unpaid';
                                 $paymentText = 'Chưa thanh toán';
-                                $paymentIcon = '⏳';
 
                                 if ($order['payment_status'] === 'PAID') {
                                     $paymentClass = 'payment-paid';
                                     $paymentText = 'Đã thanh toán';
-                                    $paymentIcon = '✅';
                                 } elseif ($order['payment_status'] === 'REFUNDED') {
                                     $paymentClass = 'payment-refunded';
                                     $paymentText = 'Đã hoàn tiền';
-                                    $paymentIcon = '↩️';
                                 }
                                 ?>
                                 <span class="payment-badge <?php echo $paymentClass; ?>">
-                                    <?php echo $paymentIcon; ?> <?php echo $paymentText; ?>
+                                    <?php echo $paymentText; ?>
                                 </span>
                             </td>
 
@@ -147,47 +158,38 @@ $currentSearch = $currentFilter['search'] ?? '';
                                 <?php
                                 $statusClass = 'status-pending';
                                 $statusText = 'Chờ xác nhận';
-                                $statusIcon = '⏳';
 
                                 switch ($order['status']) {
                                     case 'PENDING':
                                         $statusClass = 'status-pending';
                                         $statusText = 'Chờ xác nhận';
-                                        $statusIcon = '⏳';
                                         break;
                                     case 'PROCESSING': // Tương thích với đơn hàng cũ
                                     case 'PREPARING':
                                         $statusClass = 'status-preparing';
                                         $statusText = 'Đang pha chế';
-                                        $statusIcon = '☕';
                                         break;
                                     case 'READY':
                                         $statusClass = 'status-ready';
                                         $statusText = 'Pha chế xong';
-                                        $statusIcon = '✔️';
                                         break;
                                     case 'SHIPPING':
                                         $statusClass = 'status-shipping';
                                         $statusText = 'Đang giao';
-                                        $statusIcon = '🚚';
                                         break;
                                     case 'COMPLETED':
                                         $statusClass = 'status-completed';
                                         $statusText = 'Hoàn thành';
-                                        $statusIcon = '✅';
                                         break;
                                     case 'CANCELLED':
                                         $statusClass = 'status-cancelled';
                                         $statusText = 'Đã hủy';
-                                        $statusIcon = '❌';
-                                        if ($order['payment_status'] === 'REFUNDED') {
-                                            $statusText .= ' (Đã hoàn tiền)';
-                                        }
+                                        
                                         break;
                                 }
                                 ?>
                                 <span class="status-badge <?php echo $statusClass; ?>">
-                                    <?php echo $statusIcon; ?> <?php echo $statusText; ?>
+                                    <?php echo $statusText; ?>
                                 </span>
                             </td>
 
@@ -196,26 +198,30 @@ $currentSearch = $currentFilter['search'] ?? '';
                                 <div class="action-btns">
                                     <!-- Nút Xem chi tiết -->
                                     <button class="action-btn" style="background: #e3f2fd; color: #1976d2;" onclick="openOrderDetail(<?php echo $order['id']; ?>)">
-                                        👁️ Xem
+                                        Xem
                                     </button>
 
                                     <?php if ($order['status'] === 'PENDING'): ?>
                                         <button class="action-btn btn-edit" onclick="openEditOrderModal(<?php echo $order['id']; ?>, '<?php echo $order['order_type']; ?>', '<?php echo htmlspecialchars($order['table_number'] ?? '', ENT_QUOTES); ?>', '<?php echo addslashes($order['note'] ?? ''); ?>')">
-                                            ✏️ Sửa
+                                            Sửa
+                                        </button>
+
+                                        <button class="action-btn btn-cancel" onclick="openCancelModal(<?php echo $order['id']; ?>, '<?php echo htmlspecialchars($order['order_code'], ENT_QUOTES); ?>', '<?php echo $order['payment_status']; ?>')">
+                                            Hủy
                                         </button>
                                     <?php endif; ?>
 
                                     <!-- In hóa đơn - chỉ hiển thị với PENDING và COMPLETED -->
                                     <?php if ($order['status'] === 'PENDING' || $order['status'] === 'COMPLETED'): ?>
                                         <button class="action-btn btn-print" onclick="printOrder(<?php echo $order['id']; ?>)">
-                                            🖨️ In
+                                            In
                                         </button>
                                     <?php endif; ?>
 
                                     <!-- Chỉ cho phép hoàn thành khi READY -->
                                     <?php if ($order['status'] === 'READY'): ?>
                                         <button class="action-btn btn-complete" onclick="updateStatus(<?php echo $order['id']; ?>, 'COMPLETED')">
-                                            ✅ Hoàn thành
+                                            Hoàn thành
                                         </button>
                                     <?php endif; ?>
                                 </div>
@@ -284,7 +290,7 @@ $currentSearch = $currentFilter['search'] ?? '';
 <div id="cancelOrderModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h3>⚠️ Xác nhận hủy đơn</h3>
+            <h3>Xác nhận hủy đơn</h3>
             <button class="close-modal" onclick="closeCancelModal()">&times;</button>
         </div>
         <p>Bạn có chắc muốn hủy đơn <strong id="cancel-order-code"></strong> không?</p>

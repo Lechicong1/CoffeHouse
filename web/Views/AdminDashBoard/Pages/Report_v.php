@@ -230,10 +230,10 @@ $showInventoryDetails = isset($_GET['show_inventory']);
                     ?>
                         <tr>
                             <td><strong>#<?= $emp['id'] ?></strong></td>
-                            <td><?= htmlspecialchars($emp['fullname']) ?></td>
+                            <td><?= htmlspecialchars($emp['fullname'] ?? '') ?></td>
                             <td>
                                 <span style="background: #dcfce7; color: #166534; padding: 3px 10px; border-radius: 12px; font-size: 12px; font-weight: 600;">
-                                    <?= htmlspecialchars($emp['roleName']) ?>
+                                    <?= htmlspecialchars($emp['roleName'] ?? '') ?>
                                 </span>
                             </td>
                             <td style="font-weight: 700; color: #10b981;">

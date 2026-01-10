@@ -170,51 +170,8 @@ $keyword = $data['keyword'] ?? '';
         <input type="hidden" name="idDel" id="idDel">
     </form>
 
-    <script>
-        // Mở modal thêm khách hàng
-        function openAddModal() {
-            document.getElementById('modalTitle').textContent = 'Thêm Khách Hàng';
-            document.getElementById('customerForm').action = '/COFFEE_PHP/CustomerController/ins';
-            document.getElementById('customerForm').reset();
-            document.getElementById('txtId').value = '';
-            document.getElementById('customerModal').style.display = 'block';
-        }
-
-        // Mở modal sửa khách hàng
-        function openEditModal(customer) {
-            document.getElementById('modalTitle').textContent = 'Sửa Khách Hàng';
-            document.getElementById('customerForm').action = '/COFFEE_PHP/CustomerController/upd';
-            
-            document.getElementById('txtId').value = customer.id;
-            document.getElementById('txtFullName').value = customer.full_name;
-            document.getElementById('txtPhone').value = customer.phone;
-            document.getElementById('txtEmail').value = customer.email || '';
-            document.getElementById('txtPoints').value = customer.points;
-            document.getElementById('ddlStatus').value = customer.status ? '1' : '0';
-            
-            document.getElementById('customerModal').style.display = 'block';
-        }
-
-        // Đóng modal
-        function closeModal() {
-            document.getElementById('customerModal').style.display = 'none';
-        }
-
-        // Xác nhận xóa
-        function confirmDelete(id, name) {
-            if (confirm('Bạn có chắc chắn muốn xóa khách hàng "' + name + '"?')) {
-                document.getElementById('idDel').value = id;
-                document.getElementById('deleteForm').submit();
-            }
-        }
-
-        // Đóng modal khi click bên ngoài
-        window.onclick = function(event) {
-            const modal = document.getElementById('customerModal');
-            if (event.target == modal) {
-                closeModal();
-            }
-        }
-    </script>
+    <!-- Import Customer Page JS -->
+    <script src="/COFFEE_PHP/Public/Js/customer-page.js"></script>
     </div>
 </section>
+

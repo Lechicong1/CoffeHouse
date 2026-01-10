@@ -4,19 +4,19 @@
  * Theo mô hình MVC chuẩn
  */
 
-require_once './web/Services/CartService.php';
-require_once './web/Services/CustomerService.php';
-require_once './web/Services/OrderService.php';
+
 
 class CheckoutController extends Controller {
     private $cartService;
     private $customerService;
     private $orderService;
+    private $productService;
 
     public function __construct() {
-        $this->cartService = new CartService();
-        $this->customerService = new CustomerService();
-        $this->orderService = new OrderService();
+        $this->cartService = $this->service('CartService');
+        $this->customerService = $this->service('CustomerService');
+        $this->orderService =$this->service('OrderService');
+        $this->productService = $this->service('ProductService');
     }
 
     /**
@@ -43,29 +43,67 @@ class CheckoutController extends Controller {
         $customerId = $this->checkAuth();
 
         try {
-            // Lấy thông tin giỏ hàng
-            $cartData = $this->cartService->getCart($customerId);
+            // Kiểm tra xem có phải "Buy Now" không
+            if (isset($_POST['buy_now']) && $_POST['buy_now'] === '1') {
+                // Mua ngay - chỉ checkout sản phẩm được chọn
+                $productSizeId = $_POST['txtProductSizeId'] ?? null;
+                $quantity = (int)($_POST['txtQuantity'] ?? 1);
 
-            if (!$cartData['success'] || empty($cartData['items'])) {
-                echo "<script>alert('Giỏ hàng trống!'); window.location.href='/COFFEE_PHP/Cart/index';</script>";
-                exit;
+                if (!$productSizeId || $quantity < 1) {
+                    $_SESSION['error_message'] = 'Thông tin sản phẩm không hợp lệ!';
+                    header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/COFFEE_PHP/User/menu'));
+                    exit;
+                }
+
+                // Lấy thông tin sản phẩm để checkout
+                $buyNowData = $this->productService->getBuyNowData($productSizeId, $quantity);
+
+                if (!$buyNowData['success']) {
+                    $_SESSION['error_message'] = $buyNowData['message'];
+                    header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/COFFEE_PHP/User/menu'));
+                    exit;
+                }
+
+                $cartItems = $buyNowData['items'];
+                $total = $buyNowData['total'];
+                $isBuyNow = true;
+            } else {
+                // Checkout từ giỏ hàng - lấy toàn bộ giỏ hàng
+                $cartData = $this->cartService->getCart($customerId);
+
+                if (!$cartData['success'] || empty($cartData['items'])) {
+                    $_SESSION['error_message'] = 'Giỏ hàng trống!';
+                    header('Location: /COFFEE_PHP/Cart/GetData');
+                    exit;
+                }
+
+                $cartItems = $cartData['items'];
+                $total = $cartData['total'];
+                $isBuyNow = false;
             }
 
             // Lấy thông tin khách hàng và địa chỉ
             $customer = $this->customerService->getCustomerById($customerId);
             $customerAddress = $this->customerService->getCustomerAddress($customerId);
 
-            // Render view
-            $this->view('UserDashBoard/Pages/CheckoutPage', [
+            // Render view - Sử dụng MasterLayout
+            $this->view('UserDashBoard/MasterLayout', [
                 'title' => 'Thanh Toán - Coffee House',
-                'cartItems' => $cartData['items'],
-                'total' => $cartData['total'],
+                'page' => 'CheckoutPage',
+                'currentPage' => 'checkout',
+                'additionalCSS' => [
+                    'Public/Css/checkout-page.css'
+                ],
+                'cartItems' => $cartItems,
+                'total' => $total,
                 'customer' => $customer,
-                'customerAddress' => $customerAddress
+                'customerAddress' => $customerAddress,
+                'isBuyNow' => $isBuyNow
             ]);
 
         } catch (Exception $e) {
-            echo "<script>alert('Lỗi: " . addslashes($e->getMessage()) . "'); window.location.href='/COFFEE_PHP/Cart/index';</script>";
+            $_SESSION['error_message'] = 'Lỗi: ' . $e->getMessage();
+            header('Location: /COFFEE_PHP/Cart/GetData');
             exit;
         }
     }
@@ -173,9 +211,14 @@ class CheckoutController extends Controller {
             $description = urlencode('Thanh toan don hang ' . $orderCode);
             $vietQRUrl = "https://img.vietqr.io/image/{$bankId}-{$accountNo}-compact2.png?amount={$amount}&addInfo={$description}&accountName={$accountName}";
 
-            // Render view
-            $this->view('UserDashBoard/Pages/PaymentPage', [
+            // Render view - Sử dụng MasterLayout
+            $this->view('UserDashBoard/MasterLayout', [
                 'title' => 'Thanh Toán Chuyển Khoản - Coffee House',
+                'page' => 'PaymentPage',
+                'currentPage' => 'payment',
+                'additionalCSS' => [
+                    'Public/Css/payment-page.css'
+                ],
                 'order' => $order,
                 'qrUrl' => $vietQRUrl,
                 'bankInfo' => [
@@ -188,10 +231,8 @@ class CheckoutController extends Controller {
             ]);
 
         } catch (Exception $e) {
-            echo "<script>
-                alert('Lỗi: " . addslashes($e->getMessage()) . "');
-                window.location.href = '/COFFEE_PHP/User/index';
-            </script>";
+            $_SESSION['error_message'] = 'Lỗi: ' . $e->getMessage();
+            header('Location: /COFFEE_PHP/User/index');
             exit;
         }
     }
@@ -213,17 +254,20 @@ class CheckoutController extends Controller {
             // Lấy thông tin đơn hàng
             $order = $this->orderService->getOrderById($orderId);
 
-            // Render view
-            $this->view('UserDashBoard/Pages/OrderSuccessPage', [
+            // Render view - Sử dụng MasterLayout
+            $this->view('UserDashBoard/MasterLayout', [
                 'title' => 'Đặt Hàng Thành Công - Coffee House',
+                'page' => 'OrderSuccessPage',
+                'currentPage' => 'orderSuccess',
+                'additionalCSS' => [
+                    'Public/Css/order-success.css'
+                ],
                 'order' => $order
             ]);
 
         } catch (Exception $e) {
-            echo "<script>
-                alert('Lỗi: " . addslashes($e->getMessage()) . "');
-                window.location.href = '/COFFEE_PHP/User/index';
-            </script>";
+            $_SESSION['error_message'] = 'Lỗi: ' . $e->getMessage();
+            header('Location: /COFFEE_PHP/User/index');
             exit;
         }
     }

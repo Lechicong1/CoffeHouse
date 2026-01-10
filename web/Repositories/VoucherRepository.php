@@ -95,11 +95,11 @@ class VoucherRepository extends ConnectDatabase {
         $sql = "UPDATE vouchers 
                 SET name = ?, point_cost = ?, discount_type = ?, discount_value = ?,
                     max_discount_value = ?, min_bill_total = ?, start_date = ?, 
-                    end_date = ?, quantity = ?, used_count = ?, is_active = ?
+                    end_date = ?, quantity = ?, is_active = ?
                 WHERE id = ?";
 
         $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "sisdddssiiii",
+        mysqli_stmt_bind_param($stmt, "sisdddssiii",
             $voucher->name,
             $voucher->point_cost,
             $voucher->discount_type,
@@ -109,7 +109,6 @@ class VoucherRepository extends ConnectDatabase {
             $voucher->start_date,
             $voucher->end_date,
             $voucher->quantity,
-            $voucher->used_count,
             $voucher->is_active,
             $voucher->id
         );
@@ -126,7 +125,8 @@ class VoucherRepository extends ConnectDatabase {
 
     public function findActiveVouchers() {
         $sql = "SELECT * FROM vouchers 
-                WHERE is_active = 1 
+                WHERE is_active = 1
+                AND (start_date IS NULL OR start_date <= CURDATE())
                 AND (end_date IS NULL OR end_date >= CURDATE())
                 AND (quantity IS NULL OR quantity > used_count)
                 ORDER BY point_cost ASC";
@@ -141,10 +141,6 @@ class VoucherRepository extends ConnectDatabase {
         return $vouchers;
     }
 
-    /**
-     * Tự động set is_active = 0 cho các voucher đã hết hạn
-     * @return int Số voucher đã deactivate
-     */
     public function deactivateExpiredVouchers() {
         $sql = "UPDATE vouchers 
                 SET is_active = 0 

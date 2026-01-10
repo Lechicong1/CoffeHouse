@@ -17,6 +17,10 @@ class InventoryImportEntity
     public $import_date;
     public $note;
 
+    // Properties từ JOIN với bảng ingredients
+    public $ingredient_name;
+    public $unit;
+
     /**
      * Constructor - Khởi tạo entity rỗng hoặc từ array
      * @param array $data - Dữ liệu từ database (optional)
@@ -30,6 +34,8 @@ class InventoryImportEntity
             $this->total_cost = $data['total_cost'] ?? 0;
             $this->import_date = $data['import_date'] ?? null;
             $this->note = $data['note'] ?? null;
+            $this->ingredient_name = $data['ingredient_name'] ?? null;
+            $this->unit = $data['unit'] ?? '';
         }
     }
 }

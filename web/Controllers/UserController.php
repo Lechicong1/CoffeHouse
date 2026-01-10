@@ -43,8 +43,10 @@ class UserController extends Controller {
         }
 
         // Render view
-        $this->view('UserDashBoard/Pages/HomePage', [
+        $this->view('UserDashBoard/MasterLayout', [
             'title' => 'Trang Chủ - Coffee House',
+            'page' => 'HomePage',
+            'currentPage' => 'index',
             'products' => $products,
             'categories' => $categories
         ]);
@@ -56,8 +58,13 @@ class UserController extends Controller {
     function menu() {
         $categories = $this->categoryService->getAllCategories();
 
-        $this->view('UserDashBoard/Pages/MenuPage', [
+        $this->view('UserDashBoard/MasterLayout', [
             'title' => 'Thực Đơn - Coffee House',
+            'page' => 'MenuPage',
+            'currentPage' => 'menu',
+            'additionalCSS' => [
+                'Public/Css/user-menu-style.css'
+            ],
             'categories' => $categories
         ]);
     }
@@ -83,8 +90,13 @@ class UserController extends Controller {
                 }
             }
 
-            $this->view('UserDashBoard/Pages/CategoryProductsPage', [
+            $this->view('UserDashBoard/MasterLayout', [
                 'title' => $category->name . ' - Coffee House',
+                'page' => 'CategoryProductsPage',
+                'currentPage' => 'categoryProducts',
+                'additionalCSS' => [
+                    'Public/Css/user-category-products.css'
+                ],
                 'category' => $category,
                 'products' => $products
             ]);
@@ -134,8 +146,16 @@ class UserController extends Controller {
             }
         }
 
-        $this->view('UserDashBoard/Pages/ProductDetailPage', [
+        $this->view('UserDashBoard/MasterLayout', [
             'title' => $product->name . ' - Coffee House',
+            'page' => 'ProductDetailPage',
+            'currentPage' => 'productDetail',
+            'additionalCSS' => [
+                'Public/Css/user-product-detail.css'
+            ],
+            'additionalJS' => [
+                'Public/Js/user-product-detail.js'
+            ],
             'product' => $product,
             'category' => $category,
             'relatedProducts' => $relatedProducts
@@ -146,8 +166,13 @@ class UserController extends Controller {
      * Trang about
      */
     function about() {
-        $this->view('UserDashBoard/Pages/AboutPage', [
-            'title' => 'Về Chúng Tôi - Coffee House'
+        $this->view('UserDashBoard/MasterLayout', [
+            'title' => 'Về Chúng Tôi - Coffee House',
+            'page' => 'AboutPage',
+            'currentPage' => 'about',
+            'additionalCSS' => [
+                'Public/Css/user-about.css'
+            ]
         ]);
     }
 }

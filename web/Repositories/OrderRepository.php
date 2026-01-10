@@ -179,5 +179,24 @@ class OrderRepository extends ConnectDatabase {
 
         return mysqli_stmt_execute($stmt);
     }
+
+    //Tấn
+    public function findReadyForDeliveryOrders() {
+        $sql = "SELECT o.*, c.full_name as customer_name, c.phone as customer_phone
+                FROM orders o 
+                LEFT JOIN customers c ON o.customer_id = c.id 
+                WHERE o.status IN ('READY', 'SHIPPING', 'COMPLETED') 
+                AND o.order_type = 'ONLINE_DELIVERY'
+                ORDER BY o.created_at DESC";
+        $result = mysqli_query($this->con, $sql);
+        
+        $orders = [];
+        if ($result) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $orders[] = new OrderEntity($row);
+            }
+        }
+        return $orders;
+    }
 }
-?>
+

@@ -1,13 +1,7 @@
 <?php
-/**
- * FILE: CustomerEntity.php
- * DESCRIPTION: Entity Customer - Chứa properties từ bảng customers
- * TABLE: customers
- * AUTHOR: Coffee House System
- */
+
 namespace web\Entity;
 class CustomerEntity {
-    // Properties từ bảng customers
     public $id;
     public $username;
     public $password;
@@ -19,11 +13,6 @@ class CustomerEntity {
     public $points;
     public $status;
 
-
-    /**
-     * Constructor - Khởi tạo entity rỗng hoặc từ array
-     * @param array $data - Dữ liệu từ database (optional)
-     */
     public function __construct($data = []) {
         if (!empty($data)) {
             $this->id = $data['id'] ?? null;
@@ -39,10 +28,6 @@ class CustomerEntity {
         }
     }
 
-    /**
-     * Chuyển entity thành mảng (tùy chọn cho insert/update)
-     * @return array
-     */
     public function toArray() {
         return [
             'id' => $this->id,

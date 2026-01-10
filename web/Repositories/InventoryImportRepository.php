@@ -8,7 +8,10 @@ class InventoryImportRepository extends ConnectDatabase {
      * Lấy tất cả phiếu nhập kho
      */
     public function findAll() {
-        $sql = "SELECT * FROM inventory_imports ORDER BY import_date DESC";
+        $sql = "SELECT ip.*, i.name as ingredient_name, i.unit 
+                FROM inventory_imports ip
+                JOIN ingredients i ON ip.ingredient_id = i.id
+                ORDER BY ip.import_date DESC";
         $result = mysqli_query($this->con, $sql);
 
         $imports = [];
@@ -72,10 +75,11 @@ class InventoryImportRepository extends ConnectDatabase {
      * Tìm kiếm phiếu nhập theo tên nguyên liệu hoặc ghi chú
      */
     public function search($keyword) {
-        $sql = "SELECT i.* FROM inventory_imports i 
-                JOIN ingredients ing ON i.ingredient_id = ing.id 
-                WHERE i.note LIKE ? OR ing.name LIKE ? 
-                ORDER BY i.import_date DESC";
+        $sql = "SELECT ip.*, i.name as ingredient_name, i.unit 
+                FROM inventory_imports ip 
+                JOIN ingredients i ON ip.ingredient_id = i.id 
+                WHERE ip.note LIKE ? OR i.name LIKE ? 
+                ORDER BY ip.import_date DESC";
         $stmt = mysqli_prepare($this->con, $sql);
         $searchTerm = "%" . $keyword . "%";
         mysqli_stmt_bind_param($stmt, "ss", $searchTerm, $searchTerm);

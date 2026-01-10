@@ -4,220 +4,114 @@ use web\Entity\CustomerEntity;
 
 class CustomerService extends Service {
 
-    /**
-     * Lấy tất cả khách hàng
-     * @return array
-     */
     public function getAllCustomers() {
-        $repository = $this->repository('CustomerRepository');
-        return $repository->findAll();
+        return $this->repository('CustomerRepository')->findAll();
     }
 
-    /**
-     * Lấy khách hàng theo ID
-     * @param int $id
-     * @return CustomerEntity|null
-     */
     public function getCustomerById($id) {
-        $repository = $this->repository('CustomerRepository');
-        return $repository->findById($id);
+        return $this->repository('CustomerRepository')->findById($id);
     }
 
-    /**
-     * Lấy customer theo phone
-     * @param string $phone
-     * @return CustomerEntity|null
-     */
     public function getCustomerByPhone($phone) {
-        $repository = $this->repository('CustomerRepository');
-        return $repository->findByPhone($phone);
+        return $this->repository('CustomerRepository')->findByPhone($phone);
     }
 
-    /**
-     * Lấy địa chỉ của khách hàng theo ID
-     * @param int $id
-     * @return string|null
-     */
     public function getCustomerAddress($id) {
-        $repository = $this->repository('CustomerRepository');
-        return $repository->getAddressById($id);
+        return $this->repository('CustomerRepository')->getAddressById($id);
     }
 
-    /**
-     * Tìm kiếm khách hàng
-     * @param string $keyword
-     * @return array
-     */
     public function searchCustomers($keyword) {
-        $repository = $this->repository('CustomerRepository');
-        return $repository->search($keyword);
+        return $this->repository('CustomerRepository')->search($keyword);
     }
 
-    /**
-     * Tạo khách hàng mới
-     * @param array $data
-     * @return array ['success' => bool, 'message' => string]
-     */
     public function createCustomer($data) {
-        // Validate dữ liệu
         $validation = $this->validateCustomerData($data);
         if (!$validation['valid']) {
-            return [
-                'success' => false,
-                'message' => $validation['message']
-            ];
+            return ['success' => false, 'message' => $validation['message']];
         }
 
         $repository = $this->repository('CustomerRepository');
 
-        // Kiểm tra email đã tồn tại
-        if (!empty($data['email'])) {
-            $existingCustomer = $repository->findByEmail($data['email']);
-            if ($existingCustomer) {
-                return [
-                    'success' => false,
-                    'message' => 'Email đã được sử dụng bởi khách hàng khác!'
-                ];
-            }
+        if (!empty($data['email']) && $repository->findByEmail($data['email'])) {
+            return ['success' => false, 'message' => 'Email đã được sử dụng bởi khách hàng khác!'];
         }
 
-        // Kiểm tra số điện thoại đã tồn tại
-        $existingPhone = $repository->findByPhone($data['phone']);
-        if ($existingPhone) {
-            return [
-                'success' => false,
-                'message' => 'Số điện thoại đã được sử dụng bởi khách hàng khác!'
-            ];
+        if ($repository->findByPhone($data['phone'])) {
+            return ['success' => false, 'message' => 'Số điện thoại đã được sử dụng bởi khách hàng khác!'];
         }
 
-        // Tạo entity
         $customer = new CustomerEntity([
             'username' => $data['username'] ?? null,
             'password' => $data['password'] ?? null,
             'full_name' => $data['full_name'],
             'phone' => $data['phone'],
+            'account_type' => $data['account_type'] ?? 'WEB',
             'email' => $data['email'] ?? null,
             'address' => $data['address'] ?? null,
             'points' => isset($data['points']) ? (int)$data['points'] : 0,
             'status' => isset($data['status']) ? (int)$data['status'] : 1
         ]);
 
-        // Lưu vào database
         $result = $repository->create($customer);
-
-        if ($result) {
-            return [
-                'success' => true,
-                'message' => 'Thêm khách hàng thành công!'
-            ];
-        } else {
-            return [
-                'success' => false,
-                'message' => 'Có lỗi xảy ra khi thêm khách hàng!'
-            ];
-        }
+        return $result 
+            ? ['success' => true, 'message' => 'Thêm khách hàng thành công!']
+            : ['success' => false, 'message' => 'Có lỗi xảy ra khi thêm khách hàng!'];
     }
 
-    /**
-     * Cập nhật khách hàng
-     * @param int $id
-     * @param array $data
-     * @return array ['success' => bool, 'message' => string]
-     */
     public function updateCustomer($id, $data) {
         $repository = $this->repository('CustomerRepository');
-
-        // Kiểm tra khách hàng tồn tại
         $customer = $repository->findById($id);
+        
         if (!$customer) {
-            return [
-                'success' => false,
-                'message' => 'Không tìm thấy khách hàng!'
-            ];
+            return ['success' => false, 'message' => 'Không tìm thấy khách hàng!'];
         }
 
-        // Validate dữ liệu
         $validation = $this->validateCustomerData($data, $id);
         if (!$validation['valid']) {
-            return [
-                'success' => false,
-                'message' => $validation['message']
-            ];
+            return ['success' => false, 'message' => $validation['message']];
         }
 
-        // Kiểm tra email đã tồn tại (trừ khách hàng hiện tại)
-        if (!empty($data['email'])) {
-            $existingCustomer = $repository->findByEmail($data['email'], $id);
-            if ($existingCustomer) {
-                return [
-                    'success' => false,
-                    'message' => 'Email đã được sử dụng bởi khách hàng khác!'
-                ];
-            }
+        if (!empty($data['email']) && $repository->findByEmail($data['email'], $id)) {
+            return ['success' => false, 'message' => 'Email đã được sử dụng bởi khách hàng khác!'];
         }
 
-        // Kiểm tra số điện thoại đã tồn tại (trừ khách hàng hiện tại)
-        $existingPhone = $repository->findByPhone($data['phone'], $id);
-        if ($existingPhone) {
-            return [
-                'success' => false,
-                'message' => 'Số điện thoại đã được sử dụng bởi khách hàng khác!'
-            ];
+        if ($repository->findByPhone($data['phone'], $id)) {
+            return ['success' => false, 'message' => 'Số điện thoại đã được sử dụng bởi khách hàng khác!'];
         }
 
-        // Cập nhật thông tin
         $customer->full_name = $data['full_name'];
         $customer->phone = $data['phone'];
         $customer->email = $data['email'] ?? null;
         $customer->address = $data['address'] ?? null;
-        $customer->points = isset($data['points']) ? (int)$data['points'] : 0;
-        $customer->status = isset($data['status']) ? (int)$data['status'] : 1;
+        $customer->points = isset($data['points']) ? (int)$data['points'] : $customer->points;
+        $customer->status = isset($data['status']) ? (int)$data['status'] : $customer->status;
 
-        // Lưu vào database
         $result = $repository->update($customer);
-
-        if ($result) {
-            return [
-                'success' => true,
-                'message' => 'Cập nhật khách hàng thành công!'
-            ];
-        } else {
-            return [
-                'success' => false,
-                'message' => 'Có lỗi xảy ra khi cập nhật khách hàng!'
-            ];
-        }
+        return $result 
+            ? ['success' => true, 'message' => 'Cập nhật khách hàng thành công!']
+            : ['success' => false, 'message' => 'Có lỗi xảy ra khi cập nhật khách hàng!'];
     }
 
-    /**
-     * POS-friendly upsert: nếu tồn tại => cộng điểm (nếu có), trả về customer;
-     * nếu chưa tồn tại => tạo guest POS account (account_type = 'GUEST_POS').
-     * @param array $data ['phone','fullname','email','pointsToAdd']
-     * @return array ['success'=>bool,'customer'=>CustomerEntity,'created'=>bool,'message'=>string]
-     */
     public function posUpsertCustomer($data) {
         $phone = $data['phone'] ?? null;
         if (!$phone) {
-            return ['success'=>false,'message'=>'Phone is required'];
+            return ['success' => false, 'message' => 'Phone is required'];
         }
 
         $repository = $this->repository('CustomerRepository');
         $cust = $repository->findByPhone($phone);
-        $pointsToAdd = isset($data['pointsToAdd']) ? (int)$data['pointsToAdd'] : 0;
+        $pointsToAdd = (int)($data['pointsToAdd'] ?? 0);
 
         if ($cust) {
             if ($pointsToAdd > 0) {
-                $newPoints = $cust->points + $pointsToAdd;
-                $repository->updatePoints($cust->id, $newPoints);
-                $cust->points = $newPoints;
+                $cust->points += $pointsToAdd;
+                $repository->updatePoints($cust->id, $cust->points);
             }
-            return ['success'=>true,'customer'=>$cust,'created'=>false];
+            return ['success' => true, 'customer' => $cust, 'created' => false];
         }
 
-        // create guest POS customer
-        $username = 'pos_' . preg_replace('/[^0-9]/', '', $phone);
         $customer = new CustomerEntity([
-            'username' => $username,
+            'username' => 'pos_' . preg_replace('/[^0-9]/', '', $phone),
             'password' => '',
             'full_name' => $data['fullname'] ?? 'Khách lẻ',
             'phone' => $phone,
@@ -228,186 +122,77 @@ class CustomerService extends Service {
             'status' => 1
         ]);
 
-        $created = $repository->create($customer);
-        if ($created) {
-            $new = $repository->findByPhone($phone);
-            return ['success'=>true,'customer'=>$new,'created'=>true];
+        if ($repository->create($customer)) {
+            return ['success' => true, 'customer' => $repository->findByPhone($phone), 'created' => true];
         }
-
-        return ['success'=>false,'message'=>'Create failed'];
+        return ['success' => false, 'message' => 'Create failed'];
     }
 
-    /**
-     * Nâng cấp customer POS thành tài khoản WEB bằng phone
-     * @param string $phone
-     * @param string $username
-     * @param string $password
-     * @param string|null $address
-     * @return bool
-     */
     public function upgradeToWebAccountByPhone($phone, $username, $password, $address = null) {
         $repository = $this->repository('CustomerRepository');
         $cust = $repository->findByPhone($phone);
-        if (!$cust) return false;
-        return $repository->upgradeToWebAccount($cust->id, $username, $password, $address);
+        return $cust ? $repository->upgradeToWebAccount($cust->id, $username, $password, $address) : false;
     }
 
-    /**
-     * Xóa khách hàng
-     * @param int $id
-     * @return array ['success' => bool, 'message' => string]
-     */
     public function deleteCustomer($id) {
         $repository = $this->repository('CustomerRepository');
-
-        // Kiểm tra khách hàng tồn tại
         $customer = $repository->findById($id);
+        
         if (!$customer) {
-            return [
-                'success' => false,
-                'message' => 'Không tìm thấy khách hàng!'
-            ];
+            return ['success' => false, 'message' => 'Không tìm thấy khách hàng!'];
         }
 
-        // Xóa khách hàng
         $result = $repository->delete($id);
-
-        if ($result) {
-            return [
-                'success' => true,
-                'message' => 'Xóa khách hàng thành công!'
-            ];
-        } else {
-            return [
-                'success' => false,
-                'message' => 'Có lỗi xảy ra khi xóa khách hàng!'
-            ];
-        }
+        return $result 
+            ? ['success' => true, 'message' => 'Xóa khách hàng thành công!']
+            : ['success' => false, 'message' => 'Có lỗi xảy ra khi xóa khách hàng!'];
     }
 
-    /**
-     * Validate dữ liệu khách hàng
-     * @param array $data
-     * @param int|null $excludeId
-     * @return array ['valid' => bool, 'message' => string]
-     */
     private function validateCustomerData($data, $excludeId = null) {
-        // Kiểm tra họ tên
         if (empty($data['full_name']) || strlen(trim($data['full_name'])) < 2) {
-            return [
-                'valid' => false,
-                'message' => 'Họ tên phải có ít nhất 2 ký tự!'
-            ];
+            return ['valid' => false, 'message' => 'Họ tên phải có ít nhất 2 ký tự!'];
         }
-
-        // Kiểm tra số điện thoại
         if (empty($data['phone'])) {
-            return [
-                'valid' => false,
-                'message' => 'Số điện thoại không được để trống!'
-            ];
+            return ['valid' => false, 'message' => 'Số điện thoại không được để trống!'];
         }
-
-        // Validate format số điện thoại (10-11 số)
         if (!preg_match('/^[0-9]{10,11}$/', $data['phone'])) {
-            return [
-                'valid' => false,
-                'message' => 'Số điện thoại không hợp lệ! (10-11 số)'
-            ];
+            return ['valid' => false, 'message' => 'Số điện thoại không hợp lệ! (10-11 số)'];
         }
-
-        // Kiểm tra email nếu có
         if (!empty($data['email']) && !filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            return [
-                'valid' => false,
-                'message' => 'Email không hợp lệ!'
-            ];
+            return ['valid' => false, 'message' => 'Email không hợp lệ!'];
         }
-
-        // Kiểm tra điểm tích lũy
         if (isset($data['points']) && (int)$data['points'] < 0) {
-            return [
-                'valid' => false,
-                'message' => 'Điểm tích lũy không thể âm!'
-            ];
+            return ['valid' => false, 'message' => 'Điểm tích lũy không thể âm!'];
         }
-
-        return [
-            'valid' => true,
-            'message' => ''
-        ];
+        return ['valid' => true, 'message' => ''];
     }
 
-    /**
-     * Kiểm tra email đã tồn tại
-     * @param string $email
-     * @param int|null $excludeId
-     * @return bool
-     */
     public function checkEmailExists($email, $excludeId = null) {
-        $repository = $this->repository('CustomerRepository');
-        $customer = $repository->findByEmail($email, $excludeId);
-        return $customer !== null;
+        return $this->repository('CustomerRepository')->findByEmail($email, $excludeId) !== null;
     }
 
-    /**
-     * Cập nhật điểm tích lũy
-     * @param int $id
-     * @param int $points
-     * @return array ['success' => bool, 'message' => string]
-     */
     public function updateCustomerPoints($id, $points) {
         $repository = $this->repository('CustomerRepository');
-
-        // Kiểm tra khách hàng tồn tại
         $customer = $repository->findById($id);
+        
         if (!$customer) {
-            return [
-                'success' => false,
-                'message' => 'Không tìm thấy khách hàng!'
-            ];
+            return ['success' => false, 'message' => 'Không tìm thấy khách hàng!'];
         }
-
-        // Validate điểm
         if ($points < 0) {
-            return [
-                'success' => false,
-                'message' => 'Điểm tích lũy không thể âm!'
-            ];
+            return ['success' => false, 'message' => 'Điểm tích lũy không thể âm!'];
         }
 
-        // Cập nhật điểm
         $result = $repository->updatePoints($id, $points);
-
-        if ($result) {
-            return [
-                'success' => true,
-                'message' => 'Cập nhật điểm tích lũy thành công!'
-            ];
-        } else {
-            return [
-                'success' => false,
-                'message' => 'Có lỗi xảy ra khi cập nhật điểm!'
-            ];
-        }
+        return $result 
+            ? ['success' => true, 'message' => 'Cập nhật điểm tích lũy thành công!']
+            : ['success' => false, 'message' => 'Có lỗi xảy ra khi cập nhật điểm!'];
     }
 
-    /**
-     * Đếm tổng số khách hàng
-     * @return int
-     */
     public function countCustomers() {
-        $repository = $this->repository('CustomerRepository');
-        return $repository->count();
+        return $this->repository('CustomerRepository')->count();
     }
 
-    /**
-     * Đếm khách hàng theo trạng thái
-     * @param int $status
-     * @return int
-     */
     public function countCustomersByStatus($status) {
-        $repository = $this->repository('CustomerRepository');
-        return $repository->countByStatus($status);
+        return $this->repository('CustomerRepository')->countByStatus($status);
     }
 }

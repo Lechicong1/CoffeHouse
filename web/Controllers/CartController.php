@@ -43,9 +43,14 @@ class CartController extends Controller {
             // Gọi Service để lấy dữ liệu - KHÔNG có logic ở đây
             $cartData = $this->cartService->getCart($customerId);
 
-            // Chỉ render view với data từ Service
-            $this->view('UserDashBoard/Pages/CartPage', [
+            // Chỉ render view với data từ Service - Sử dụng MasterLayout
+            $this->view('UserDashBoard/MasterLayout', [
                 'title' => 'Giỏ Hàng - Coffee House',
+                'page' => 'CartPage',
+                'currentPage' => 'cart',
+                'additionalCSS' => [
+                    'Public/Css/cart-page.css'
+                ],
                 'cartItems' => $cartData['items'] ?? [],
                 'total' => $cartData['total'] ?? 0,
                 'count' => $cartData['count'] ?? 0

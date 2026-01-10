@@ -16,6 +16,9 @@ class ProductEntity {
     public $is_active;
     public $created_at;
 
+    // Property bổ sung (không có trong DB, được gán từ Controller)
+    public $sizes = [];  // Mảng các ProductSizeEntity
+
     /**
      * Constructor - Khởi tạo entity rỗng hoặc từ array
      * @param array $data - Dữ liệu từ database (optional)

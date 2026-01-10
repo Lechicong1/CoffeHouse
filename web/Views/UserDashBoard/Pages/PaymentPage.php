@@ -1,106 +1,79 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?php echo $data['title'] ?? 'Thanh Toán Chuyển Khoản'; ?></title>
-    <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/user-style.css">
-    <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/payment-page.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
-    <!-- Header -->
-    <?php include_once './web/Views/UserDashBoard/header.php'; ?>
-
-    <main class="payment-container">
-        <div class="payment-wrapper">
-            <div class="payment-header">
-                <i class="fas fa-qrcode"></i>
-                <h1>THANH TOÁN CHUYỂN KHOẢN</h1>
-                <p>Quét mã QR bên dưới để hoàn tất thanh toán</p>
-            </div>
-
-            <?php if (isset($data['order'])): ?>
-                <div class="order-info-box">
-                    <div class="info-item">
-                        <span class="label">Mã đơn hàng:</span>
-                        <span class="value order-code"><?php echo htmlspecialchars($data['order']->order_code); ?></span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Tổng tiền:</span>
-                        <span class="value amount"><?php echo number_format($data['order']->total_amount, 0, ',', '.'); ?>đ</span>
-                    </div>
+<!-- ===================================
+     FILE: PaymentPage.php
+     MÔ TẢ: Trang thanh toán chuyển khoản
+     Nội dung chính - Được include vào MasterLayout
+     =================================== -->
+<main class="payment-container">
+    <div class="payment-wrapper">
+        <div class="payment-header">
+            <i class="fas fa-qrcode"></i>
+            <h1>THANH TOÁN CHUYỂN KHOẢN</h1>
+            <p>Quét mã QR bên dưới để hoàn tất thanh toán</p>
+        </div>
+        <?php if (isset($data['order'])): ?>
+            <div class="order-info-box">
+                <div class="info-item">
+                    <span class="label">Mã đơn hàng:</span>
+                    <span class="value order-code"><?php echo htmlspecialchars($data['order']->order_code); ?></span>
                 </div>
-            <?php endif; ?>
-
-            <div class="qr-section">
-                <div class="qr-container">
-                    <h3>Quét Mã QR Để Thanh Toán</h3>
-                    <div class="qr-code">
-                        <img src="<?php echo $data['qrUrl']; ?>" alt="QR Code VietQR">
-                    </div>
-                    
-                    <div class="bank-info">
-                        <h4>Thông Tin Chuyển Khoản</h4>
-                        <div class="bank-detail">
-                            <i class="fas fa-university"></i>
-                            <div>
-                                <strong>Ngân hàng:</strong>
-                                <span><?php echo $data['bankInfo']['bankName']; ?></span>
-                            </div>
-                        </div>
-                        <div class="bank-detail">
-                            <i class="fas fa-credit-card"></i>
-                            <div>
-                                <strong>Số tài khoản:</strong>
-                                <span><?php echo $data['bankInfo']['accountNo']; ?></span>
-                            </div>
-                        </div>
-                        <div class="bank-detail">
-                            <i class="fas fa-user"></i>
-                            <div>
-                                <strong>Chủ tài khoản:</strong>
-                                <span><?php echo $data['bankInfo']['accountName']; ?></span>
-                            </div>
-                        </div>
-                        <div class="bank-detail highlight">
-                            <i class="fas fa-money-bill-wave"></i>
-                            <div>
-                                <strong>Số tiền:</strong>
-                                <span class="amount-value"><?php echo $data['bankInfo']['amount']; ?>đ</span>
-                            </div>
-                        </div>
-                        <div class="bank-detail">
-                            <i class="fas fa-comment-dots"></i>
-                            <div>
-                                <strong>Nội dung:</strong>
-                                <span><?php echo $data['bankInfo']['description']; ?></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="payment-note">
-                        <i class="fas fa-info-circle"></i>
-                        <p><strong>Lưu ý quan trọng:</strong> Vui lòng chuyển khoản đúng nội dung để đơn hàng được xử lý nhanh chóng. Chúng tôi sẽ xác nhận đơn hàng sau khi nhận được thanh toán.</p>
-                    </div>
+                <div class="info-item">
+                    <span class="label">Tổng tiền:</span>
+                    <span class="value amount"><?php echo number_format($data['order']->total_amount, 0, ',', '.'); ?>đ</span>
                 </div>
             </div>
-
-            <div class="action-buttons">
-                <a href="/COFFEE_PHP/Checkout/orderSuccess?order_id=<?php echo $data['order']->id; ?>" class="btn btn-primary">
-                    <i class="fas fa-check-double"></i>
-                    Tôi Đã Chuyển Khoản
-                </a>
-                <a href="/COFFEE_PHP/User/index" class="btn btn-secondary">
-                    <i class="fas fa-home"></i>
-                    Về Trang Chủ
-                </a>
+        <?php endif; ?>
+        <div class="qr-section">
+            <div class="qr-container">
+                <h3>Quét Mã QR Để Thanh Toán</h3>
+                <div class="qr-code">
+                    <img src="<?php echo $data['qrUrl']; ?>" alt="QR Code VietQR">
+                </div>
+                <div class="bank-info">
+                    <h4>Thông Tin Chuyển Khoản</h4>
+                    <div class="bank-detail">
+                        <i class="fas fa-university"></i>
+                        <div>
+                            <strong>Ngân hàng:</strong>
+                            <span><?php echo $data['bankInfo']['bankName']; ?></span>
+                        </div>
+                    </div>
+                    <div class="bank-detail">
+                        <i class="fas fa-credit-card"></i>
+                        <div>
+                            <strong>Số tài khoản:</strong>
+                            <span><?php echo $data['bankInfo']['accountNo']; ?></span>
+                        </div>
+                    </div>
+                    <div class="bank-detail highlight">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <div>
+                            <strong>Số tiền:</strong>
+                            <span class="amount-value"><?php echo $data['bankInfo']['amount']; ?>đ</span>
+                        </div>
+                    </div>
+                    <div class="bank-detail">
+                        <i class="fas fa-comment-dots"></i>
+                        <div>
+                            <strong>Nội dung:</strong>
+                            <span><?php echo $data['bankInfo']['description']; ?></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="payment-note">
+                    <i class="fas fa-info-circle"></i>
+                    <p><strong>Lưu ý quan trọng:</strong> Vui lòng chuyển khoản đúng nội dung để đơn hàng được xử lý nhanh chóng.</p>
+                </div>
             </div>
         </div>
-    </main>
-
-    <!-- Footer -->
-    <?php include_once './web/Views/UserDashBoard/footer.php'; ?>
-</body>
-</html>
-
+        <div class="action-buttons">
+            <a href="/COFFEE_PHP/Checkout/orderSuccess?order_id=<?php echo $data['order']->id; ?>" class="btn btn-primary">
+                <i class="fas fa-check-double"></i>
+                Tôi Đã Chuyển Khoản
+            </a>
+            <a href="/COFFEE_PHP/User/index" class="btn btn-secondary">
+                <i class="fas fa-home"></i>
+                Về Trang Chủ
+            </a>
+        </div>
+    </div>
+</main>

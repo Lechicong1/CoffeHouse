@@ -3,10 +3,13 @@ include_once './web/Repositories/OrderRepository.php';
 include_once './web/Repositories/OrderItemRepository.php';
 include_once './web/Repositories/CartRepository.php';
 include_once './web/Repositories/ProductSizeRepository.php';
+include_once './web/Repositories/RecipeRepository.php';
+include_once './web/Repositories/IngredientRepository.php';
 include_once './web/Entity/OrderEntity.php';
 include_once './web/Entity/OrderItemEntity.php';
 include_once './web/Services/VoucherService.php';
 include_once './web/Repositories/CustomerRepository.php';
+include_once './Enums/size.enum.php';
 
 use web\Entity\OrderEntity;
 use web\Entity\OrderItemEntity;
@@ -17,6 +20,8 @@ class OrderService {
     private $cartRepo;
     private $productSizeRepo;
     private $voucherService;
+    private $recipeRepo;
+    private $ingredientRepo;
 
     public function __construct() {
         $this->orderRepo = new OrderRepository();
@@ -24,6 +29,8 @@ class OrderService {
         $this->cartRepo = new CartRepository();
         $this->productSizeRepo = new ProductSizeRepository();
         $this->voucherService = new VoucherService();
+        $this->recipeRepo = new RecipeRepository();
+        $this->ingredientRepo = new IngredientRepository();
     }
 
     /**
@@ -31,6 +38,36 @@ class OrderService {
      */
     public function getOrderRepo() {
         return $this->orderRepo;
+    }
+
+    /**
+     * Validate số lượng nguyên liệu trước khi đặt hàng
+     */
+    private function validateIngredientStock($orderItems) {
+        foreach ($orderItems as $item) {
+            $productSizeId = is_array($item) ? $item['product_size_id'] : $item->product_size_id;
+            $quantity = is_array($item) ? $item['quantity'] : $item->quantity;
+
+            $productSize = $this->productSizeRepo->findById($productSizeId);
+
+            if ($productSize) {
+                $multiplier = SizeEnum::getMultiplier($productSize->size_name);
+                $recipes = $this->recipeRepo->getByProductId($productSize->product_id);
+
+                foreach ($recipes as $recipe) {
+                    $ingredient = $this->ingredientRepo->findById($recipe->ingredient_id);
+                    if ($ingredient) {
+                        $quantityNeeded = $recipe->base_amount * $multiplier * $quantity;
+
+                        if ($ingredient->stock_quantity < $quantityNeeded) {
+                            return ['success' => false, 'message' => 'Không đủ nguyên liệu để đặt hàng'];
+                        }
+                    }
+                }
+            }
+        }
+
+        return ['success' => true];
     }
 
     /**
@@ -45,7 +82,13 @@ class OrderService {
                 throw new Exception('Giỏ hàng trống');
             }
 
-            // 2. Tạo Order Entity
+            // 2. Validate số lượng nguyên liệu trước khi đặt hàng
+            $validateResult = $this->validateIngredientStock($cartItems);
+            if (!$validateResult['success']) {
+                return $validateResult;
+            }
+
+            // 3. Tạo Order Entity
             $order = new OrderEntity();
             $order->order_code = $this->generateOrderCode();
             $order->customer_id = $customerId;
@@ -66,7 +109,11 @@ class OrderService {
             $order->receiver_phone = $data['customer_phone'];
             $order->shipping_fee = 0;
             $order->note = $data['note'] ?? '';
+
+            // 4. Tạo đơn hàng
             $orderId = $this->orderRepo->create($order);
+
+            // 5. Tạo order items
             foreach ($cartItems as $cartItem) {
                 $item = new OrderItemEntity();
                 $item->order_id = $orderId;
@@ -78,6 +125,7 @@ class OrderService {
                 $this->orderItemRepo->create($item);
             }
 
+            // 6. Xử lý voucher (nếu có)
             $discountAmount = 0.0;
             if (!empty($data['voucher']) && !empty($order->customer_id)) {
                 $voucherId = isset($data['voucher']['voucher_id']) ? (int)$data['voucher']['voucher_id'] : null;
@@ -94,6 +142,8 @@ class OrderService {
                     $discountAmount = $redeemResult['discount_amount'];
                 }
             }
+
+            // 7. Xóa giỏ hàng
             $this->cartRepo->clearCart($customerId);
 
             $final_total = $order->total_amount - (float)$discountAmount;
@@ -306,7 +356,23 @@ class OrderService {
      * @return array
      */
     public function getOrders($filters = []) {
-        return $this->orderRepo->findAllWithFilters($filters);
+        // Normalize filters and apply default order_type for staff POS listing
+        $normalized = [];
+        if (!empty($filters['status'])) {
+            $normalized['status'] = $filters['status'];
+        }
+        if (!empty($filters['search'])) {
+            $normalized['search'] = trim($filters['search']);
+        }
+
+        // Nếu controller không cung cấp order_type, mặc định chỉ lấy AT_COUNTER và TAKEAWAY
+        if (isset($filters['order_type']) && !empty($filters['order_type'])) {
+            $normalized['order_type'] = $filters['order_type'];
+        } else {
+            $normalized['order_type'] = ['AT_COUNTER', 'TAKEAWAY'];
+        }
+
+        return $this->orderRepo->findAllWithFilters($normalized);
     }
 
     /**
@@ -316,6 +382,74 @@ class OrderService {
      */
     public function getOrderItems($orderId) {
         return $this->orderItemRepo->findByOrderId($orderId);
+    }
+
+    /**
+     * Tạo đơn hàng từ POS (POST raw data) - Service xử lý parsing và validation
+     * @param array $postData Raw POST data từ controller
+     * @return array
+     */
+    public function createOrderFromPOS($postData) {
+        try {
+            // Validate required fields minimally here; deep validation in createOrder()
+            $data = [];
+            $data['staff_id'] = $postData['staff_id'] ?? null;
+            $data['customer_id'] = !empty($postData['customer_id']) ? (int)$postData['customer_id'] : null;
+            $data['order_type'] = $postData['order_type'] ?? 'AT_COUNTER';
+            $data['payment_method'] = $postData['payment_method'] ?? 'CASH';
+            $data['total_amount'] = isset($postData['total_amount']) ? (float)$postData['total_amount'] : 0.0;
+            $data['note'] = trim($postData['note'] ?? '');
+            $data['table_number'] = !empty($postData['table_number']) ? trim($postData['table_number']) : null;
+
+            // Parse cart items which may be JSON string
+            $items = $postData['cart_items'] ?? [];
+            if (is_string($items)) {
+                $decoded = json_decode($items, true);
+                if ($decoded && is_array($decoded)) {
+                    $items = $decoded;
+                } else {
+                    $items = [];
+                }
+            }
+            $data['items'] = $items;
+
+            // Voucher
+            if (!empty($postData['voucher_id'])) {
+                $data['voucher'] = ['voucher_id' => (int)$postData['voucher_id']];
+            }
+
+            return $this->createOrder($data);
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+    /**
+     * Lấy dữ liệu order + items dùng cho hóa đơn (service helper)
+     * @param int $orderId
+     * @return array ['success'=>bool,'order'=>array,'items'=>array]
+     */
+    public function getOrderInvoiceData($orderId) {
+        try {
+            if (!$orderId) return ['success' => false, 'message' => 'Thiếu order_id'];
+
+            // Lấy order (có customer info) bằng cách dùng repository findAllWithFilters và tìm id
+            $all = $this->orderRepo->findAllWithFilters([]);
+            $orderData = null;
+            foreach ($all as $o) {
+                if ((int)$o['id'] === (int)$orderId) {
+                    $orderData = $o;
+                    break;
+                }
+            }
+
+            if (!$orderData) return ['success' => false, 'message' => 'Không tìm thấy đơn hàng'];
+
+            $items = $this->getOrderItems($orderId);
+            return ['success' => true, 'order' => $orderData, 'items' => $items];
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
     }
 
     /**

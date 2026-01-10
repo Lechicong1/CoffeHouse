@@ -12,6 +12,9 @@ class InventoryCheckRepository extends ConnectDatabase {
      * @return array Mảng chứa thông tin nguyên liệu và kiểm kho (nếu có)
      */
     public function getInventoryCheckByDate($date) {
+        error_log("=== DEBUG getInventoryCheckByDate ===");
+        error_log("Date param: " . $date);
+
         $sql = "SELECT 
                     i.id AS i_id, 
                     i.name AS i_name, 
@@ -22,20 +25,38 @@ class InventoryCheckRepository extends ConnectDatabase {
                     c.actualQuantity, 
                     c.difference, 
                     c.note, 
-                    c.checked_at 
+                    c.checked_at,
+                    DATE(c.checked_at) AS check_date
                 FROM ingredients i 
                 LEFT JOIN inventory_checks c 
                     ON i.name = c.ingredient AND DATE(c.checked_at) = ? 
                 ORDER BY i.name";
         
+        error_log("SQL: " . $sql);
+
         $stmt = mysqli_prepare($this->con, $sql);
+
+        if (!$stmt) {
+            error_log("ERROR PREPARE: " . mysqli_error($this->con));
+            return [];
+        }
+
         mysqli_stmt_bind_param($stmt, "s", $date);
         mysqli_stmt_execute($stmt);
         
         $result = mysqli_stmt_get_result($stmt);
+
+        if (!$result) {
+            error_log("ERROR GET RESULT: " . mysqli_error($this->con));
+            return [];
+        }
+
         $data = [];
-        
+        $rowCount = 0;
+
         while ($row = mysqli_fetch_assoc($result)) {
+            $rowCount++;
+            error_log("Row $rowCount: ingredient={$row['i_name']}, c_id={$row['c_id']}, check_date={$row['check_date']}");
             // Xây dựng đối tượng ingredient (luôn có)
             $ingredient = [
                 'id' => $row['i_id'],
@@ -46,7 +67,8 @@ class InventoryCheckRepository extends ConnectDatabase {
             
             // Xây dựng đối tượng check (có thể null nếu chưa kiểm kho)
             $check = null;
-            if ($row['c_id'] !== null) {
+            // Kiểm tra c_id: phải khác null VÀ không phải empty string
+            if (!empty($row['c_id']) && $row['c_id'] !== null) {
                 $check = [
                     'id' => $row['c_id'],
                     'ingredient' => $row['i_name'],
@@ -56,6 +78,9 @@ class InventoryCheckRepository extends ConnectDatabase {
                     'note' => $row['note'],
                     'checked_at' => $row['checked_at']
                 ];
+                error_log("  -> Has check: actualQty={$row['actualQuantity']}, diff={$row['difference']}");
+            } else {
+                error_log("  -> No check (c_id is NULL or empty)");
             }
             
             // Kết hợp ingredient và check
@@ -65,7 +90,32 @@ class InventoryCheckRepository extends ConnectDatabase {
             ];
         }
         
+        error_log("Total rows: $rowCount, Data count: " . count($data));
+
         return $data;
+    }
+
+    /**
+     * Kiểm tra xem nguyên liệu đã được kiểm kho trong ngày chưa
+     * @param string $ingredientName Tên nguyên liệu
+     * @return bool True nếu đã có, False nếu chưa
+     */
+    public function checkExistsTodayByIngredient($ingredientName) {
+        $sql = "SELECT id FROM inventory_checks 
+                WHERE ingredient = ? AND DATE(checked_at) = CURDATE()";
+
+        $stmt = mysqli_prepare($this->con, $sql);
+
+        if (!$stmt) {
+            error_log("Prepare checkExistsTodayByIngredient failed: " . mysqli_error($this->con));
+            return false;
+        }
+
+        mysqli_stmt_bind_param($stmt, "s", $ingredientName);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        return mysqli_num_rows($result) > 0;
     }
 
     /**

@@ -13,96 +13,59 @@ let currentProduct = {
     quantity: 1
 };
 
-// ========== KHỞI TẠO KHI TRANG LOAD ==========
+// ========== USER PRODUCT DETAIL - MINIMAL JS ==========
+// Chỉ xử lý UI cơ bản - Form submit thuần túy qua PHP
+
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 Product Detail JS loaded (UI only mode)');
-    initializeProductDetail();
-    initializeSizeButtons();
+    initializeSizeSelection();
     initializeQuantityControls();
-    initializeBuyNowButton();
+    initializeBuyNow();
     initializeTabs();
 });
 
-// ========== KHỞI TẠO THÔNG TIN SẢN PHẨM ==========
-function initializeProductDetail() {
-    // Tự động chọn size đầu tiên
-    const firstSizeBtn = document.querySelector('.size-btn');
-    if (firstSizeBtn) {
-        firstSizeBtn.classList.add('active');
-        currentProduct.sizeId = firstSizeBtn.dataset.productSizeId;
-        currentProduct.sizeName = firstSizeBtn.dataset.size;
-        currentProduct.price = parseFloat(firstSizeBtn.dataset.price);
-
-        // Cập nhật hidden input
-        document.getElementById('selected-product-size-id').value = currentProduct.sizeId;
-
-        console.log('✅ Auto-selected first size:', currentProduct);
-    }
-}
-
-// ========== XỬ LÝ CHỌN SIZE ==========
-function initializeSizeButtons() {
+// ========== CHỌN SIZE (Cập nhật hidden input) ==========
+function initializeSizeSelection() {
     const sizeBtns = document.querySelectorAll('.size-btn');
-    console.log('🔘 Found', sizeBtns.length, 'size buttons');
+    const hiddenSizeInput = document.getElementById('selected-product-size-id');
+    const priceDisplay = document.getElementById('product-price');
 
     sizeBtns.forEach(btn => {
         btn.addEventListener('click', function(e) {
             e.preventDefault();
-            console.log('🖱️ Size button clicked:', this.dataset.size);
 
-            // Bỏ active khỏi tất cả các nút
+            // Bỏ active khỏi tất cả
             sizeBtns.forEach(b => b.classList.remove('active'));
 
-            // Thêm active cho nút được chọn
+            // Thêm active cho button được chọn
             this.classList.add('active');
 
-            // Cập nhật thông tin size
-            currentProduct.sizeId = this.dataset.productSizeId;
-            currentProduct.sizeName = this.dataset.size;
-            currentProduct.price = parseFloat(this.dataset.price);
-
-            // Cập nhật hidden input để gửi lên server
-            document.getElementById('selected-product-size-id').value = currentProduct.sizeId;
-
-            console.log('✅ Updated size:', currentProduct);
+            // Cập nhật hidden input để submit lên server
+            hiddenSizeInput.value = this.dataset.productSizeId;
 
             // Cập nhật hiển thị giá
-            updatePriceDisplay();
+            if (priceDisplay) {
+                const price = parseFloat(this.dataset.price);
+                priceDisplay.textContent = new Intl.NumberFormat('vi-VN').format(price) + 'đ';
+            }
         });
     });
 }
 
-// ========== CẬP NHẬT HIỂN THỊ GIÁ ==========
-function updatePriceDisplay() {
-    const priceElement = document.getElementById('product-price');
-    if (priceElement && currentProduct.price) {
-        priceElement.textContent = formatCurrency(currentProduct.price) + 'đ';
-        priceElement.style.transition = 'transform 0.2s';
-        priceElement.style.transform = 'scale(1.05)';
-        setTimeout(() => {
-            priceElement.style.transform = 'scale(1)';
-        }, 200);
-        console.log('💰 Price updated:', currentProduct.price);
-    }
-}
-
-// ========== XỬ LÝ TĂNG/GIẢM SỐ LƯỢNG ==========
+// ========== TĂNG/GIẢM SỐ LƯỢNG ==========
 function initializeQuantityControls() {
     const decreaseBtn = document.getElementById('decrease-qty');
     const increaseBtn = document.getElementById('increase-qty');
     const quantityDisplay = document.getElementById('quantity');
     const hiddenQuantity = document.getElementById('selected-quantity');
 
-    console.log('🔢 Quantity controls initialized');
-
     if (decreaseBtn) {
         decreaseBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            if (currentProduct.quantity > 1) {
-                currentProduct.quantity--;
-                quantityDisplay.textContent = currentProduct.quantity;
-                hiddenQuantity.value = currentProduct.quantity;
-                console.log('➖ Quantity decreased:', currentProduct.quantity);
+            let qty = parseInt(quantityDisplay.textContent);
+            if (qty > 1) {
+                qty--;
+                quantityDisplay.textContent = qty;
+                hiddenQuantity.value = qty;
             }
         });
     }
@@ -110,18 +73,18 @@ function initializeQuantityControls() {
     if (increaseBtn) {
         increaseBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            if (currentProduct.quantity < 99) {
-                currentProduct.quantity++;
-                quantityDisplay.textContent = currentProduct.quantity;
-                hiddenQuantity.value = currentProduct.quantity;
-                console.log('➕ Quantity increased:', currentProduct.quantity);
+            let qty = parseInt(quantityDisplay.textContent);
+            if (qty < 99) {
+                qty++;
+                quantityDisplay.textContent = qty;
+                hiddenQuantity.value = qty;
             }
         });
     }
 }
 
-// ========== XỬ LÝ NÚT MUA NGAY ==========
-function initializeBuyNowButton() {
+// ========== MUA NGAY (Set flag và submit form) ==========
+function initializeBuyNow() {
     const buyNowBtn = document.getElementById('buy-now');
     const buyNowFlag = document.getElementById('buy-now-flag');
     const form = document.getElementById('add-to-cart-form');
@@ -129,18 +92,17 @@ function initializeBuyNowButton() {
     if (buyNowBtn && form) {
         buyNowBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            console.log('⚡ Buy now clicked');
 
             // Set flag để controller biết là mua ngay
             buyNowFlag.value = '1';
 
-            // Submit form
+            // Submit form - controller sẽ xử lý và redirect
             form.submit();
         });
     }
 }
 
-// ========== XỬ LÝ TABS ==========
+// ========== TABS (Chỉ chuyển tab UI) ==========
 function initializeTabs() {
     const tabButtons = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -149,11 +111,11 @@ function initializeTabs() {
         btn.addEventListener('click', function() {
             const targetTab = this.dataset.tab;
 
-            // Bỏ active khỏi tất cả
+            // Bỏ active
             tabButtons.forEach(b => b.classList.remove('active'));
             tabContents.forEach(c => c.classList.remove('active'));
 
-            // Thêm active cho tab được chọn
+            // Thêm active
             this.classList.add('active');
             const targetContent = document.getElementById(`tab-${targetTab}`);
             if (targetContent) {
@@ -161,9 +123,4 @@ function initializeTabs() {
             }
         });
     });
-}
-
-// ========== HELPER FUNCTIONS ==========
-function formatCurrency(amount) {
-    return new Intl.NumberFormat('vi-VN').format(amount);
 }

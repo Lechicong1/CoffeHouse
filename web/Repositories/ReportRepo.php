@@ -58,9 +58,8 @@ class ReportRepo extends ConnectDatabase {
     }
     // lay danh sach tat ca nhan vien va luong (thay the EmployeeService)
     public function getAllSalaryEmployee($fromDate, $toDate) {
-        $sql = "SELECT e.id, e.fullname, e.luong, e.create_at, r.roleName 
+        $sql = "SELECT e.id, e.fullname, e.luong, e.create_at, e.roleName 
                 FROM employee e
-                LEFT JOIN role r ON e.role_id = r.id
                 WHERE e.create_at BETWEEN ? AND ?
                 ORDER BY e.create_at DESC";
         $stmt = mysqli_prepare($this->con, $sql);

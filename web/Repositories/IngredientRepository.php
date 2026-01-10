@@ -92,7 +92,7 @@ class IngredientRepository extends ConnectDatabase {
      * @return bool
      */
     public function create($ingredient) {
-        $sql = "INSERT INTO ingredients (name, unit, stock_quantity, expiry_date, is_active) 
+        $sql = "INSERT INTO ingredients (name, unit, stock_quantity, expiry_date, is_active)
                 VALUES (?, ?, ?, ?, ?)";
 
         $stmt = mysqli_prepare($this->con, $sql);
@@ -159,7 +159,7 @@ class IngredientRepository extends ConnectDatabase {
      * @return int Số dòng bị ảnh hưởng
      */
     public function deactivateExpiredIngredients() {
-        $sql = "UPDATE ingredients 
+        $sql = "UPDATE ingredients
                 SET is_active = 0 
                 WHERE is_active = 1 
                 AND expiry_date IS NOT NULL 

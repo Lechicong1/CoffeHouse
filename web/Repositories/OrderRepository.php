@@ -94,11 +94,20 @@ class OrderRepository extends ConnectDatabase {
             $types .= "s";
         }
         
-        // Filter by order_type
+        // Filter by order_type (support string or array for IN clause)
         if (!empty($filters['order_type'])) {
-            $sql .= " AND o.order_type = ?";
-            $params[] = $filters['order_type'];
-            $types .= "s";
+            if (is_array($filters['order_type'])) {
+                $placeholders = implode(',', array_fill(0, count($filters['order_type']), '?'));
+                $sql .= " AND o.order_type IN ($placeholders)";
+                foreach ($filters['order_type'] as $ot) {
+                    $params[] = $ot;
+                    $types .= "s";
+                }
+            } else {
+                $sql .= " AND o.order_type = ?";
+                $params[] = $filters['order_type'];
+                $types .= "s";
+            }
         }
 
         // Search by order_code or phone

@@ -1,37 +1,50 @@
-const modal = document.getElementById('importModal');
-const form = document.getElementById('importForm');
-const modalTitle = document.getElementById('modalTitle');
+// ========== INVENTORY IMPORTS - MINIMAL JS ==========
+// Chỉ giữ lại confirm delete và validation cơ bản
 
-function openImportModal(mode, importData = null) {
-    modal.classList.add('active');
-    
-    if (mode === 'add') {
-        modalTitle.textContent = 'Tạo phiếu nhập mới';
-        form.action = '?url=InventoryImportController/store';
-        form.reset();
-        document.getElementById('importId').value = '';
-        // Set default date to today
-        document.getElementById('importDate').valueAsDate = new Date();
-    } else {
-        modalTitle.textContent = 'Cập nhật phiếu nhập';
-        form.action = '?url=InventoryImportController/update';
-        
-        document.getElementById('importId').value = importData.id;
-        document.getElementById('ingredientId').value = importData.ingredient_id;
-        document.getElementById('importQuantity').value = importData.import_quantity;
-        document.getElementById('totalCost').value = importData.total_cost;
-        document.getElementById('importDate').value = importData.import_date; // Format YYYY-MM-DD matches input type date
-        document.getElementById('note').value = importData.note;
+// Form validation đơn giản
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form[action*="store"], form[action*="update"]');
+
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const ingredientId = form.querySelector('select[name="ingredient_id"]').value;
+            const importQuantity = form.querySelector('input[name="import_quantity"]').value;
+            const totalCost = form.querySelector('input[name="total_cost"]').value;
+            const importDate = form.querySelector('input[name="import_date"]').value;
+
+            // Validation cơ bản
+            if (!ingredientId) {
+                alert('Vui lòng chọn nguyên liệu!');
+                e.preventDefault();
+                return false;
+            }
+
+            if (!importQuantity || importQuantity <= 0) {
+                alert('Số lượng nhập phải lớn hơn 0!');
+                e.preventDefault();
+                return false;
+            }
+
+            if (!totalCost || totalCost < 0) {
+                alert('Tổng tiền không hợp lệ!');
+                e.preventDefault();
+                return false;
+            }
+
+            if (!importDate) {
+                alert('Vui lòng chọn ngày nhập!');
+                e.preventDefault();
+                return false;
+            }
+
+            // Thành công - cho phép submit
+            return true;
+        });
     }
-}
+});
 
-function closeImportModal() {
-    modal.classList.remove('active');
-}
-
-// Close modal when clicking outside
-window.onclick = function(event) {
-    if (event.target == modal) {
-        closeImportModal();
-    }
+// Hàm format tiền tệ khi nhập
+function formatCurrency(input) {
+    let value = input.value.replace(/\D/g, '');
+    input.value = value;
 }

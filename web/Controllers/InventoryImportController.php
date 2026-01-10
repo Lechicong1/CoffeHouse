@@ -86,19 +86,15 @@ class InventoryImportController extends Controller {
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['btnXuatexcel'])) {
             $keyword = trim($_POST['txtSearch'] ?? '');
 
-            // Lấy dữ liệu phiếu nhập
+            // Lấy dữ liệu phiếu nhập (đã có ingredient_name và unit từ JOIN)
             if (!empty($keyword)) {
                 $imports = $this->inventoryImportService->searchImports($keyword);
             } else {
                 $imports = $this->inventoryImportService->getAllImports();
             }
 
-            // Lấy danh sách nguyên liệu để map tên
-            $ingredients = $this->ingredientService->getAllIngredients();
-            $ingredientMap = $this->createIngredientMap($ingredients);
-
             // Chuyển đổi dữ liệu để xuất Excel
-            $data = $this->prepareExcelData($imports, $ingredientMap);
+            $data = $this->prepareExcelData($imports);
 
             // Định nghĩa cấu trúc cột cho Excel
             $headers = [
@@ -145,27 +141,14 @@ class InventoryImportController extends Controller {
     }
 
     /**
-     * Tạo map nguyên liệu để tối ưu việc tìm kiếm
-     */
-    private function createIngredientMap($ingredients) {
-        $ingredientMap = [];
-        foreach ($ingredients as $ingredient) {
-            $ingredientMap[$ingredient->id] = $ingredient->name;
-        }
-        return $ingredientMap;
-    }
-
-    /**
      * Chuẩn bị dữ liệu để xuất Excel
      */
-    private function prepareExcelData($imports, $ingredientMap) {
-        return array_map(function($import) use ($ingredientMap) {
-            $ingredientName = $ingredientMap[$import->ingredient_id] ?? 'N/A';
-
+    private function prepareExcelData($imports) {
+        return array_map(function($import) {
             return [
                 'id' => $import->id,
-                'ingredient_name' => $ingredientName,
-                'import_quantity' => $import->import_quantity,
+                'ingredient_name' => $import->ingredient_name ?? 'N/A',
+                'import_quantity' => $import->import_quantity . ' ' . ($import->unit ?? ''),
                 'total_cost' => number_format($import->total_cost, 0, ',', '.'),
                 'import_date' => date('d/m/Y H:i', strtotime($import->import_date)),
                 'note' => $import->note ?? '-'

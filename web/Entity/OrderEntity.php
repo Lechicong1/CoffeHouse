@@ -26,11 +26,10 @@ class OrderEntity {
     public $table_number;
     public $created_at;
     public $updated_at;
-
-    /**
-     * Constructor - Khởi tạo entity rỗng hoặc từ array
-     * @param array $data - Dữ liệu từ database (optional)
-     */
+    
+    public $customer_name;
+    public $customer_phone;
+    
     public function __construct($data = []) {
         if (!empty($data)) {
             $this->id = $data['id'] ?? null;

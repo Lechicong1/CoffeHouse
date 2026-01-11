@@ -175,10 +175,6 @@ class EmployeeService extends Service {
 
 
 
-    public function checkUsernameExists($username) {
-        $employee = $this->employeeRepo->findByUsername($username);
-        return $employee !== null;
-    }
 
     /**
      * Kiểm tra email đã tồn tại chưa

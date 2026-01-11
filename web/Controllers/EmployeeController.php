@@ -100,18 +100,6 @@ class EmployeeController extends Controller {
     function ins() {
         if (isset($_POST['btnThem'])) {
             try {
-                // Kiểm tra username có trùng không
-                if ($this->employeeService->checkUsernameExists($_POST['txtUsername'])) {
-                    echo "<script>alert('Username đã tồn tại!')</script>";
-                    $this->view('AdminDashBoard/MasterLayout', [
-                        'page' => 'Employees_v',
-                        'section' => 'employees',
-                        'employees' => $this->employeeService->getAllEmployees(),
-                        'roles' => $this->getRoles()
-                    ]);
-                    return;
-                }
-                
                 $data = [
                     'username' => $_POST['txtUsername'],
                     'password' => $_POST['txtPassword'],

@@ -17,9 +17,9 @@ class InventoryImportService extends  Service {
         return $this->inventoryImportRepository->findAll();
     }
 
-    public function getImportById($id) {
-        return $this->inventoryImportRepository->findById($id);
-    }
+//    public function getImportById($id) {
+//        return $this->inventoryImportRepository->findById($id);
+//    }
 
     public function createImport($data) {
         try {
@@ -129,9 +129,9 @@ class InventoryImportService extends  Service {
         return $this->inventoryImportRepository->search($keyword);
     }
 
-    public function getImportsByIngredient($ingredientId) {
-        return $this->inventoryImportRepository->findByIngredientId($ingredientId);
-    }
+//    public function getImportsByIngredient($ingredientId) {
+//        return $this->inventoryImportRepository->findByIngredientId($ingredientId);
+//    }
 
     /**
      * Validate dữ liệu nhập kho

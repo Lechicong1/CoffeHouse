@@ -22,20 +22,20 @@ class InventoryImportRepository extends ConnectDatabase {
         return $imports;
     }
 
-    /**
-     * Lấy phiếu nhập theo ID
-     */
-    public function findById($id) {
-        $sql = "SELECT * FROM inventory_imports WHERE id = ?";
-        $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "i", $id);
-        mysqli_stmt_execute($stmt);
-
-        $result = mysqli_stmt_get_result($stmt);
-        $data = mysqli_fetch_assoc($result);
-
-        return $data ? new InventoryImportEntity($data) : null;
-    }
+//    /**
+//     * Lấy phiếu nhập theo ID
+//     */
+//    public function findById($id) {
+//        $sql = "SELECT * FROM inventory_imports WHERE id = ?";
+//        $stmt = mysqli_prepare($this->con, $sql);
+//        mysqli_stmt_bind_param($stmt, "i", $id);
+//        mysqli_stmt_execute($stmt);
+//
+//        $result = mysqli_stmt_get_result($stmt);
+//        $data = mysqli_fetch_assoc($result);
+//
+//        return $data ? new InventoryImportEntity($data) : null;
+//    }
 
     /**
      * Tạo phiếu nhập mới
@@ -94,23 +94,23 @@ class InventoryImportRepository extends ConnectDatabase {
         return $imports;
     }
     
-    /**
-     * Lấy danh sách nhập kho theo nguyên liệu
-     */
-    public function findByIngredientId($ingredientId) {
-        $sql = "SELECT * FROM inventory_imports WHERE ingredient_id = ? ORDER BY import_date DESC";
-        $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "i", $ingredientId);
-        mysqli_stmt_execute($stmt);
-
-        $result = mysqli_stmt_get_result($stmt);
-        $imports = [];
-        while ($row = mysqli_fetch_assoc($result)) {
-            $imports[] = new InventoryImportEntity($row);
-        }
-
-        return $imports;
-    }
+//    /**
+//     * Lấy danh sách nhập kho theo nguyên liệu
+//     */
+//    public function findByIngredientId($ingredientId) {
+//        $sql = "SELECT * FROM inventory_imports WHERE ingredient_id = ? ORDER BY import_date DESC";
+//        $stmt = mysqli_prepare($this->con, $sql);
+//        mysqli_stmt_bind_param($stmt, "i", $ingredientId);
+//        mysqli_stmt_execute($stmt);
+//
+//        $result = mysqli_stmt_get_result($stmt);
+//        $imports = [];
+//        while ($row = mysqli_fetch_assoc($result)) {
+//            $imports[] = new InventoryImportEntity($row);
+//        }
+//
+//        return $imports;
+//    }
 
     /**
      * Lấy phiếu nhập theo khoảng thời gian (cho Report)

@@ -59,6 +59,15 @@ class ProductService {
         return $this->productRepository->findAll();
     }
 
+    public function getActiveProducts() {
+        $products = $this->productRepository->findAllActive();
+        // Gắn sizes cho mỗi sản phẩm
+        foreach ($products as $product) {
+            $product->sizes = $this->productRepository->getSizesByProductId($product->id);
+        }
+        return $products;
+    }
+
     public function getProductById($id) {
         return $this->productRepository->findById($id);
     }
@@ -278,6 +287,24 @@ class ProductService {
 
     public function getProductsByCategory($categoryId) {
         return $this->productRepository->findByCategoryId($categoryId);
+    }
+
+    public function getActiveProductsByCategory($categoryId) {
+        $products = $this->productRepository->findActiveByCategoryId($categoryId);
+        // Gắn sizes cho mỗi sản phẩm
+        foreach ($products as $product) {
+            $product->sizes = $this->productRepository->getSizesByProductId($product->id);
+        }
+        return $products;
+    }
+
+    public function getRelatedProducts($categoryId, $excludeId, $limit = 4) {
+        $products = $this->productRepository->findRelatedProducts($categoryId, $excludeId, $limit);
+        // Gắn sizes cho mỗi sản phẩm
+        foreach ($products as $product) {
+            $product->sizes = $this->productRepository->getSizesByProductId($product->id);
+        }
+        return $products;
     }
 
     public function searchProducts($keyword) {

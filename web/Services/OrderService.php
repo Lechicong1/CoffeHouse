@@ -10,6 +10,7 @@ include_once './web/Entity/OrderItemEntity.php';
 include_once './web/Services/VoucherService.php';
 include_once './web/Repositories/CustomerRepository.php';
 include_once './Enums/size.enum.php';
+include_once './Enums/status.enum.php';
 
 use web\Entity\OrderEntity;
 use web\Entity\OrderItemEntity;
@@ -466,19 +467,26 @@ class OrderService {
                 return ['success' => false, 'message' => 'Không tìm thấy đơn hàng'];
             }
 
-            // Validate status
-            $validStatuses = ['PENDING', 'PREPARING', 'READY', 'SHIPPING', 'COMPLETED', 'CANCELLED'];
+            // Validate status sử dụng OrderStatus enum
+            $validStatuses = [
+                OrderStatus::PENDING,
+                OrderStatus::PREPARING,
+                OrderStatus::READY,
+                OrderStatus::SHIPPING,
+                OrderStatus::COMPLETED,
+                OrderStatus::CANCELLED
+            ];
             if (!in_array($newStatus, $validStatuses)) {
                 return ['success' => false, 'message' => 'Trạng thái không hợp lệ'];
             }
 
             // Nếu hủy đơn đã thanh toán -> Đánh dấu hoàn tiền
-            if ($newStatus === 'CANCELLED' && $order->payment_status === 'PAID') {
+            if ($newStatus === OrderStatus::CANCELLED && $order->payment_status === 'PAID') {
                 $order->payment_status = 'REFUNDED';
             }
 
             // Khi giao hàng xong (COMPLETED) -> Đánh dấu đã thanh toán (COD)
-            if ($newStatus === 'COMPLETED' && $order->payment_status !== 'PAID') {
+            if ($newStatus === OrderStatus::COMPLETED && $order->payment_status !== 'PAID') {
                 $order->payment_status = 'PAID';
             }
 
@@ -486,7 +494,7 @@ class OrderService {
             
             if ($this->orderRepo->update($order)) {
                 // Cộng điểm khi đơn hàng COMPLETED (Web: shipper hoàn thành)
-                if ($newStatus === 'COMPLETED' && $order->customer_id) {
+                if ($newStatus === OrderStatus::COMPLETED && $order->customer_id) {
                     $this->awardLoyaltyPoints($order->customer_id, $order->total_amount);
                 }
                 return ['success' => true, 'message' => 'Cập nhật trạng thái thành công'];
@@ -514,7 +522,7 @@ class OrderService {
             }
             
             // Chỉ cho phép sửa note khi đơn hàng đang ở trạng thái PENDING
-            if ($order->status !== 'PENDING') {
+            if ($order->status !== OrderStatus::PENDING) {
                 return ['success' => false, 'message' => 'Chỉ có thể sửa ghi chú khi đơn hàng đang chờ xác nhận'];
             }
 
@@ -541,7 +549,7 @@ class OrderService {
                 return ['success' => false, 'message' => 'Không tìm thấy đơn hàng'];
             }
 
-            if ($order->status !== 'PENDING') {
+            if ($order->status !== OrderStatus::PENDING) {
                 return ['success' => false, 'message' => 'Chỉ có thể sửa đơn khi đang chờ xác nhận'];
             }
 
@@ -603,6 +611,50 @@ class OrderService {
                 'success' => false,
                 'message' => $e->getMessage()
             ];
+        }
+    }
+
+   // cong le
+    public function cancelOrder($orderId, $customerId) {
+        try {
+            // 1. Kiểm tra đơn hàng tồn tại
+            $order = $this->orderRepo->findById($orderId);
+            if (!$order) {
+                return ['success' => false, 'message' => 'Không tìm thấy đơn hàng'];
+            }
+
+            // 2. Kiểm tra quyền sở hữu
+            if ($order->customer_id != $customerId) {
+                return ['success' => false, 'message' => 'Bạn không có quyền hủy đơn hàng này'];
+            }
+
+            // 3. Kiểm tra trạng thái đơn hàng (chỉ cho phép hủy PENDING)
+            if ($order->status !== OrderStatus::PENDING) {
+                return ['success' => false, 'message' => 'Không thể hủy đơn hàng đã được xử lý'];
+            }
+
+            // 4. Cập nhật trạng thái
+            $order->status = OrderStatus::CANCELLED;
+
+            // Nếu đã thanh toán -> đánh dấu hoàn tiền
+            if ($order->payment_status === 'PAID') {
+                $order->payment_status = 'REFUNDED';
+            } else {
+                $order->payment_status = 'CANCELLED';
+            }
+
+            // 5. Cập nhật vào database
+            if ($this->orderRepo->update($order)) {
+                return [
+                    'success' => true,
+                    'message' => 'Hủy đơn hàng thành công'
+                ];
+            }
+
+            return ['success' => false, 'message' => 'Lỗi khi hủy đơn hàng'];
+
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => 'Lỗi: ' . $e->getMessage()];
         }
     }
 

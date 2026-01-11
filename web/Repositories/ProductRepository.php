@@ -22,6 +22,21 @@ class ProductRepository extends ConnectDatabase {
     }
 
     /**
+     * Lấy tất cả sản phẩm đang active
+     */
+    public function findAllActive() {
+        $sql = "SELECT * FROM products WHERE is_active = 1 ORDER BY name ASC";
+        $result = mysqli_query($this->con, $sql);
+
+        $products = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $products[] = new ProductEntity($row);
+        }
+
+        return $products;
+    }
+
+    /**
      * Lấy sản phẩm theo ID
      */
     public function findById($id) {
@@ -102,6 +117,24 @@ class ProductRepository extends ConnectDatabase {
      */
     public function findByCategoryId($categoryId) {
         $sql = "SELECT * FROM products WHERE category_id = ? ORDER BY name ASC";
+        $stmt = mysqli_prepare($this->con, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $categoryId);
+        mysqli_stmt_execute($stmt);
+
+        $result = mysqli_stmt_get_result($stmt);
+        $products = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $products[] = new ProductEntity($row);
+        }
+
+        return $products;
+    }
+
+    /**
+     * Lấy sản phẩm active theo danh mục
+     */
+    public function findActiveByCategoryId($categoryId) {
+        $sql = "SELECT * FROM products WHERE category_id = ? AND is_active = 1 ORDER BY name ASC";
         $stmt = mysqli_prepare($this->con, $sql);
         mysqli_stmt_bind_param($stmt, "i", $categoryId);
         mysqli_stmt_execute($stmt);
@@ -212,6 +245,24 @@ class ProductRepository extends ConnectDatabase {
         $data = mysqli_fetch_assoc($result);
 
         return $data ? (object)$data : null;
+    }
+
+    /**
+     * Lấy sản phẩm liên quan (cùng danh mục, loại trừ sản phẩm hiện tại)
+     */
+    public function findRelatedProducts($categoryId, $excludeId, $limit = 4) {
+        $sql = "SELECT * FROM products WHERE category_id = ? AND id != ? AND is_active = 1 ORDER BY RAND() LIMIT ?";
+        $stmt = mysqli_prepare($this->con, $sql);
+        mysqli_stmt_bind_param($stmt, "iii", $categoryId, $excludeId, $limit);
+        mysqli_stmt_execute($stmt);
+
+        $result = mysqli_stmt_get_result($stmt);
+        $products = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $products[] = new ProductEntity($row);
+        }
+
+        return $products;
     }
 }
 

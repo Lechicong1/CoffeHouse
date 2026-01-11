@@ -30,6 +30,12 @@ $error = $data['error'] ?? null;
         30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
         40%, 60% { transform: translate3d(4px, 0, 0); }
     }
+
+    /* Override header text color in report tables: remove custom/brand color and use default dark text */
+    .report-table thead th {
+        color: #222 !important;
+        /* ensure any font-weight or text-transform remains but color is neutral */
+    }
 </style>
 <div class="product-report-container">
     <div class="report-header">
@@ -139,7 +145,7 @@ $error = $data['error'] ?? null;
                         <th width="10%" class="text-right">Số Lượng</th>
                         <th width="15%" class="text-right">Doanh Thu</th>
                         <th width="15%" class="text-left">Tỷ Trọng (%)</th>
-                        <th width="10%" class="text-right">Giá Hiện Tại</th>
+                        <th width="10%" class="text-right">Giá Trung bình</th>
                     </tr>
                 </thead>
                 <tbody>

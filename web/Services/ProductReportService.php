@@ -17,7 +17,6 @@ class ProductReportService
 
     public function getProductReportData($fromDate, $toDate, $categoryId = null, $sortBy = 'desc')
     {
-        // 1. Chạy câu SQL để lấy danh sách $products
         $products = $this->repo->getProductReportData($fromDate, $toDate, $categoryId);
 
         // 2. Tính toán tổng để hiển thị lên 4 Card View
@@ -45,15 +44,15 @@ class ProductReportService
             }
         }
 
-        // 3. Tính % Tỷ trọng cho từng món (Thay thế Pie Chart)
+        // Tính % Tỷ trọng cho từng món
         foreach ($products as &$p) {
             $p['percent'] = ($totalRevenue > 0)
                 ? round(($p['total_revenue'] / $totalRevenue) * 100, 2)
                 : 0;
             
             // Tính giá bán hiện tại (TB)
-            $p['avg_price'] = ($p['total_quantity'] > 0) 
-                ? $p['total_revenue'] / $p['total_quantity'] 
+            $p['avg_price'] = ($p['total_quantity'] > 0)
+                ? $p['total_revenue'] / $p['total_quantity']
                 : 0;
         }
 

@@ -183,7 +183,7 @@ function renderMenuGrid(items) {
 
   grid.innerHTML = "";
 
-  // ✅ Đảm bảo voucher_id được set từ state (nguồn sự thật)
+  // Đảm bảo voucher_id được set từ state (nguồn sự thật)
   const voucherInput = document.getElementById("form-voucher-id");
   if (voucherInput) {
     const vid = window.currentOrder?.voucher?.voucher_id || "";

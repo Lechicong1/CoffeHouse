@@ -139,47 +139,6 @@ class InventoryCheckService extends Service {
         }
     }
 
-    /**
-     * Tạo mới bản ghi kiểm kho
-     * @param array $data
-     * @return bool|int
-     */
-    public function createInventoryCheck($data) {
-        $this->validateInventoryCheckData($data);
-        $data['difference'] = $data['actualQuantity'] - $data['theoryQuantity'];
-
-        return $this->inventoryCheckRepo->create($data);
-    }
-
-    /**
-     * Cập nhật bản ghi kiểm kho
-     * @param int $id
-     * @param array $data
-     * @return bool
-     */
-    public function updateInventoryCheck($id, $data) {
-        if (!is_numeric($id) || $id <= 0) {
-            throw new Exception("ID không hợp lệ");
-        }
-
-        $this->validateInventoryCheckData($data);
-        $data['difference'] = $data['actualQuantity'] - $data['theoryQuantity'];
-
-        return $this->inventoryCheckRepo->update($id, $data);
-    }
-
-    /**
-     * Xóa bản ghi kiểm kho
-     * @param int $id
-     * @return bool
-     */
-    public function deleteInventoryCheck($id) {
-        if (!is_numeric($id) || $id <= 0) {
-            throw new Exception("ID không hợp lệ");
-        }
-
-        return $this->inventoryCheckRepo->delete($id);
-    }
 
     /**
      * Lấy báo cáo thất thoát theo tháng (tất cả)

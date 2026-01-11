@@ -10,9 +10,6 @@ class InventoryCheckMonthController extends Controller {
         $this->inventoryCheckService = $this->service('InventoryCheckService');
     }
 
-    /**
-     * Hiển thị trang báo cáo thất thoát theo tháng
-     */
     public function Index() {
         try {
             // Lấy tháng từ request (nếu có)
@@ -38,39 +35,6 @@ class InventoryCheckMonthController extends Controller {
         } catch (Exception $e) {
             error_log("Error in InventoryCheckMonthController: " . $e->getMessage());
             echo "Lỗi: " . $e->getMessage();
-        }
-    }
-
-    /**
-     * API lấy dữ liệu theo tháng (cho AJAX)
-     */
-    public function GetDataByMonth() {
-        header('Content-Type: application/json');
-
-        try {
-            $month = isset($_GET['month']) ? (int)$_GET['month'] : null;
-
-            if ($month) {
-                $data = $this->inventoryCheckService->getInventoryCheckBySpecificMonth($month);
-            } else {
-                $data = $this->inventoryCheckService->getInventoryCheckByMonth();
-            }
-
-            // Chuyển entities thành array
-            $result = array_map(function($entity) {
-                return $entity->toArray();
-            }, $data);
-
-            echo json_encode([
-                'success' => true,
-                'data' => $result
-            ]);
-        } catch (Exception $e) {
-            error_log("Error in GetDataByMonth: " . $e->getMessage());
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
         }
     }
 }

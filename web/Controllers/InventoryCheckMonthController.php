@@ -1,6 +1,6 @@
 <?php
 /**
- * InventoryCheckMonthController - Xử lý báo cáo thất thoát kho theo tháng
+ * InventoryCheckMonthController - Xử lý báo cáo thất thoát kho theo khoảng thời gian
  */
 class InventoryCheckMonthController extends Controller {
 
@@ -10,67 +10,45 @@ class InventoryCheckMonthController extends Controller {
         $this->inventoryCheckService = $this->service('InventoryCheckService');
     }
 
-    /**
-     * Hiển thị trang báo cáo thất thoát theo tháng
-     */
     public function Index() {
+        // Lấy khoảng thời gian từ request (nếu có)
+        $fromDate = isset($_GET['from_date']) ? $_GET['from_date'] : date('Y-m-01');
+        $toDate = isset($_GET['to_date']) ? $_GET['to_date'] : date('Y-m-d');
+
+        // Biến lưu thông báo lỗi
+        $errorMessage = null;
+        $inventoryData = [];
+
         try {
-            // Lấy tháng từ request (nếu có)
-            $selectedMonth = isset($_GET['month']) ? (int)$_GET['month'] : null;
-
-            // Lấy dữ liệu
-            if ($selectedMonth) {
-                $inventoryData = $this->inventoryCheckService->getInventoryCheckBySpecificMonth($selectedMonth);
-            } else {
-                $inventoryData = $this->inventoryCheckService->getInventoryCheckByMonth();
-            }
-
-            // Truyền dữ liệu vào view
-            $data = [
-                'section' => 'inventory_check_month',
-                'page' => 'InventoryCheckMonth_v',
-                'inventoryData' => $inventoryData,
-                'selectedMonth' => $selectedMonth
-            ];
-
-            // Render Master Layout với View con
-            $this->view('AdminDashBoard/MasterLayout', $data);
+            // Lấy dữ liệu theo khoảng thời gian
+            $inventoryData = $this->inventoryCheckService->getInventoryCheckByDateRange($fromDate, $toDate);
         } catch (Exception $e) {
             error_log("Error in InventoryCheckMonthController: " . $e->getMessage());
-            echo "Lỗi: " . $e->getMessage();
-        }
-    }
+            $errorMessage = $e->getMessage();
 
-    /**
-     * API lấy dữ liệu theo tháng (cho AJAX)
-     */
-    public function GetDataByMonth() {
-        header('Content-Type: application/json');
+            // Reset về giá trị mặc định khi có lỗi
+            $fromDate = date('Y-m-01');
+            $toDate = date('Y-m-d');
 
-        try {
-            $month = isset($_GET['month']) ? (int)$_GET['month'] : null;
-
-            if ($month) {
-                $data = $this->inventoryCheckService->getInventoryCheckBySpecificMonth($month);
-            } else {
-                $data = $this->inventoryCheckService->getInventoryCheckByMonth();
+            // Thử lấy dữ liệu với ngày mặc định
+            try {
+                $inventoryData = $this->inventoryCheckService->getInventoryCheckByDateRange($fromDate, $toDate);
+            } catch (Exception $ex) {
+                $inventoryData = [];
             }
-
-            // Chuyển entities thành array
-            $result = array_map(function($entity) {
-                return $entity->toArray();
-            }, $data);
-
-            echo json_encode([
-                'success' => true,
-                'data' => $result
-            ]);
-        } catch (Exception $e) {
-            error_log("Error in GetDataByMonth: " . $e->getMessage());
-            echo json_encode([
-                'success' => false,
-                'message' => $e->getMessage()
-            ]);
         }
+
+        // Truyền dữ liệu vào view
+        $data = [
+            'section' => 'inventory_check_month',
+            'page' => 'InventoryCheckMonth_v',
+            'inventoryData' => $inventoryData,
+            'fromDate' => $fromDate,
+            'toDate' => $toDate,
+            'errorMessage' => $errorMessage
+        ];
+
+        // Render Master Layout với View con
+        $this->view('AdminDashBoard/MasterLayout', $data);
     }
 }

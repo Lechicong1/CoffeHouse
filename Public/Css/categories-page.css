@@ -44,13 +44,9 @@
     font-size: 15px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s;
-    box-shadow: 0 4px 15px rgba(182, 218, 159, 0.3);
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(182, 218, 159, 0.5);
     background: linear-gradient(135deg, #9fc885 0%, #8ab670 100%);
 }
 
@@ -69,12 +65,10 @@
     border-radius: 12px;
     font-size: 15px;
     outline: none;
-    transition: all 0.3s;
 }
 
 .search-input:focus {
     border-color: #b6da9f;
-    box-shadow: 0 0 0 3px rgba(182, 218, 159, 0.2);
 }
 
 /* Table Container */
@@ -106,7 +100,6 @@
 
 .data-table tbody tr {
     border-bottom: 1px solid #f0f4ef;
-    transition: all 0.2s;
 }
 
 .data-table tbody tr:hover {
@@ -147,7 +140,6 @@
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
     margin-right: 8px;
 }
 
@@ -158,8 +150,6 @@
 
 .btn-edit:hover {
     background: linear-gradient(135deg, #9fc885 0%, #8ab670 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(182, 218, 159, 0.4);
 }
 
 .btn-delete {
@@ -169,8 +159,6 @@
 
 .btn-delete:hover {
     background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(245, 101, 101, 0.4);
 }
 
 /* ========== MODAL STYLES ========== */
@@ -185,22 +173,10 @@
     z-index: 10000;
     justify-content: center;
     align-items: center;
-    backdrop-filter: blur(4px);
-    animation: fadeIn 0.3s;
 }
 
 .modal.active {
     display: flex;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
 }
 
 .modal-content {
@@ -211,19 +187,6 @@
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    animation: slideDown 0.3s;
-}
-
-@keyframes slideDown {
-    from {
-        transform: translateY(-50px);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
 }
 
 .modal-header {
@@ -268,7 +231,6 @@
     width: 40px;
     height: 40px;
     border-radius: 8px;
-    transition: all 0.2s;
 }
 
 .btn-close-modal:hover {
@@ -308,13 +270,11 @@
     font-size: 15px;
     font-family: inherit;
     outline: none;
-    transition: all 0.3s;
 }
 
 .form-group input[type="text"]:focus,
 .form-group textarea:focus {
     border-color: #b6da9f;
-    box-shadow: 0 0 0 3px rgba(182, 218, 159, 0.2);
 }
 
 .form-group textarea {
@@ -340,7 +300,6 @@
     font-size: 15px;
     font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s;
     display: flex;
     align-items: center;
     gap: 8px;
@@ -353,19 +312,15 @@
 
 .btn-cancel:hover {
     background: #cbd5e0;
-    transform: translateY(-2px);
 }
 
 .btn-submit {
     background: linear-gradient(135deg, #b6da9f 0%, #9fc885 100%);
     color: #2c2c2c;
-    box-shadow: 0 4px 15px rgba(182, 218, 159, 0.3);
 }
 
 .btn-submit:hover {
     background: linear-gradient(135deg, #9fc885 0%, #8ab670 100%);
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(182, 218, 159, 0.5);
 }
 
 /* Responsive Design */

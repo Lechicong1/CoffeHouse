@@ -44,7 +44,10 @@ $currentPage = $data['currentPage'] ?? $currentSection;
                 <li><a href="/COFFEE_PHP/User/index#about" class="<?= $currentPage === 'about-section' ? 'active' : '' ?>">Giới thiệu</a></li>
                 <li><a href="/COFFEE_PHP/User/menu" class="<?= $currentPage === 'menu' ? 'active' : '' ?>">Thực đơn</a></li>
                 <li><a href="/COFFEE_PHP/User/index#location" class="<?= $currentPage === 'location' ? 'active' : '' ?>">Địa chỉ</a></li>
-                <li><a href="/COFFEE_PHP/User/about" class="<?= $currentPage === 'about' ? 'active' : '' ?>">Về chúng tôi</a></li>
+
+                <?php if ($currentUser && isset($currentUser['type']) && $currentUser['type'] === 'customer'): ?>
+                    <li><a href="/COFFEE_PHP/OrderController/GetData" class="<?= $currentPage === 'myOrders' ? 'active' : '' ?>">📋 Đơn hàng</a></li>
+                <?php endif; ?>
             </ul>
 
             <?php if ($currentUser && isset($currentUser['type']) && $currentUser['type'] === 'customer'): ?>

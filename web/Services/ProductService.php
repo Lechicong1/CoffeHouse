@@ -59,6 +59,15 @@ class ProductService {
         return $this->productRepository->findAll();
     }
 
+    public function getActiveProducts() {
+        $products = $this->productRepository->findAllActive();
+        // Gắn sizes cho mỗi sản phẩm
+        foreach ($products as $product) {
+            $product->sizes = $this->productRepository->getSizesByProductId($product->id);
+        }
+        return $products;
+    }
+
     public function getProductById($id) {
         return $this->productRepository->findById($id);
     }
@@ -280,6 +289,24 @@ class ProductService {
         return $this->productRepository->findByCategoryId($categoryId);
     }
 
+    public function getActiveProductsByCategory($categoryId) {
+        $products = $this->productRepository->findActiveByCategoryId($categoryId);
+        // Gắn sizes cho mỗi sản phẩm
+        foreach ($products as $product) {
+            $product->sizes = $this->productRepository->getSizesByProductId($product->id);
+        }
+        return $products;
+    }
+
+    public function getRelatedProducts($categoryId, $excludeId, $limit = 4) {
+        $products = $this->productRepository->findRelatedProducts($categoryId, $excludeId, $limit);
+        // Gắn sizes cho mỗi sản phẩm
+        foreach ($products as $product) {
+            $product->sizes = $this->productRepository->getSizesByProductId($product->id);
+        }
+        return $products;
+    }
+
     public function searchProducts($keyword) {
         return $this->productRepository->search($keyword);
     }
@@ -306,46 +333,6 @@ class ProductService {
         // Validate category_id
         if (empty($data['category_id'])) {
             throw new Exception("Vui lòng chọn danh mục");
-        }
-    }
-
-    /**
-     * Lấy thông tin sản phẩm cho "Buy Now" (không cần giỏ hàng)
-     */
-    public function getBuyNowData($productSizeId, $quantity) {
-        try {
-            // Lấy thông tin sản phẩm từ database
-            $productSize = $this->productRepository->getProductSizeInfo($productSizeId);
-
-            if (!$productSize) {
-                return [
-                    'success' => false,
-                    'message' => 'Sản phẩm không tồn tại'
-                ];
-            }
-
-            // Tạo item data cho buy now
-            $item = (object)[
-                'id' => 0, // Fake ID
-                'product_name' => $productSize->product_name,
-                'size_name' => $productSize->size_name,
-                'price' => $productSize->price,
-                'quantity' => $quantity,
-                'subtotal' => $productSize->price * $quantity,
-                'image_url' => $productSize->image_url,
-                'product_size_id' => $productSizeId
-            ];
-
-            return [
-                'success' => true,
-                'items' => [$item],
-                'total' => $item->subtotal
-            ];
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
-            ];
         }
     }
 }

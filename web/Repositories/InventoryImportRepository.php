@@ -22,20 +22,20 @@ class InventoryImportRepository extends ConnectDatabase {
         return $imports;
     }
 
-//    /**
-//     * Lấy phiếu nhập theo ID
-//     */
-//    public function findById($id) {
-//        $sql = "SELECT * FROM inventory_imports WHERE id = ?";
-//        $stmt = mysqli_prepare($this->con, $sql);
-//        mysqli_stmt_bind_param($stmt, "i", $id);
-//        mysqli_stmt_execute($stmt);
-//
-//        $result = mysqli_stmt_get_result($stmt);
-//        $data = mysqli_fetch_assoc($result);
-//
-//        return $data ? new InventoryImportEntity($data) : null;
-//    }
+    /**
+     * Lấy phiếu nhập theo ID
+     */
+    public function findById($id) {
+        $sql = "SELECT * FROM inventory_imports WHERE id = ?";
+        $stmt = mysqli_prepare($this->con, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        mysqli_stmt_execute($stmt);
+
+        $result = mysqli_stmt_get_result($stmt);
+        $data = mysqli_fetch_assoc($result);
+
+        return $data ? new InventoryImportEntity($data) : null;
+    }
 
     /**
      * Tạo phiếu nhập mới

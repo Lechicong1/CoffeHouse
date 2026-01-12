@@ -10,11 +10,12 @@ include_once './web/Entity/OrderItemEntity.php';
 include_once './web/Services/VoucherService.php';
 include_once './web/Repositories/CustomerRepository.php';
 include_once './Enums/size.enum.php';
+include_once './Enums/status.enum.php';
 
 use web\Entity\OrderEntity;
 use web\Entity\OrderItemEntity;
 
-class OrderService {
+class OrderService  {
     private $orderRepo;
     private $orderItemRepo;
     private $cartRepo;
@@ -41,8 +42,46 @@ class OrderService {
     }
 
     /**
-     * Validate số lượng nguyên liệu trước khi đặt hàng
+     * Validate dữ liệu đơn hàng từ checkout
      */
+    public function validateOrderData($data) {
+        $requiredFields = [
+            'customer_name' => 'Tên người nhận',
+            'customer_phone' => 'Số điện thoại',
+            'shipping_address' => 'Địa chỉ giao hàng',
+            'payment_method' => 'Phương thức thanh toán',
+            'total_amount' => 'Tổng tiền'
+        ];
+
+        foreach ($requiredFields as $field => $label) {
+            if (empty($data[$field])) {
+                return [
+                    'success' => false,
+                    'message' => "Vui lòng nhập {$label}"
+                ];
+            }
+        }
+
+        // Validate phone number format
+        if (!preg_match('/^[0-9]{10,11}$/', $data['customer_phone'])) {
+            return [
+                'success' => false,
+                'message' => 'Số điện thoại không hợp lệ (10-11 số)'
+            ];
+        }
+
+
+        // Validate total amount
+        if (!is_numeric($data['total_amount']) || $data['total_amount'] <= 0) {
+            return [
+                'success' => false,
+                'message' => 'Tổng tiền không hợp lệ'
+            ];
+        }
+
+        return ['success' => true];
+    }
+
     private function validateIngredientStock($orderItems) {
         foreach ($orderItems as $item) {
             $productSizeId = is_array($item) ? $item['product_size_id'] : $item->product_size_id;
@@ -75,35 +114,31 @@ class OrderService {
      */
     public function createOrderFromCheckout($customerId, $data) {
         try {
-            // 1. Lấy giỏ hàng
-            $cartItems = $this->cartRepo->findCartByCustomerId($customerId);
-
-            if (empty($cartItems)) {
-                throw new Exception('Giỏ hàng trống');
+            // 1. Lấy items trực tiếp từ $data (đã được Controller xử lý sẵn)
+            if (empty($data['items'])) {
+                return ['success' => false, 'message' => 'Không có sản phẩm trong đơn hàng'];
             }
 
+            $cartItems = $data['items'];
+            // Validate qua OrderService
+            $validation = $this->validateOrderData($data);
+            if (!$validation['success']) {
+                throw new Exception($validation['message']);
+            }
             // 2. Validate số lượng nguyên liệu trước khi đặt hàng
             $validateResult = $this->validateIngredientStock($cartItems);
             if (!$validateResult['success']) {
                 return $validateResult;
             }
-
-            // 3. Tạo Order Entity
+            // 3. Tạo Order Entity - Luôn tạo với trạng thái PENDING
             $order = new OrderEntity();
             $order->order_code = $this->generateOrderCode();
             $order->customer_id = $customerId;
-            $order->order_type = $data['order_type'] ?? 'ONLINE_DELIVERY';
-            $order->status = ($data['payment_method'] === 'CASH') ? 'PENDING' : 'AWAITING_PAYMENT';
-            $order->payment_status = ($data['payment_method'] === 'CASH') ? 'PENDING' : 'AWAITING_PAYMENT';
+            $order->order_type = 'ONLINE_DELIVERY';
+            $order->status = OrderStatus::PENDING;
+            $order->payment_status = 'PAID';
             $order->payment_method = $data['payment_method'];
-
-            // Compute sub_total from cart to be used for voucher calculation
-            $sub_total = 0.0;
-            foreach ($cartItems as $ci) {
-                $sub_total += (float)$ci->price * (int)$ci->quantity;
-            }
-            $order->total_amount = $sub_total; // store pre-discount total
-
+            $order->total_amount = $data['total_amount'];
             $order->shipping_address = $data['shipping_address'];
             $order->receiver_name = $data['customer_name'];
             $order->receiver_phone = $data['customer_phone'];
@@ -125,44 +160,39 @@ class OrderService {
                 $this->orderItemRepo->create($item);
             }
 
-            // 6. Xử lý voucher (nếu có)
-            $discountAmount = 0.0;
+            // 6. Xử lý voucher (nếu có) - chỉ redeem (cập nhật used_count, trừ điểm)
+            // Lưu ý: Frontend đã gửi total_amount ĐÃ TRỪ voucher, không cần tính lại
             if (!empty($data['voucher']) && !empty($order->customer_id)) {
                 $voucherId = isset($data['voucher']['voucher_id']) ? (int)$data['voucher']['voucher_id'] : null;
                 if ($voucherId) {
+                    // Tính subtotal gốc từ items để check min_bill_total đúng
+                    $originalSubtotal = 0;
+                    foreach ($cartItems as $item) {
+                        $originalSubtotal += (float)$item->price * (int)$item->quantity;
+                    }
+                    
+                    // Gọi redeemVoucher với subtotal GỐC để validate min_bill_total đúng
                     $redeemResult = $this->voucherService->redeemVoucher(
                         $order->customer_id,
                         $voucherId,
-                        $order->total_amount
+                        $originalSubtotal
                     );
 
                     if (!$redeemResult['success']) {
                         return $redeemResult;
                     }
-                    $discountAmount = $redeemResult['discount_amount'];
                 }
             }
-
-            // 7. Xóa giỏ hàng
-            $this->cartRepo->clearCart($customerId);
-
-            $final_total = $order->total_amount - (float)$discountAmount;
-            if ($final_total < 0) $final_total = 0.0;
-
-            if ($discountAmount > 0) {
-                $order->id = $orderId;
-                $order->total_amount = $final_total;
-                $this->orderRepo->update($order);
+            // 7. Xóa giỏ hàng (chỉ khi checkout từ Cart, không phải Buy Now)
+            if (empty($data['is_buy_now'])) {
+                $this->cartRepo->clearCart($customerId);
             }
 
             return [
                 'success' => true,
                 'order_id' => $orderId,
                 'order_code' => $order->order_code,
-                'message' => 'Đặt hàng thành công',
-                'sub_total' => $sub_total,
-                'discount_amount' => (float)$discountAmount,
-                'final_total' => $final_total
+                'message' => 'Đặt hàng thành công'
             ];
 
         } catch (Exception $e) {
@@ -180,7 +210,7 @@ class OrderService {
             return ['success' => false, 'message' => 'Không có sản phẩm trong đơn hàng'];
         }
 
-        // 2. Validate và tính sub_total (CHỈ validate, KHÔNG tạo order ở đây)
+        // Chuẩn hóa dữ liệu & Tính tổng tiền
         $sub_total = 0.0;
         $validatedItems = [];
 
@@ -203,14 +233,22 @@ class OrderService {
             $validatedItems[] = [
                 'size_id' => $productSize->id,
                 'qty' => $qty,
+                'product_size_id' => $productSize->id, // cho checkkho
+                'quantity' => $qty,
                 'price' => $realPrice,
                 'notes' => $it['notes'] ?? ''
             ];
         }
 
-        // 3. Check items hợp lệ
+        // Check items hợp lệ & Kiểm tra tồn kho nguyên liệu trước
         if (empty($validatedItems)) {
             return ['success' => false, 'message' => 'Không có sản phẩm hợp lệ trong đơn hàng'];
+        }
+
+        // --- Kiểm tra tồn kho nguyên liệu ---
+        $stockCheck = $this->validateIngredientStock($validatedItems);
+        if (!$stockCheck['success']) {
+            return $stockCheck;
         }
 
         // 4. Tạo Order Entity (SAU KHI validate xong)
@@ -234,7 +272,7 @@ class OrderService {
              // Xử lý logic mang về nếu cần
         }
 
-        // 5. Transaction: tạo order + items + voucher
+        // tạo order + items + voucher
         $con = $this->orderRepo->con;
         if (!mysqli_begin_transaction($con)) {
             return ['success' => false, 'message' => 'Không thể bắt đầu transaction DB'];
@@ -310,17 +348,11 @@ class OrderService {
         }
     }
 
-    /**
-     * Tạo mã đơn hàng tự động (cũ - cho checkout)
-     */
+
     private function generateOrderCode() {
         return 'ORD' . date('YmdHis') . rand(100, 999);
     }
 
-    /**
-     * Tạo mã đơn hàng unique theo format ORD + 4 số
-     * Kiểm tra trùng và random lại nếu trùng
-     */
     private function generateUniqueOrderCode() {
         $maxAttempts = 10;
         $attempts = 0;
@@ -343,17 +375,13 @@ class OrderService {
         return 'ORD' . substr(time(), -4);
     }
 
-    /**
-     * Lấy thông tin đơn hàng theo ID
-     */
     public function getOrderById($orderId) {
         return $this->orderRepo->findById($orderId);
     }
 
     /**
      * Lấy danh sách đơn hàng với filter
-     * @param array $filters ['status' => 'PROCESSING', 'search' => 'ORD123']
-     * @return array
+     *  ['status' => 'PROCESSING', 'search' => 'ORD123']
      */
     public function getOrders($filters = []) {
         // Normalize filters and apply default order_type for staff POS listing
@@ -375,20 +403,11 @@ class OrderService {
         return $this->orderRepo->findAllWithFilters($normalized);
     }
 
-    /**
-     * Lấy chi tiết items của đơn hàng
-     * @param int $orderId
-     * @return array
-     */
+
     public function getOrderItems($orderId) {
         return $this->orderItemRepo->findByOrderId($orderId);
     }
 
-    /**
-     * Tạo đơn hàng từ POS (POST raw data) - Service xử lý parsing và validation
-     * @param array $postData Raw POST data từ controller
-     * @return array
-     */
     public function createOrderFromPOS($postData) {
         try {
             // Validate required fields minimally here; deep validation in createOrder()
@@ -466,19 +485,13 @@ class OrderService {
                 return ['success' => false, 'message' => 'Không tìm thấy đơn hàng'];
             }
 
-            // Validate status
-            $validStatuses = ['PENDING', 'PREPARING', 'READY', 'SHIPPING', 'COMPLETED', 'CANCELLED'];
-            if (!in_array($newStatus, $validStatuses)) {
-                return ['success' => false, 'message' => 'Trạng thái không hợp lệ'];
-            }
-
             // Nếu hủy đơn đã thanh toán -> Đánh dấu hoàn tiền
-            if ($newStatus === 'CANCELLED' && $order->payment_status === 'PAID') {
+            if ($newStatus === OrderStatus::CANCELLED && $order->payment_status === 'PAID') {
                 $order->payment_status = 'REFUNDED';
             }
 
             // Khi giao hàng xong (COMPLETED) -> Đánh dấu đã thanh toán (COD)
-            if ($newStatus === 'COMPLETED' && $order->payment_status !== 'PAID') {
+            if ($newStatus === OrderStatus::COMPLETED && $order->payment_status !== 'PAID') {
                 $order->payment_status = 'PAID';
             }
 
@@ -486,7 +499,7 @@ class OrderService {
             
             if ($this->orderRepo->update($order)) {
                 // Cộng điểm khi đơn hàng COMPLETED (Web: shipper hoàn thành)
-                if ($newStatus === 'COMPLETED' && $order->customer_id) {
+                if ($newStatus === OrderStatus::COMPLETED && $order->customer_id) {
                     $this->awardLoyaltyPoints($order->customer_id, $order->total_amount);
                 }
                 return ['success' => true, 'message' => 'Cập nhật trạng thái thành công'];
@@ -514,7 +527,7 @@ class OrderService {
             }
             
             // Chỉ cho phép sửa note khi đơn hàng đang ở trạng thái PENDING
-            if ($order->status !== 'PENDING') {
+            if ($order->status !== OrderStatus::PENDING) {
                 return ['success' => false, 'message' => 'Chỉ có thể sửa ghi chú khi đơn hàng đang chờ xác nhận'];
             }
 
@@ -541,7 +554,7 @@ class OrderService {
                 return ['success' => false, 'message' => 'Không tìm thấy đơn hàng'];
             }
 
-            if ($order->status !== 'PENDING') {
+            if ($order->status !== OrderStatus::PENDING) {
                 return ['success' => false, 'message' => 'Chỉ có thể sửa đơn khi đang chờ xác nhận'];
             }
 
@@ -603,6 +616,48 @@ class OrderService {
                 'success' => false,
                 'message' => $e->getMessage()
             ];
+        }
+    }
+
+   // cong le
+    public function cancelOrder($orderId, $customerId) {
+        try {
+            // 1. Kiểm tra đơn hàng tồn tại
+            $order = $this->orderRepo->findById($orderId);
+            if (!$order) {
+                return ['success' => false, 'message' => 'Không tìm thấy đơn hàng'];
+            }
+
+            // 2. Kiểm tra quyền sở hữu
+            if ($order->customer_id != $customerId) {
+                return ['success' => false, 'message' => 'Bạn không có quyền hủy đơn hàng này'];
+            }
+            // 3. Kiểm tra trạng thái đơn hàng (chỉ cho phép hủy PENDING)
+            if ($order->status !== OrderStatus::PENDING) {
+                return ['success' => false, 'message' => 'Không thể hủy đơn hàng đã được xử lý'];
+            }
+
+            // 4. Cập nhật trạng thái
+            $order->status = OrderStatus::CANCELLED;
+
+            // Nếu đã thanh toán -> đánh dấu hoàn tiền
+            if ($order->payment_status === 'PAID') {
+                $order->payment_status = 'REFUNDED';
+            } else {
+                $order->payment_status = 'CANCELLED';
+            }
+
+            // 5. Cập nhật vào database
+            if ($this->orderRepo->update($order)) {
+                return [
+                    'success' => true,
+                    'message' => 'Hủy đơn hàng thành công'
+                ];
+            }
+
+
+        } catch (Exception $e) {
+            return ['success' => false, 'message' => 'Lỗi: ' . $e->getMessage()];
         }
     }
 

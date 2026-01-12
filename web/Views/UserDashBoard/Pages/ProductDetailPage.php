@@ -1,4 +1,3 @@
-
 <?php
 $product = $data['product'] ?? null;
 $category = $data['category'] ?? null;
@@ -6,18 +5,12 @@ $category = $data['category'] ?? null;
 
 <?php if (isset($product)): ?>
 <section class="product-detail-section">
-    <!-- Breadcrumb -->
-
-
     <div class="product-container">
         <!-- Product Images -->
         <div class="product-images">
             <div class="main-image">
-                <?php if (!empty($product->image_url)): ?>
-                    <img src="<?= htmlspecialchars($product->image_url) ?>" alt="<?= htmlspecialchars($product->name) ?>">
-                <?php else: ?>
-                    <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800" alt="<?= htmlspecialchars($product->name) ?>">
-                <?php endif; ?>
+                <img src="<?= !empty($product->image_url) ? htmlspecialchars($product->image_url) : 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800' ?>"
+                     alt="<?= htmlspecialchars($product->name) ?>">
             </div>
         </div>
 
@@ -37,26 +30,21 @@ $category = $data['category'] ?? null;
                 <p><?= nl2br(htmlspecialchars($product->description)) ?></p>
             </div>
 
-            <!-- Form cho cả 2 action: Thêm giỏ hàng và Mua ngay -->
             <form method="POST" id="product-form">
                 <input type="hidden" name="product_id" value="<?= $product->id ?>">
                 <input type="hidden" name="txtProductSizeId" id="selected-product-size-id"
                        value="<?= !empty($product->sizes) ? $product->sizes[0]->id : '' ?>">
                 <input type="hidden" name="txtQuantity" id="selected-quantity" value="1">
+                <!-- Thêm các field cho Buy Now - không cần query lại database -->
+                <input type="hidden" name="txtProductName" id="selected-product-name" value="<?= htmlspecialchars($product->name) ?>">
+                <input type="hidden" name="txtPrice" id="selected-price" value="<?= !empty($product->sizes) ? $product->sizes[0]->price : 0 ?>">
 
-                <!-- Hiển thị giá sản phẩm -->
+                <!-- Giá sản phẩm -->
                 <div class="product-price" id="product-price">
-                    <?php
-                    if (!empty($product->sizes)) {
-                        // Hiển thị giá của size đầu tiên
-                        echo number_format($product->sizes[0]->price, 0, ',', '.') . 'đ';
-                    } else {
-                        echo 'Liên hệ';
-                    }
-                    ?>
+                    <?= !empty($product->sizes) ? number_format($product->sizes[0]->price, 0, ',', '.') . 'đ' : 'Liên hệ' ?>
                 </div>
 
-                <!-- Chọn size với button style -->
+                <!-- Chọn size -->
                 <?php if (!empty($product->sizes)): ?>
                 <div class="product-options">
                     <div class="option-group">
@@ -66,7 +54,6 @@ $category = $data['category'] ?? null;
                                 <button type="button"
                                         class="size-btn <?= $index === 0 ? 'active' : '' ?>"
                                         data-product-size-id="<?= $size->id ?>"
-                                        data-size="<?= htmlspecialchars($size->size_name) ?>"
                                         data-price="<?= $size->price ?>">
                                     Size <?= htmlspecialchars($size->size_name) ?> -
                                     <?= number_format($size->price, 0, ',', '.') ?>đ
@@ -77,7 +64,7 @@ $category = $data['category'] ?? null;
                 </div>
                 <?php endif; ?>
 
-                <!-- Số lượng với quantity controls -->
+                <!-- Số lượng -->
                 <div class="quantity-selector">
                     <label>Số lượng</label>
                     <div class="quantity-controls">
@@ -92,7 +79,6 @@ $category = $data['category'] ?? null;
                     <button type="submit" name="btnThemGioHang" formaction="?url=CartController/ins" class="btn-add-cart">
                         🛒 Thêm vào giỏ hàng
                     </button>
-
                     <button type="submit" name="btnMuaNgay" formaction="?url=CheckoutController/GetData" class="btn-buy-now">
                         ⚡ Đặt hàng ngay
                     </button>
@@ -133,7 +119,6 @@ $category = $data['category'] ?? null;
             </div>
         </div>
     </div>
-
 </section>
 
 <?php else: ?>
@@ -142,49 +127,3 @@ $category = $data['category'] ?? null;
     <p><a href="?url=UserController/menu">← Quay lại thực đơn</a></p>
 </section>
 <?php endif; ?>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Xử lý chọn size
-    document.querySelectorAll('.size-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            // Remove active từ tất cả
-            document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-            // Add active cho button được click
-            this.classList.add('active');
-            // Cập nhật hidden input
-            document.getElementById('selected-product-size-id').value = this.dataset.productSizeId;
-        });
-    });
-
-    // Xử lý quantity
-    let qty = 1;
-    const qtyDisplay = document.getElementById('quantity');
-    const qtyInput = document.getElementById('selected-quantity');
-
-    document.getElementById('decrease-qty').addEventListener('click', function() {
-        if (qty > 1) {
-            qty--;
-            qtyDisplay.textContent = qty;
-            qtyInput.value = qty;
-        }
-    });
-
-    document.getElementById('increase-qty').addEventListener('click', function() {
-        qty++;
-        qtyDisplay.textContent = qty;
-        qtyInput.value = qty;
-    });
-
-    // Xử lý tab
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const tab = this.dataset.tab;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            this.classList.add('active');
-            document.getElementById(`tab-${tab}`).classList.add('active');
-        });
-    });
-});
-</script>

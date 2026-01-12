@@ -4,7 +4,6 @@
      Nội dung chính - Được include vào MasterLayout
      =================================== -->
 
-<!-- MENU HERO -->
 <section class="menu-hero">
     <div class="menu-hero-content">
         <h1>THỰC ĐƠN</h1>
@@ -12,29 +11,22 @@
     </div>
 </section>
 
-<!-- CATEGORIES SHOWCASE -->
 <section class="categories-section">
-    <?php if (isset($categories) && !empty($categories)): ?>
-        <?php
+    <?php if (isset($categories) && !empty($categories)):
         $index = 0;
         foreach ($categories as $category):
-            $isReverse = ($index % 2 != 0) ? 'reverse' : '';
-            $index++;
-        ?>
+            $isReverse = ($index++ % 2 != 0) ? 'reverse' : '';
+    ?>
         <div class="category-showcase <?= $isReverse ?>" id="category-<?= $category->id ?>">
             <div class="category-content">
                 <div class="category-text">
                     <h2><?= strtoupper(htmlspecialchars($category->name)) ?></h2>
                     <p><?= htmlspecialchars($category->description) ?></p>
-                    <!-- Link đến trang sản phẩm theo category -->
-                    <a href="?url=UserController/categoryProducts&id=<?= $category->id ?>" class="btn-discover">
-                        KHÁM PHÁ THÊM
-                    </a>
+                    <a href="?url=UserController/categoryProducts&id=<?= $category->id ?>" class="btn-discover">KHÁM PHÁ THÊM</a>
                 </div>
             </div>
         </div>
-        <?php endforeach; ?>
-    <?php else: ?>
+    <?php endforeach; else: ?>
         <div style="text-align: center; padding: 60px 20px; color: #666;">
             <h3>Hiện tại chưa có danh mục nào</h3>
             <p>Vui lòng quay lại sau để khám phá thực đơn của chúng tôi!</p>

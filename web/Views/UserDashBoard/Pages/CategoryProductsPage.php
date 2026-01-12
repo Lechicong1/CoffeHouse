@@ -25,7 +25,7 @@ $products = $data['products'] ?? [];
                 $minPrice = !empty($product->sizes) ? min(array_column($product->sizes, 'price')) : null;
         ?>
             <div class="menu-card">
-                <a href="/COFFEE_PHP/User/productDetail?id=<?= $product->id ?>" style="text-decoration: none; color: inherit;">
+                <a href="/COFFEE_PHP/UserController/productDetail?id=<?= $product->id ?>" style="text-decoration: none; color: inherit;">
                     <div class="menu-card-image">
                         <img src="/COFFEE_PHP/<?= htmlspecialchars($product->image_url ?: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=500') ?>" alt="<?= htmlspecialchars($product->name) ?>">
                     </div>

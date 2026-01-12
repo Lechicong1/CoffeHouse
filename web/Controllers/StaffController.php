@@ -335,9 +335,6 @@ class StaffController extends Controller {
             if (isset($_GET['search']) && !empty($_GET['search'])) {
                 $filters['search'] = trim($_GET['search']);
             }
-            
-            // NOTE: Không gán filter order_type ở Controller theo MVC
-            // Service sẽ áp dụng filter mặc định phù hợp (ví dụ: AT_COUNTER và TAKEAWAY)
 
             // Lấy danh sách đơn hàng
             $orders = $this->orderService->getOrders($filters);

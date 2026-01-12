@@ -97,6 +97,17 @@
 
                 <!-- Form checkout toàn bộ giỏ hàng -->
                 <form method="POST" action="/COFFEE_PHP/Checkout/GetData" style="margin-top: 20px;">
+                    <!-- Gửi tổng tiền -->
+                    <input type="hidden" name="txtTotalAmount" value="<?= $data['total'] ?>">
+
+                    <!-- Gửi từng sản phẩm dưới dạng field array đơn giản -->
+                    <?php foreach ($data['cartItems'] as $index => $item): ?>
+                        <input type="hidden" name="cart_product_name[]" value="<?= htmlspecialchars($item->product_name) ?>">
+                        <input type="hidden" name="cart_product_size_id[]" value="<?= $item->product_size_id ?>">
+                        <input type="hidden" name="cart_quantity[]" value="<?= $item->quantity ?>">
+                        <input type="hidden" name="cart_price[]" value="<?= $item->price ?>">
+                    <?php endforeach; ?>
+
                     <button type="submit" class="checkout-btn">💳 Thanh toán</button>
                 </form>
 

@@ -40,6 +40,7 @@ class ProductService {
                     break;
                 }
             }
+            // lấy size đầu tiên
             if ($price == 0 && count($sizes) > 0) {
                 $price = $sizes[0]->price;
             }

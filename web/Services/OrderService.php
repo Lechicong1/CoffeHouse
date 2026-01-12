@@ -318,17 +318,11 @@ class OrderService {
         }
     }
 
-    /**
-     * Tạo mã đơn hàng tự động (cũ - cho checkout)
-     */
+
     private function generateOrderCode() {
         return 'ORD' . date('YmdHis') . rand(100, 999);
     }
 
-    /**
-     * Tạo mã đơn hàng unique theo format ORD + 4 số
-     * Kiểm tra trùng và random lại nếu trùng
-     */
     private function generateUniqueOrderCode() {
         $maxAttempts = 10;
         $attempts = 0;
@@ -351,17 +345,13 @@ class OrderService {
         return 'ORD' . substr(time(), -4);
     }
 
-    /**
-     * Lấy thông tin đơn hàng theo ID
-     */
     public function getOrderById($orderId) {
         return $this->orderRepo->findById($orderId);
     }
 
     /**
      * Lấy danh sách đơn hàng với filter
-     * @param array $filters ['status' => 'PROCESSING', 'search' => 'ORD123']
-     * @return array
+     *  ['status' => 'PROCESSING', 'search' => 'ORD123']
      */
     public function getOrders($filters = []) {
         // Normalize filters and apply default order_type for staff POS listing
@@ -383,20 +373,11 @@ class OrderService {
         return $this->orderRepo->findAllWithFilters($normalized);
     }
 
-    /**
-     * Lấy chi tiết items của đơn hàng
-     * @param int $orderId
-     * @return array
-     */
+
     public function getOrderItems($orderId) {
         return $this->orderItemRepo->findByOrderId($orderId);
     }
 
-    /**
-     * Tạo đơn hàng từ POS (POST raw data) - Service xử lý parsing và validation
-     * @param array $postData Raw POST data từ controller
-     * @return array
-     */
     public function createOrderFromPOS($postData) {
         try {
             // Validate required fields minimally here; deep validation in createOrder()

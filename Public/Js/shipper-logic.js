@@ -1,7 +1,5 @@
 let currentFilter = 'all';
 
-document.addEventListener('DOMContentLoaded', function () {});
-
 function filterOrders(filter) {
     currentFilter = filter;
 

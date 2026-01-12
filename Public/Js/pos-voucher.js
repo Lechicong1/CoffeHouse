@@ -189,7 +189,7 @@ function previewVoucherServer(voucherId) {
       if (!pv) return;
 
       if (pv.dataset.ok !== "1") {
-        console.warn(pv.dataset.msg || "Preview failed");
+        console.warn(pv.dataset.msg || "Xem trước voucher thất bại");
         return;
       }
 

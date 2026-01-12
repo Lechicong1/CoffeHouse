@@ -105,8 +105,6 @@ class OrderAdminController extends Controller {
      */
     private function getPaymentStatusLabel($paymentStatus) {
         $labels = [
-            'PENDING' => 'Chưa thanh toán',
-            'AWAITING_PAYMENT' => 'Chờ thanh toán',
             'PAID' => 'Đã thanh toán',
             'REFUNDED' => 'Đã hoàn tiền',
             'UNPAID' => 'Chưa thanh toán'

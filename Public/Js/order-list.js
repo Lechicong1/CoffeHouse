@@ -90,6 +90,7 @@ function closeEditOrderModal() {
     document.getElementById('editOrderModal').style.display = 'none';
 }
 
+// Hàm hiển thị/ẩn nhóm chọn số bàn trong modal chỉnh sửa đơn
 function toggleEditTableGroup(orderType) {
     const group = document.getElementById('edit-table-group');
     const tableSelect = document.getElementById('edit-table-number');

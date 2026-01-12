@@ -210,7 +210,7 @@ class OrderService  {
             return ['success' => false, 'message' => 'Không có sản phẩm trong đơn hàng'];
         }
 
-        // 2. Validate và tính sub_total (CHỈ validate, KHÔNG tạo order ở đây)
+        // Chuẩn hóa dữ liệu & Tính tổng tiền
         $sub_total = 0.0;
         $validatedItems = [];
 
@@ -233,14 +233,22 @@ class OrderService  {
             $validatedItems[] = [
                 'size_id' => $productSize->id,
                 'qty' => $qty,
+                'product_size_id' => $productSize->id, // cho checkkho
+                'quantity' => $qty,
                 'price' => $realPrice,
                 'notes' => $it['notes'] ?? ''
             ];
         }
 
-        // 3. Check items hợp lệ
+        // Check items hợp lệ & Kiểm tra tồn kho nguyên liệu trước
         if (empty($validatedItems)) {
             return ['success' => false, 'message' => 'Không có sản phẩm hợp lệ trong đơn hàng'];
+        }
+
+        // --- Kiểm tra tồn kho nguyên liệu ---
+        $stockCheck = $this->validateIngredientStock($validatedItems);
+        if (!$stockCheck['success']) {
+            return $stockCheck;
         }
 
         // 4. Tạo Order Entity (SAU KHI validate xong)
@@ -264,7 +272,7 @@ class OrderService  {
              // Xử lý logic mang về nếu cần
         }
 
-        // 5. Transaction: tạo order + items + voucher
+        // tạo order + items + voucher
         $con = $this->orderRepo->con;
         if (!mysqli_begin_transaction($con)) {
             return ['success' => false, 'message' => 'Không thể bắt đầu transaction DB'];
@@ -340,6 +348,7 @@ class OrderService  {
         }
     }
 
+
     private function generateOrderCode() {
         return 'ORD' . date('YmdHis') . rand(100, 999);
     }
@@ -366,17 +375,13 @@ class OrderService  {
         return 'ORD' . substr(time(), -4);
     }
 
-    /**
-     * Lấy thông tin đơn hàng theo ID
-     */
     public function getOrderById($orderId) {
         return $this->orderRepo->findById($orderId);
     }
 
     /**
      * Lấy danh sách đơn hàng với filter
-     * @param array $filters ['status' => 'PROCESSING', 'search' => 'ORD123']
-     * @return array
+     *  ['status' => 'PROCESSING', 'search' => 'ORD123']
      */
     public function getOrders($filters = []) {
         // Normalize filters and apply default order_type for staff POS listing
@@ -398,20 +403,11 @@ class OrderService  {
         return $this->orderRepo->findAllWithFilters($normalized);
     }
 
-    /**
-     * Lấy chi tiết items của đơn hàng
-     * @param int $orderId
-     * @return array
-     */
+
     public function getOrderItems($orderId) {
         return $this->orderItemRepo->findByOrderId($orderId);
     }
 
-    /**
-     * Tạo đơn hàng từ POS (POST raw data) - Service xử lý parsing và validation
-     * @param array $postData Raw POST data từ controller
-     * @return array
-     */
     public function createOrderFromPOS($postData) {
         try {
             // Validate required fields minimally here; deep validation in createOrder()
@@ -487,19 +483,6 @@ class OrderService  {
             
             if (!$order) {
                 return ['success' => false, 'message' => 'Không tìm thấy đơn hàng'];
-            }
-
-            // Validate status sử dụng OrderStatus enum
-            $validStatuses = [
-                OrderStatus::PENDING,
-                OrderStatus::PREPARING,
-                OrderStatus::READY,
-                OrderStatus::SHIPPING,
-                OrderStatus::COMPLETED,
-                OrderStatus::CANCELLED
-            ];
-            if (!in_array($newStatus, $validStatuses)) {
-                return ['success' => false, 'message' => 'Trạng thái không hợp lệ'];
             }
 
             // Nếu hủy đơn đã thanh toán -> Đánh dấu hoàn tiền

@@ -23,6 +23,7 @@ class ProductService {
 
             $sizes = $this->productRepository->getSizesByProductId($product->id);
             $sizeList = [];
+            // lấy danh sách size
             foreach ($sizes as $size) {
                 $sizeList[] = [
                     'id' => $size->id,  // product_size_id - QUAN TRỌNG!
@@ -39,6 +40,7 @@ class ProductService {
                     break;
                 }
             }
+            // lấy size đầu tiên
             if ($price == 0 && count($sizes) > 0) {
                 $price = $sizes[0]->price;
             }

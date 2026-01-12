@@ -81,10 +81,6 @@
 
         <!-- Footer - Links -->
         <div class="login-footer">
-            <a href="#" class="footer-link" onclick="handleForgotPassword(); return false;">
-                Quên mật khẩu?
-            </a>
-            <span class="footer-separator">|</span>
             <a href="#" class="footer-link" onclick="handleRegister(); return false;">
                 Đăng ký tài khoản
             </a>

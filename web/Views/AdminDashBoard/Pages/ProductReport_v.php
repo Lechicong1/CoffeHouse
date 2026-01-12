@@ -30,22 +30,56 @@ $error = $data['error'] ?? null;
         30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
         40%, 60% { transform: translate3d(4px, 0, 0); }
     }
+
+    /* Override header text color in report tables: remove custom/brand color and use default dark text */
+    .report-table thead th {
+        color: #222 !important;
+        /* ensure any font-weight or text-transform remains but color is neutral */
+    }
+    .btn-filter, .btn-export {
+        background: #B6DA9F !important; /* Màu xanh cốm (giống màu voucher trong POS) */
+        color: white !important;        /* Chữ trắng */
+        border: none !important;        /* Bỏ viền xấu */
+        padding: 10px 24px !important;  /* Làm nút to ra */
+        border-radius: 4px !important;  /* Bo góc nhẹ */
+        cursor: pointer !important;     /* Con chuột biến thành bàn tay */
+        transition: all 0.3s ease !important; /* Hiệu ứng mượt khi di chuột */
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; /* Đổ bóng nhẹ */
+    }
+    /* Khi di chuột vào: Nút đậm màu hơn, nổi lên một chút */
+    .btn-filter:hover, .btn-export:hover {
+        background: #98C480 !important;
+        transform: translateY(-1px) !important;
+    }
+
+    /* Khi bấm xuống: Nút lún xuống lại vị trí cũ */
+    .btn-filter:active, .btn-export:active {
+        transform: translateY(0) !important;
+    }
+    .section-title-wrapper {
+        display: flex;
+        justify-content: space-between; /* Đẩy tiêu đề sang trái, nút sang phải */
+        align-items: center;            /* Căn giữa theo chiều dọc */
+        margin-bottom: 20px;
+    }
 </style>
 <div class="product-report-container">
     <div class="report-header">
         <h2>Báo Cáo Hiệu Suất Sản Phẩm</h2>
+
+        <!-- Form lọc dữ liệu -->
         <form method="GET" action="" class="filter-form">
-            
+
             <div class="filter-group">
                 <label>Từ ngày:</label>
                 <input type="date" name="from_date" value="<?php echo date('Y-m-d', strtotime($fromDate)); ?>" required>
             </div>
-            
+
             <div class="filter-group">
                 <label>Đến ngày:</label>
                 <input type="date" name="to_date" value="<?php echo date('Y-m-d', strtotime($toDate)); ?>" required>
             </div>
-            
+
             <div class="filter-group">
                 <label>Danh mục:</label>
                 <select name="category_id">
@@ -67,7 +101,7 @@ $error = $data['error'] ?? null;
                     <option value="top_5_low" <?php echo ($sortBy == 'top_5_low') ? 'selected' : ''; ?>>⚠️ Top 5 Doanh Thu Thấp Nhất</option>
                 </select>
             </div>
-            
+
             <button type="submit" class="btn-filter">Lọc Dữ Liệu</button>
         </form>
     </div>
@@ -128,7 +162,18 @@ $error = $data['error'] ?? null;
 
     <!-- 2. KHU VỰC CHI TIẾT (ADVANCED TABLE) -->
     <div class="table-section">
-        <div class="section-title">Chi Tiết Hiệu Quả Từng Món</div>
+        <div class="section-title-wrapper">
+            <div class="section-title">Chi Tiết Hiệu Quả Từng Món</div>
+
+            <!-- Form xuất Excel -->
+            <form method="POST" action="/COFFEE_PHP/ProductReportController/xuatexcel" class="export-form-inline">
+                <input type="hidden" name="from_date" value="<?php echo date('Y-m-d', strtotime($fromDate)); ?>">
+                <input type="hidden" name="to_date" value="<?php echo date('Y-m-d', strtotime($toDate)); ?>">
+                <input type="hidden" name="category_id" value="<?php echo $categoryId; ?>">
+                <input type="hidden" name="sort_by" value="<?php echo $sortBy; ?>">
+                <button type="submit" name="btnXuatexcel" class="btn-export">Xuất Excel</button>
+            </form>
+        </div>
         <div class="table-responsive">
             <table class="report-table">
                 <thead>
@@ -139,7 +184,7 @@ $error = $data['error'] ?? null;
                         <th width="10%" class="text-right">Số Lượng</th>
                         <th width="15%" class="text-right">Doanh Thu</th>
                         <th width="15%" class="text-left">Tỷ Trọng (%)</th>
-                        <th width="10%" class="text-right">Giá Hiện Tại</th>
+                        <th width="10%" class="text-right">Giá Trung bình</th>
                     </tr>
                 </thead>
                 <tbody>

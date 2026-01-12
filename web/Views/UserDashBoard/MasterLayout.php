@@ -28,10 +28,11 @@ $currentPage = $data['currentPage'] ?? $currentSection;
     <link rel="stylesheet" href="Public/Css/user-style.css">
     <?php if (isset($data['additionalCSS'])): ?>
         <?php foreach ($data['additionalCSS'] as $css): ?>
-            <link rel="stylesheet" href="<?= $css ?>">
+            <link rel="stylesheet" href="<?= $css . '?v=' . time() ?>">
         <?php endforeach; ?>
     <?php endif; ?>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <!-- ========== HEADER & NAVIGATION ========== -->

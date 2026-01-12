@@ -10,10 +10,26 @@
                 </div>
                 <form id="checkoutForm" method="POST" action="/COFFEE_PHP/Checkout/placeOrder" class="checkout-form">
                     <input type="hidden" name="txtTotalAmount" value="<?php echo $data['total']; ?>">
+
                     <?php if (isset($data['isBuyNow']) && $data['isBuyNow']): ?>
+                        <!-- Buy Now: gửi lại thông tin sản phẩm -->
                         <input type="hidden" name="is_buy_now" value="1">
-                        <input type="hidden" name="buy_now_items" value='<?php echo json_encode($data['cartItems']); ?>'>
+                        <input type="hidden" name="buy_now" value="1">
+                        <?php $item = $data['cartItems'][0]; ?>
+                        <input type="hidden" name="txtProductSizeId" value="<?= $item->product_size_id ?>">
+                        <input type="hidden" name="txtQuantity" value="<?= $item->quantity ?>">
+                        <input type="hidden" name="txtPrice" value="<?= $item->price ?>">
+                        <input type="hidden" name="txtProductName" value="<?= htmlspecialchars($item->product_name) ?>">
+                    <?php else: ?>
+                        <!-- Cart: gửi lại danh sách sản phẩm -->
+                        <?php foreach ($data['cartItems'] as $item): ?>
+                            <input type="hidden" name="cart_product_name[]" value="<?= htmlspecialchars($item->product_name) ?>">
+                            <input type="hidden" name="cart_product_size_id[]" value="<?= $item->product_size_id ?>">
+                            <input type="hidden" name="cart_quantity[]" value="<?= $item->quantity ?>">
+                            <input type="hidden" name="cart_price[]" value="<?= $item->price ?>">
+                        <?php endforeach; ?>
                     <?php endif; ?>
+
                     <div class="form-group">
                         <label for="customerVoucher">Mã Voucher (nếu có)</label>
                         <div style="display:flex;gap:8px;align-items:center;">
@@ -33,7 +49,7 @@
                     </div>
                     <div class="form-group">
                         <label for="shippingAddress">Địa chỉ giao hàng <span class="required">*</span></label>
-                        <textarea id="shippingAddress" name="txtShippingAddress" rows="3" required><?php echo htmlspecialchars($data['customerAddress'] ?? ''); ?></textarea>
+                        <textarea id="shippingAddress" name="txtShippingAddress" rows="3" required><?php echo htmlspecialchars($data['customer']->address ?? ''); ?></textarea>
                     </div>
                     <div class="form-group">
                         <label for="note">Ghi chú</label>

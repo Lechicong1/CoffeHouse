@@ -15,7 +15,7 @@ include_once './Enums/status.enum.php';
 use web\Entity\OrderEntity;
 use web\Entity\OrderItemEntity;
 
-class OrderService {
+class OrderService  {
     private $orderRepo;
     private $orderItemRepo;
     private $cartRepo;
@@ -42,8 +42,46 @@ class OrderService {
     }
 
     /**
-     * Validate số lượng nguyên liệu trước khi đặt hàng
+     * Validate dữ liệu đơn hàng từ checkout
      */
+    public function validateOrderData($data) {
+        $requiredFields = [
+            'customer_name' => 'Tên người nhận',
+            'customer_phone' => 'Số điện thoại',
+            'shipping_address' => 'Địa chỉ giao hàng',
+            'payment_method' => 'Phương thức thanh toán',
+            'total_amount' => 'Tổng tiền'
+        ];
+
+        foreach ($requiredFields as $field => $label) {
+            if (empty($data[$field])) {
+                return [
+                    'success' => false,
+                    'message' => "Vui lòng nhập {$label}"
+                ];
+            }
+        }
+
+        // Validate phone number format
+        if (!preg_match('/^[0-9]{10,11}$/', $data['customer_phone'])) {
+            return [
+                'success' => false,
+                'message' => 'Số điện thoại không hợp lệ (10-11 số)'
+            ];
+        }
+
+
+        // Validate total amount
+        if (!is_numeric($data['total_amount']) || $data['total_amount'] <= 0) {
+            return [
+                'success' => false,
+                'message' => 'Tổng tiền không hợp lệ'
+            ];
+        }
+
+        return ['success' => true];
+    }
+
     private function validateIngredientStock($orderItems) {
         foreach ($orderItems as $item) {
             $productSizeId = is_array($item) ? $item['product_size_id'] : $item->product_size_id;
@@ -76,48 +114,31 @@ class OrderService {
      */
     public function createOrderFromCheckout($customerId, $data) {
         try {
-            // 1. Kiểm tra xem có phải "Buy Now" không
-            if (!empty($data['is_buy_now']) && !empty($data['buy_now_items'])) {
-                // Trường hợp Buy Now - sử dụng items từ request
-                $cartItems = [];
-                foreach ($data['buy_now_items'] as $item) {
-                    $obj = new stdClass();
-                    $obj->product_size_id = $item['product_size_id'];
-                    $obj->quantity = $item['quantity'];
-                    $obj->price = $item['price'];
-                    $cartItems[] = $obj;
-                }
-            } else {
-                // Trường hợp checkout từ giỏ hàng - lấy từ database
-                $cartItems = $this->cartRepo->findCartByCustomerId($customerId);
-
-                if (empty($cartItems)) {
-                    return ['success' => false, 'message' => 'Giỏ hàng trống'];
-                }
+            // 1. Lấy items trực tiếp từ $data (đã được Controller xử lý sẵn)
+            if (empty($data['items'])) {
+                return ['success' => false, 'message' => 'Không có sản phẩm trong đơn hàng'];
             }
 
+            $cartItems = $data['items'];
+            // Validate qua OrderService
+            $validation = $this->validateOrderData($data);
+            if (!$validation['success']) {
+                throw new Exception($validation['message']);
+            }
             // 2. Validate số lượng nguyên liệu trước khi đặt hàng
             $validateResult = $this->validateIngredientStock($cartItems);
             if (!$validateResult['success']) {
                 return $validateResult;
             }
-
             // 3. Tạo Order Entity - Luôn tạo với trạng thái PENDING
             $order = new OrderEntity();
             $order->order_code = $this->generateOrderCode();
             $order->customer_id = $customerId;
-            $order->order_type = $data['order_type'] ?? 'ONLINE_DELIVERY';
+            $order->order_type = 'ONLINE_DELIVERY';
             $order->status = OrderStatus::PENDING;
             $order->payment_status = 'PAID';
             $order->payment_method = $data['payment_method'];
-
-            // Compute sub_total from cart to be used for voucher calculation
-            $sub_total = 0.0;
-            foreach ($cartItems as $ci) {
-                $sub_total += (float)$ci->price * (int)$ci->quantity;
-            }
-            $order->total_amount = $sub_total; // store pre-discount total
-
+            $order->total_amount = $data['total_amount'];
             $order->shipping_address = $data['shipping_address'];
             $order->receiver_name = $data['customer_name'];
             $order->receiver_phone = $data['customer_phone'];
@@ -157,11 +178,6 @@ class OrderService {
                 }
             }
 
-            // 7. Chỉ xóa giỏ hàng nếu KHÔNG phải Buy Now
-            if (empty($data['is_buy_now'])) {
-                $this->cartRepo->clearCart($customerId);
-            }
-
             $final_total = $order->total_amount - (float)$discountAmount;
             if ($final_total < 0) $final_total = 0.0;
 
@@ -170,15 +186,16 @@ class OrderService {
                 $order->total_amount = $final_total;
                 $this->orderRepo->update($order);
             }
+            // 7. Xóa giỏ hàng (chỉ khi checkout từ Cart, không phải Buy Now)
+            if (empty($data['is_buy_now'])) {
+                $this->cartRepo->clearCart($customerId);
+            }
 
             return [
                 'success' => true,
                 'order_id' => $orderId,
                 'order_code' => $order->order_code,
-                'message' => 'Đặt hàng thành công',
-                'sub_total' => $sub_total,
-                'discount_amount' => (float)$discountAmount,
-                'final_total' => $final_total
+                'message' => 'Đặt hàng thành công'
             ];
 
         } catch (Exception $e) {
@@ -326,17 +343,10 @@ class OrderService {
         }
     }
 
-    /**
-     * Tạo mã đơn hàng tự động (cũ - cho checkout)
-     */
     private function generateOrderCode() {
         return 'ORD' . date('YmdHis') . rand(100, 999);
     }
 
-    /**
-     * Tạo mã đơn hàng unique theo format ORD + 4 số
-     * Kiểm tra trùng và random lại nếu trùng
-     */
     private function generateUniqueOrderCode() {
         $maxAttempts = 10;
         $attempts = 0;

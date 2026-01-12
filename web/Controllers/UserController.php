@@ -82,11 +82,6 @@ class UserController extends Controller {
         }
 
         $product = $this->productService->getProductById($productId);
-        if (!$product || $product->is_active != 1) {
-            header('Location: /COFFEE_PHP/User/menu');
-            exit;
-        }
-
         $product->sizes = $this->productService->getProductSizes($product->id);
         $category = $this->categoryService->getCategoryById($product->category_id);
         $relatedProducts = $this->productService->getRelatedProducts($product->category_id, $productId, 4);
@@ -102,7 +97,6 @@ class UserController extends Controller {
             'relatedProducts' => $relatedProducts
         ]);
     }
-
 
 }
 ?>

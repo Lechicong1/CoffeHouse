@@ -10,6 +10,10 @@
                 </div>
                 <form id="checkoutForm" method="POST" action="/COFFEE_PHP/Checkout/placeOrder" class="checkout-form">
                     <input type="hidden" name="txtTotalAmount" value="<?php echo $data['total']; ?>">
+                    <?php if (isset($data['isBuyNow']) && $data['isBuyNow']): ?>
+                        <input type="hidden" name="is_buy_now" value="1">
+                        <input type="hidden" name="buy_now_items" value='<?php echo json_encode($data['cartItems']); ?>'>
+                    <?php endif; ?>
                     <div class="form-group">
                         <label for="customerVoucher">Mã Voucher (nếu có)</label>
                         <div style="display:flex;gap:8px;align-items:center;">

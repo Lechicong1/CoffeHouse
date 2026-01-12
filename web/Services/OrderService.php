@@ -76,11 +76,24 @@ class OrderService {
      */
     public function createOrderFromCheckout($customerId, $data) {
         try {
-            // 1. Lấy giỏ hàng
-            $cartItems = $this->cartRepo->findCartByCustomerId($customerId);
+            // 1. Kiểm tra xem có phải "Buy Now" không
+            if (!empty($data['is_buy_now']) && !empty($data['buy_now_items'])) {
+                // Trường hợp Buy Now - sử dụng items từ request
+                $cartItems = [];
+                foreach ($data['buy_now_items'] as $item) {
+                    $obj = new stdClass();
+                    $obj->product_size_id = $item['product_size_id'];
+                    $obj->quantity = $item['quantity'];
+                    $obj->price = $item['price'];
+                    $cartItems[] = $obj;
+                }
+            } else {
+                // Trường hợp checkout từ giỏ hàng - lấy từ database
+                $cartItems = $this->cartRepo->findCartByCustomerId($customerId);
 
-            if (empty($cartItems)) {
-                throw new Exception('Giỏ hàng trống');
+                if (empty($cartItems)) {
+                    return ['success' => false, 'message' => 'Giỏ hàng trống'];
+                }
             }
 
             // 2. Validate số lượng nguyên liệu trước khi đặt hàng
@@ -89,13 +102,13 @@ class OrderService {
                 return $validateResult;
             }
 
-            // 3. Tạo Order Entity
+            // 3. Tạo Order Entity - Luôn tạo với trạng thái PENDING
             $order = new OrderEntity();
             $order->order_code = $this->generateOrderCode();
             $order->customer_id = $customerId;
             $order->order_type = $data['order_type'] ?? 'ONLINE_DELIVERY';
-            $order->status = ($data['payment_method'] === 'CASH') ? 'PENDING' : 'AWAITING_PAYMENT';
-            $order->payment_status = ($data['payment_method'] === 'CASH') ? 'PENDING' : 'AWAITING_PAYMENT';
+            $order->status = OrderStatus::PENDING;
+            $order->payment_status = 'PAID';
             $order->payment_method = $data['payment_method'];
 
             // Compute sub_total from cart to be used for voucher calculation
@@ -144,8 +157,10 @@ class OrderService {
                 }
             }
 
-            // 7. Xóa giỏ hàng
-            $this->cartRepo->clearCart($customerId);
+            // 7. Chỉ xóa giỏ hàng nếu KHÔNG phải Buy Now
+            if (empty($data['is_buy_now'])) {
+                $this->cartRepo->clearCart($customerId);
+            }
 
             $final_total = $order->total_amount - (float)$discountAmount;
             if ($final_total < 0) $final_total = 0.0;

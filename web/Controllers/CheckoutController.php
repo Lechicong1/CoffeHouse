@@ -109,17 +109,11 @@ class CheckoutController extends Controller {
     }
 
     /**
-     * Xử lý đặt hàng (POST) - Giống như Employee/ins, upd, del
+     * Xử lý đặt hàng (POST) - Đơn giản hóa: Tạo đơn thành công ngay với trạng thái PENDING
      */
     public function placeOrder() {
-        // Debug: Kiểm tra POST data
-        error_log("=== CHECKOUT DEBUG ===");
-        error_log("POST data: " . print_r($_POST, true));
-        error_log("btnDatHang isset: " . (isset($_POST['btnDatHang']) ? 'YES' : 'NO'));
-
         // Kiểm tra phương thức POST
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            error_log("Not POST request, redirecting to GetData");
             header('Location: /COFFEE_PHP/Checkout/GetData');
             exit;
         }
@@ -131,7 +125,9 @@ class CheckoutController extends Controller {
             $requiredFields = ['txtCustomerName', 'txtCustomerPhone', 'txtShippingAddress', 'payment_method', 'txtTotalAmount'];
             foreach ($requiredFields as $field) {
                 if (empty($_POST[$field])) {
-                    throw new Exception("Vui lòng điền đầy đủ thông tin: $field");
+                    $_SESSION['error_message'] = 'Vui lòng điền đầy đủ thông tin';
+                    header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/COFFEE_PHP/Checkout/GetData'));
+                    exit;
                 }
             }
 
@@ -143,44 +139,39 @@ class CheckoutController extends Controller {
                 'note' => trim($_POST['txtNote'] ?? ''),
                 'payment_method' => $_POST['payment_method'],
                 'total_amount' => (float)$_POST['txtTotalAmount'],
-                'voucher' => [ 'voucher_id' => isset($_POST['applied_voucher_id']) && $_POST['applied_voucher_id'] !== '' ? (int)$_POST['applied_voucher_id'] : null ],
-                'order_type' => 'ONLINE_DELIVERY'
+                'voucher' => [
+                    'voucher_id' => isset($_POST['applied_voucher_id']) && $_POST['applied_voucher_id'] !== ''
+                        ? (int)$_POST['applied_voucher_id']
+                        : null
+                ],
+                'order_type' => 'ONLINE_DELIVERY',
+                // Thêm xử lý Buy Now
+                'is_buy_now' => isset($_POST['is_buy_now']) && $_POST['is_buy_now'] === '1',
+                'buy_now_items' => isset($_POST['buy_now_items']) ? json_decode($_POST['buy_now_items'], true) : null
             ];
-
-            error_log("Order data prepared: " . print_r($orderData, true));
 
             // Tạo đơn hàng thông qua Service
             $result = $this->orderService->createOrderFromCheckout($customerId, $orderData);
 
-            error_log("Order result: " . print_r($result, true));
+            // DEBUG: Log kết quả để kiểm tra
+            error_log("Order Result: " . print_r($result, true));
 
             if ($result['success']) {
-                // Xử lý theo phương thức thanh toán
-                if ($orderData['payment_method'] === 'CASH') {
-                    echo "<script>
-                        alert('Đặt hàng thành công!');
-                        window.location.href = '/COFFEE_PHP/Checkout/orderSuccess?order_id={$result['order_id']}';
-                    </script>";
-                } else {
-                    echo "<script>
-                        window.location.href = '/COFFEE_PHP/Checkout/payment?order_id={$result['order_id']}&order_code=" . urlencode($result['order_code']) . "&amount={$orderData['total_amount']}';
-                    </script>";
-                }
+                // Đặt hàng thành công -> Chuyển đến trang thành công ngay
+                $_SESSION['success_message'] = 'Đặt hàng thành công! Mã đơn hàng: ' . $result['order_code'];
+                header('Location: /COFFEE_PHP/Checkout/orderSuccess?order_id=' . $result['order_id']);
                 exit;
             } else {
-                echo "<script>
-                    alert('Lỗi: " . addslashes($result['message']) . "');
-                    window.history.back();
-                </script>";
+                // DEBUG: Log lỗi để kiểm tra
+                error_log("Order Failed: " . ($result['message'] ?? 'Unknown error'));
+                $_SESSION['error_message'] = 'Lỗi đặt hàng: ' . ($result['message'] ?? 'Không xác định');
+                header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/COFFEE_PHP/Checkout/GetData'));
                 exit;
             }
 
         } catch (Exception $e) {
-            error_log("Exception in placeOrder: " . $e->getMessage());
-            echo "<script>
-                alert('Lỗi: " . addslashes($e->getMessage()) . "');
-                window.history.back();
-            </script>";
+            $_SESSION['error_message'] = 'Lỗi: ' . $e->getMessage();
+            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/COFFEE_PHP/Checkout/GetData'));
             exit;
         }
     }

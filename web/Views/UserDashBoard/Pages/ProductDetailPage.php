@@ -34,7 +34,7 @@ $category = $data['category'] ?? null;
                 <input type="hidden" name="product_id" value="<?= $product->id ?>">
                 <input type="hidden" name="txtProductSizeId" id="selected-product-size-id"
                        value="<?= !empty($product->sizes) ? $product->sizes[0]->id : '' ?>">
-                <input type="hidden" name="txtQuantity" id="selected-quantity" valu e="1">
+                <input type="hidden" name="txtQuantity" id="selected-quantity" value="1">
 
                 <!-- Giá sản phẩm -->
                 <div class="product-price" id="product-price">

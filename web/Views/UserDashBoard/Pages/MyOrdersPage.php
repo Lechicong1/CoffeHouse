@@ -6,19 +6,7 @@ $orders = $data['orders'] ?? [];
     <div class="container">
         <h1 class="page-title">ĐƠN HÀNG CỦA TÔI</h1>
 
-        <?php if (isset($_SESSION['success'])): ?>
-            <div class="alert alert-success">
-                ✓ <?= htmlspecialchars($_SESSION['success']) ?>
-            </div>
-            <?php unset($_SESSION['success']); ?>
-        <?php endif; ?>
 
-        <?php if (isset($_SESSION['error'])): ?>
-            <div class="alert alert-error">
-                ✗ <?= htmlspecialchars($_SESSION['error']) ?>
-            </div>
-            <?php unset($_SESSION['error']); ?>
-        <?php endif; ?>
 
         <?php if (empty($orders)): ?>
             <div class="empty-orders">
@@ -43,8 +31,6 @@ $orders = $data['orders'] ?? [];
                                     <?php
                                     $statusText = [
                                         'PENDING' => 'Chờ xử lý',
-                                        'AWAITING_PAYMENT' => 'Chờ thanh toán',
-                                        'PROCESSING' => 'Đang xử lý',
                                         'PREPARING' => 'Đang pha chế',
                                         'READY' => 'Đã hoàn thành',
                                         'SHIPPING' => 'Đang giao',
@@ -59,12 +45,6 @@ $orders = $data['orders'] ?? [];
 
                         <div class="order-body">
                             <div class="order-details">
-                                <div class="detail-row">
-                                    <span class="label">Loại đơn:</span>
-                                    <span class="value">
-                                        <?= $order->order_type === 'ONLINE_DELIVERY' ? '🚚 Giao hàng' : '🏪 Tại quầy' ?>
-                                    </span>
-                                </div>
 
                                 <?php if ($order->order_type === 'ONLINE_DELIVERY'): ?>
                                     <div class="detail-row">
@@ -95,21 +75,6 @@ $orders = $data['orders'] ?? [];
                                     </span>
                                 </div>
 
-                                <div class="detail-row">
-                                    <span class="label">Trạng thái thanh toán:</span>
-                                    <span class="value payment-status-<?= strtolower($order->payment_status) ?>">
-                                        <?php
-                                        $paymentStatusText = [
-                                            'PENDING' => 'Chờ thanh toán',
-                                            'AWAITING_PAYMENT' => 'Chờ thanh toán',
-                                            'PAID' => '✓ Đã thanh toán',
-                                            'REFUNDED' => 'Đã hoàn tiền',
-                                            'UNPAID' => 'Chưa thanh toán'
-                                        ];
-                                        echo $paymentStatusText[$order->payment_status] ?? $order->payment_status;
-                                        ?>
-                                    </span>
-                                </div>
 
                                 <?php if (!empty($order->note)): ?>
                                     <div class="detail-row">

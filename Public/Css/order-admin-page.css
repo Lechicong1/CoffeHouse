@@ -1,0 +1,245 @@
+/* ========== ORDER ADMIN PAGE STYLES ========== */
+/* File CSS riêng cho trang Quản lý Đơn hàng Admin */
+
+/* Header Section */
+#orders .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 3px solid #e2e8f0;
+}
+
+#orders .header-title {
+    flex: 1;
+}
+
+#orders .header-title h2 {
+    font-size: 32px;
+    font-weight: 900;
+    color: #2d3748;
+    margin: 0 0 8px 0;
+    line-height: 1.2;
+}
+
+#orders .subtitle {
+    color: #718096;
+    font-size: 15px;
+    margin: 0;
+}
+
+#orders .header-actions {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+/* Buttons */
+#orders .btn-primary {
+    padding: 12px 32px;
+    background: linear-gradient(135deg, #b6da9f 0%, #9fc885 100%);
+    color: #2c2c2c;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+#orders .btn-primary:hover {
+    transform: none;
+    box-shadow: 0 4px 12px rgba(182, 218, 159, 0.4);
+    opacity: 0.9;
+}
+
+#orders .btn-refresh {
+    background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+    color: white;
+}
+
+#orders .btn-excel {
+    background: linear-gradient(135deg, #55efc4 0%, #00b894 100%);
+    color: white;
+}
+
+/* Search Form */
+#orders .search-form {
+    display: flex;
+    gap: 12px;
+    max-width: 700px;
+    margin-bottom: 24px;
+}
+
+#orders .search-input {
+    flex: 1;
+    padding: 12px 20px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+#orders .search-input:focus {
+    border-color: #b6da9f;
+}
+
+/* Table Styles */
+#orders .table-container {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+#orders .data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#orders .data-table thead {
+    background: linear-gradient(135deg, #b6da9f 0%, #9fc885 100%);
+    color: #2c2c2c;
+}
+
+#orders .data-table th {
+    padding: 16px;
+    text-align: left;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+}
+
+#orders .data-table tbody tr {
+    border-bottom: 1px solid #e2e8f0;
+    transition: background-color 0.2s ease;
+}
+
+#orders .data-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+#orders .data-table td {
+    padding: 16px;
+    font-size: 14px;
+    color: #2d3748;
+}
+
+/* ========== STATUS BADGES ========== */
+#orders .status-badge,
+#orders .payment-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+/* Order Status Badges */
+#orders .status-pending {
+    background-color: #ffeaa7;
+    color: #d35400;
+}
+
+#orders .status-awaiting {
+    background-color: #dfe6e9;
+    color: #636e72;
+}
+
+#orders .status-preparing {
+    background-color: #a29bfe;
+    color: #fff;
+}
+
+#orders .status-ready {
+    background-color: #81ecec;
+    color: #00695c;
+}
+
+#orders .status-shipping {
+    background-color: #74b9ff;
+    color: #fff;
+}
+
+#orders .status-completed {
+    background-color: #55efc4;
+    color: #00695c;
+}
+
+#orders .status-cancelled {
+    background-color: #ff7675;
+    color: #fff;
+}
+
+#orders .status-default {
+    background-color: #e2e8f0;
+    color: #718096;
+}
+
+/* Payment Status Badges */
+#orders .payment-pending {
+    background-color: #ffeaa7;
+    color: #d35400;
+}
+
+#orders .payment-awaiting {
+    background-color: #fab1a0;
+    color: #c0392b;
+}
+
+#orders .payment-paid {
+    background-color: #55efc4;
+    color: #00695c;
+}
+
+#orders .payment-refunded {
+    background-color: #dfe6e9;
+    color: #636e72;
+}
+
+#orders .payment-unpaid {
+    background-color: #ff7675;
+    color: #fff;
+}
+
+#orders .payment-default {
+    background-color: #e2e8f0;
+    color: #718096;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+    #orders .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    #orders .header-actions {
+        width: 100%;
+        flex-wrap: wrap;
+    }
+
+    #orders .search-form {
+        flex-direction: column;
+        max-width: 100%;
+    }
+
+    #orders .table-container {
+        overflow-x: auto;
+    }
+
+    #orders .data-table {
+        min-width: 800px;
+    }
+}
+

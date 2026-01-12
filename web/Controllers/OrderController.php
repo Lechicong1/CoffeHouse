@@ -1,10 +1,6 @@
 <?php
 include_once './Config/Controller.php';
 
-/**
- * Order Controller - Quản lý đơn hàng của khách hàng
- * Theo mô hình MVC chuẩn
- */
 class OrderController extends Controller {
     private $orderService;
 
@@ -12,9 +8,6 @@ class OrderController extends Controller {
         $this->orderService = $this->service('OrderService');
     }
 
-    /**
-     * Kiểm tra đăng nhập
-     */
     private function checkAuth() {
         if (session_status() !== PHP_SESSION_ACTIVE) {
             session_start();
@@ -28,9 +21,6 @@ class OrderController extends Controller {
         return $_SESSION['user']['id'];
     }
 
-    /**
-     * Hiển thị danh sách đơn hàng của khách hàng
-     */
     function GetData() {
         $customerId = $this->checkAuth();
 
@@ -46,9 +36,6 @@ class OrderController extends Controller {
         ]);
     }
 
-    /**
-     * Hủy đơn hàng
-     */
     function cancelOrder() {
         $customerId = $this->checkAuth();
 

@@ -57,7 +57,7 @@
                 <i class="fas fa-home"></i>
                 Về Trang Chủ
             </a>
-            <a href="/COFFEE_PHP/User/orders" class="btn btn-secondary">
+            <a href="/COFFEE_PHP/OrderController" class="btn btn-secondary">
                 <i class="fas fa-receipt"></i>
                 Xem Đơn Hàng
             </a>

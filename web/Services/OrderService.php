@@ -649,7 +649,6 @@ class OrderService  {
             if ($order->customer_id != $customerId) {
                 return ['success' => false, 'message' => 'Bạn không có quyền hủy đơn hàng này'];
             }
-
             // 3. Kiểm tra trạng thái đơn hàng (chỉ cho phép hủy PENDING)
             if ($order->status !== OrderStatus::PENDING) {
                 return ['success' => false, 'message' => 'Không thể hủy đơn hàng đã được xử lý'];
@@ -673,7 +672,6 @@ class OrderService  {
                 ];
             }
 
-            return ['success' => false, 'message' => 'Lỗi khi hủy đơn hàng'];
 
         } catch (Exception $e) {
             return ['success' => false, 'message' => 'Lỗi: ' . $e->getMessage()];

@@ -380,6 +380,23 @@ class OrderService  {
     }
 
     /**
+     * Lấy tất cả đơn hàng cho Admin (đơn giản)
+     * @return array
+     */
+    public function getAllOrdersForAdmin() {
+        return $this->orderRepo->getAllOrdersForAdmin();
+    }
+
+    /**
+     * Tìm kiếm đơn hàng theo keyword cho Admin
+     * @param string $keyword
+     * @return array
+     */
+    public function searchOrdersForAdmin($keyword) {
+        return $this->orderRepo->searchOrdersForAdmin($keyword);
+    }
+
+    /**
      * Lấy danh sách đơn hàng với filter
      *  ['status' => 'PROCESSING', 'search' => 'ORD123']
      */

@@ -221,4 +221,48 @@ class OrderRepository extends ConnectDatabase {
         }
         return $orders;
     }
+
+    /**
+     * Lấy tất cả đơn hàng cho Admin (đơn giản)
+     * @return array
+     */
+    public function getAllOrdersForAdmin() {
+        $sql = "SELECT order_code, status, payment_status, total_amount, receiver_name, receiver_phone 
+                FROM orders 
+                ORDER BY id DESC";
+        $result = mysqli_query($this->con, $sql);
+
+        $orders = [];
+        if ($result) {
+            while ($row = mysqli_fetch_assoc($result)) {
+                $orders[] = $row;
+            }
+        }
+        return $orders;
+    }
+
+    /**
+     * Tìm kiếm đơn hàng theo keyword (mã đơn, tên, SĐT người nhận)
+     * @param string $keyword
+     * @return array
+     */
+    public function searchOrdersForAdmin($keyword) {
+        $keyword = '%' . mysqli_real_escape_string($this->con, $keyword) . '%';
+
+        $sql = "SELECT order_code, status, payment_status, total_amount, receiver_name, receiver_phone 
+                FROM orders 
+                WHERE order_code LIKE ? OR receiver_name LIKE ? OR receiver_phone LIKE ?
+                ORDER BY id DESC";
+
+        $stmt = mysqli_prepare($this->con, $sql);
+        mysqli_stmt_bind_param($stmt, "sss", $keyword, $keyword, $keyword);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        $orders = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $orders[] = $row;
+        }
+        return $orders;
+    }
 }

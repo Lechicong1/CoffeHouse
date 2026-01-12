@@ -140,25 +140,32 @@ class InventoryCheckService extends Service {
     }
 
 
-    /**
-     * Lấy báo cáo thất thoát theo tháng (tất cả)
-     * @return array
-     */
-    public function getInventoryCheckByMonth() {
-        return $this->inventoryCheckRepo->getInventoryCheckByMonth();
-    }
 
     /**
-     * Lấy báo cáo thất thoát theo tháng cụ thể
-     * @param int $month Tháng cần lọc (1-12)
+     * Lấy báo cáo thất thoát theo khoảng thời gian (từ ngày - đến ngày)
+     * @param string $fromDate Ngày bắt đầu (format: Y-m-d)
+     * @param string $toDate Ngày kết thúc (format: Y-m-d)
      * @return array
      */
-    public function getInventoryCheckBySpecificMonth($month) {
-        if (!is_numeric($month) || $month < 1 || $month > 12) {
-            throw new Exception("Tháng không hợp lệ");
+    public function getInventoryCheckByDateRange($fromDate, $toDate) {
+        // Validate input
+        if (empty($fromDate) || empty($toDate)) {
+            throw new Exception("Ngày bắt đầu và ngày kết thúc không được để trống");
         }
 
-        return $this->inventoryCheckRepo->getInventoryCheckBySpecificMonth($month);
+        // Validate date format
+        $fromDateTime = DateTime::createFromFormat('Y-m-d', $fromDate);
+        $toDateTime = DateTime::createFromFormat('Y-m-d', $toDate);
+
+        if (!$fromDateTime || !$toDateTime) {
+            throw new Exception("Định dạng ngày không hợp lệ (Y-m-d)");
+        }
+
+        if ($fromDateTime > $toDateTime) {
+            throw new Exception("Ngày bắt đầu phải nhỏ hơn hoặc bằng ngày kết thúc");
+        }
+
+        return $this->inventoryCheckRepo->getInventoryCheckByDateRange($fromDate, $toDate);
     }
 }
 ?>

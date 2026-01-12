@@ -108,7 +108,7 @@
 .data-table tbody td {
     padding: 12px 20px;
     font-size: 0.95rem;
-    color: var(--text-dark);
+    color: #222222;
 }
 
 .data-table tbody td.text-bold {
@@ -347,16 +347,22 @@
     box-shadow: 0 0 0 3px rgba(182, 218, 159, 0.2);
 }
 
+.date-col {
+    text-align: center;
+    font-weight: 600;
+    color: #222222;
+}
+
 .month-col {
     text-align: center;
     font-weight: 600;
-    color: #555;
+    color: #222222;
 }
 
 .quantity-col {
     text-align: right;
     font-weight: 500;
-    color: #333;
+    color: #222222;
 }
 
 .difference-col {
@@ -379,7 +385,7 @@
 
 .ingredient-name {
     font-weight: 600;
-    color: #333;
+    color: #222222;
 }
 
 .empty-message {
@@ -419,3 +425,7 @@
         padding: 10px 12px;
     }
 }
+
+
+
+

@@ -488,19 +488,6 @@ class OrderService  {
                 return ['success' => false, 'message' => 'Không tìm thấy đơn hàng'];
             }
 
-            // Validate status sử dụng OrderStatus enum
-            $validStatuses = [
-                OrderStatus::PENDING,
-                OrderStatus::PREPARING,
-                OrderStatus::READY,
-                OrderStatus::SHIPPING,
-                OrderStatus::COMPLETED,
-                OrderStatus::CANCELLED
-            ];
-            if (!in_array($newStatus, $validStatuses)) {
-                return ['success' => false, 'message' => 'Trạng thái không hợp lệ'];
-            }
-
             // Nếu hủy đơn đã thanh toán -> Đánh dấu hoàn tiền
             if ($newStatus === OrderStatus::CANCELLED && $order->payment_status === 'PAID') {
                 $order->payment_status = 'REFUNDED';

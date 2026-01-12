@@ -11,7 +11,7 @@ class ShipperService {
         $this->orderService = new OrderService();
     }
 
-    public function getReadyOrders() {
+    public function getAllDeliveryOrders() {
         return $this->orderRepo->findReadyForDeliveryOrders();
     }
 

@@ -115,22 +115,6 @@ class VoucherController extends Controller {
         }
     }
 
-    public function getById() {
-        $id = (int)($_GET['id'] ?? 0);
-        if ($id <= 0) {
-            echo 'Lỗi: ID không hợp lệ';
-            return;
-        }
-        
-        $voucher = $this->service('VoucherService')->getVoucherById($id);
-        echo $voucher ? 'Thành công: Tìm thấy voucher ' . $voucher->name : 'Lỗi: Không tìm thấy voucher';
-    }
-
-    public function getActiveVouchers() {
-        $vouchers = $this->service('VoucherService')->getActiveVouchers();
-        echo !empty($vouchers) ? 'Tìm thấy ' . count($vouchers) . ' voucher đang hoạt động' : 'Không có voucher nào đang hoạt động';
-    }
-
     public function getEligibleVouchers() {
         header('Content-Type: text/html; charset=UTF-8');
         $customerId = (int)($_POST['customer_id'] ?? 0) ?: null;
@@ -148,7 +132,7 @@ class VoucherController extends Controller {
         $voucherId = (int)($_POST['voucher_id'] ?? 0);
         $total = (float)($_POST['total_amount'] ?? 0);
 
-        $res = $this->service('VoucherService')->previewVoucher($customerId, $voucherId, $total);
+        $res = $this->service('VoucherService')->previewApplyVoucher($customerId, $voucherId, $total);
 
         if (!$res['success']) {
             echo '<span id="pv" data-ok="0" data-msg="'.htmlspecialchars($res['message'], ENT_QUOTES).'"></span>';

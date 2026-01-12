@@ -16,10 +16,6 @@ class CustomerService extends Service {
         return $this->repository('CustomerRepository')->findByPhone($phone);
     }
 
-    public function getCustomerAddress($id) {
-        return $this->repository('CustomerRepository')->getAddressById($id);
-    }
-
     public function searchCustomers($keyword) {
         return $this->repository('CustomerRepository')->search($keyword);
     }
@@ -167,10 +163,6 @@ class CustomerService extends Service {
         return ['valid' => true, 'message' => ''];
     }
 
-    public function checkEmailExists($email, $excludeId = null) {
-        return $this->repository('CustomerRepository')->findByEmail($email, $excludeId) !== null;
-    }
-
     public function updateCustomerPoints($id, $points) {
         $repository = $this->repository('CustomerRepository');
         $customer = $repository->findById($id);
@@ -192,7 +184,27 @@ class CustomerService extends Service {
         return $this->repository('CustomerRepository')->count();
     }
 
-    public function countCustomersByStatus($status) {
-        return $this->repository('CustomerRepository')->countByStatus($status);
+    public function awardLoyaltyPoints($customerId, $totalAmount) {
+        if (!$customerId || $totalAmount <= 0) {
+            return 0;
+        }
+
+        $points = (int)floor($totalAmount / 1000);
+        if ($points <= 0) {
+            return 0;
+        }
+
+        $repository = $this->repository('CustomerRepository');
+        $customer = $repository->findById($customerId);
+        if (!$customer) {
+            return 0;
+        }
+
+        $newPoints = (int)$customer->points + $points;
+        if ($repository->updatePoints($customerId, $newPoints)) {
+            return $points;
+        }
+
+        return 0;
     }
 }

@@ -12,9 +12,6 @@ class VoucherService extends Service {
         return $this->repository('VoucherRepository')->findAll();
     }
 
-    public function getVoucherById($id) {
-        return $this->repository('VoucherRepository')->findById($id);
-    }
 
     public function searchVouchers($keyword) {
         return $this->repository('VoucherRepository')->search($keyword);
@@ -140,10 +137,6 @@ class VoucherService extends Service {
                 'point_cost' => $voucher->point_cost
             ]
         ];
-    }
-
-    public function previewVoucher($customerId, $voucherId, $totalAmount) {
-        return $this->previewApplyVoucher($customerId, $voucherId, $totalAmount);
     }
 
     public function redeemVoucher($customerId, $voucherId, $billTotal, $con = null) {

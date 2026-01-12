@@ -16,10 +16,6 @@ class CustomerService extends Service {
         return $this->repository('CustomerRepository')->findByPhone($phone);
     }
 
-    public function getCustomerAddress($id) {
-        return $this->repository('CustomerRepository')->getAddressById($id);
-    }
-
     public function searchCustomers($keyword) {
         return $this->repository('CustomerRepository')->search($keyword);
     }
@@ -167,10 +163,6 @@ class CustomerService extends Service {
         return ['valid' => true, 'message' => ''];
     }
 
-    public function checkEmailExists($email, $excludeId = null) {
-        return $this->repository('CustomerRepository')->findByEmail($email, $excludeId) !== null;
-    }
-
     public function updateCustomerPoints($id, $points) {
         $repository = $this->repository('CustomerRepository');
         $customer = $repository->findById($id);
@@ -190,10 +182,6 @@ class CustomerService extends Service {
 
     public function countCustomers() {
         return $this->repository('CustomerRepository')->count();
-    }
-
-    public function countCustomersByStatus($status) {
-        return $this->repository('CustomerRepository')->countByStatus($status);
     }
 
     public function awardLoyaltyPoints($customerId, $totalAmount) {

@@ -151,5 +151,13 @@ class VoucherRepository extends ConnectDatabase {
         mysqli_query($this->con, $sql);
         return mysqli_affected_rows($this->con);
     }
+
+    public function incrementUsedCount($id, $con = null) {
+        $connection = $con ?? $this->con;
+        $sql = "UPDATE vouchers SET used_count = used_count + 1 WHERE id = ?";
+        $stmt = mysqli_prepare($connection, $sql);
+        mysqli_stmt_bind_param($stmt, "i", $id);
+        return mysqli_stmt_execute($stmt);
+    }
 }
 ?>

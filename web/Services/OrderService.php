@@ -160,31 +160,28 @@ class OrderService  {
                 $this->orderItemRepo->create($item);
             }
 
-            // 6. Xử lý voucher (nếu có)
-            $discountAmount = 0.0;
+            // 6. Xử lý voucher (nếu có) - chỉ redeem (cập nhật used_count, trừ điểm)
+            // Lưu ý: Frontend đã gửi total_amount ĐÃ TRỪ voucher, không cần tính lại
             if (!empty($data['voucher']) && !empty($order->customer_id)) {
                 $voucherId = isset($data['voucher']['voucher_id']) ? (int)$data['voucher']['voucher_id'] : null;
                 if ($voucherId) {
+                    // Tính subtotal gốc từ items để check min_bill_total đúng
+                    $originalSubtotal = 0;
+                    foreach ($cartItems as $item) {
+                        $originalSubtotal += (float)$item->price * (int)$item->quantity;
+                    }
+                    
+                    // Gọi redeemVoucher với subtotal GỐC để validate min_bill_total đúng
                     $redeemResult = $this->voucherService->redeemVoucher(
                         $order->customer_id,
                         $voucherId,
-                        $order->total_amount
+                        $originalSubtotal
                     );
 
                     if (!$redeemResult['success']) {
                         return $redeemResult;
                     }
-                    $discountAmount = $redeemResult['discount_amount'];
                 }
-            }
-
-            $final_total = $order->total_amount - (float)$discountAmount;
-            if ($final_total < 0) $final_total = 0.0;
-
-            if ($discountAmount > 0) {
-                $order->id = $orderId;
-                $order->total_amount = $final_total;
-                $this->orderRepo->update($order);
             }
             // 7. Xóa giỏ hàng (chỉ khi checkout từ Cart, không phải Buy Now)
             if (empty($data['is_buy_now'])) {

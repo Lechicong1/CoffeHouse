@@ -33,10 +33,12 @@
                     <div class="form-group">
                         <label for="customerVoucher">Mã Voucher (nếu có)</label>
                         <div style="display:flex;gap:8px;align-items:center;">
-                            <input type="text" id="customerVoucher" name="txtVoucherCode" placeholder="Nhập mã voucher hoặc chọn" style="flex:1;padding:8px;">
+                            <input type="text" id="customerVoucher" name="txtVoucherCode" placeholder="Nhập mã voucher hoặc chọn" style="flex:1;padding:8px;" readonly>
                             <button type="button" id="openVoucherListBtn" class="btn">Chọn voucher</button>
+                            <button type="button" id="cancelVoucherBtn" class="btn" style="display:none;background:#dc3545;color:#fff;">Hủy</button>
                         </div>
                         <input type="hidden" id="appliedVoucherId" name="applied_voucher_id" value="">
+                        <input type="hidden" id="originalTotal" value="<?php echo $data['total']; ?>">
                         <div id="checkoutVoucherMsg" style="margin-top:8px;color:#0a6; font-size:0.95rem"></div>
                     </div>
                     <div class="form-group">
@@ -126,13 +128,18 @@
                 </div>
                 <div class="summary-total">
                     <span>Tổng cộng:</span>
-                    <span><?php echo number_format($data['total'], 0, ',', '.'); ?>đ</span>
+                    <span id="grandTotal"><?php echo number_format($data['total'], 0, ',', '.'); ?>đ</span>
                 </div>
             </div>
         </div>
     </div>
 </main>
 <script>
+// Variables required by voucher-web.js
+const CUSTOMER_ID = <?php echo isset($data['customer']->id) ? (int)$data['customer']->id : 'null'; ?>;
+const TOTAL_AMOUNT = <?php echo isset($data['total']) ? (float)$data['total'] : 0; ?>;
+
+// QR Code payment handling
 document.querySelectorAll('input[name="payment_method"]').forEach(option => {
     option.addEventListener('change', function() {
         const qrSection = document.getElementById('qrSection');
@@ -147,3 +154,4 @@ document.querySelectorAll('input[name="payment_method"]').forEach(option => {
 </script>
 <script src="/COFFEE_PHP/Public/Js/voucher-utils.js"></script>
 <script src="/COFFEE_PHP/Public/Js/voucher-web.js"></script>
+

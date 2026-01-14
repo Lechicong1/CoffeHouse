@@ -99,7 +99,18 @@ $roles = $data['roles'] ?? [
                                 </span>
                             </td>
                             <td>
-                                <button class="btn-edit" onclick='openEmployeeModal("edit", <?= htmlspecialchars(json_encode($employee->toArray())) ?>)' title="Sửa">
+                                <button class="btn-edit"
+                                    data-id="<?= htmlspecialchars($employee->id) ?>"
+                                    data-username="<?= htmlspecialchars($employee->username) ?>"
+                                    data-fullname="<?= htmlspecialchars($employee->fullname) ?>"
+                                    data-email="<?= htmlspecialchars($employee->email ?? '') ?>"
+                                    data-phone="<?= htmlspecialchars($employee->phonenumber) ?>"
+                                    data-role="<?= htmlspecialchars($employee->roleName ?? '') ?>"
+                                    data-salary="<?= htmlspecialchars($employee->luong) ?>"
+                                    data-address="<?= htmlspecialchars($employee->address ?? '') ?>"
+                                    data-createat="<?= htmlspecialchars($employee->create_at ?? '') ?>"
+                                    onclick='openEmployeeModal("edit", this)'
+                                    title="Sửa">
                                     ✏️ Sửa
                                 </button>
                                 <form method="POST" action="EmployeeController/del" style="display: inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa không?')">

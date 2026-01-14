@@ -7,7 +7,7 @@
 /**
  * MỞ MODAL THÊM/SỬA NHÂN VIÊN
  */
-function openEmployeeModal(action, employeeData = null) {
+function openEmployeeModal(action, buttonElement = null) {
     const modal = document.getElementById('employeeModal');
     const form = document.getElementById('employeeForm');
     const title = document.getElementById('modalTitle');
@@ -37,20 +37,27 @@ function openEmployeeModal(action, employeeData = null) {
         submitBtn.name = 'btnThem';
         submitBtn.innerHTML = '<span>✅</span> Lưu lại';
     } else {
-        // Chế độ sửa
+        // Chế độ sửa - Đọc dữ liệu từ data attributes
+        if (!buttonElement || !buttonElement.dataset) {
+            alert('Lỗi: Không tìm thấy dữ liệu nhân viên!');
+            return;
+        }
+
+        const data = buttonElement.dataset;
+
         title.textContent = '✏️ Sửa thông tin nhân viên';
         form.action = 'EmployeeController/upd';
 
-        // Điền dữ liệu vào form
-        document.getElementById('employeeId').value = employeeData.id;
-        document.getElementById('username').value = employeeData.username;
-        document.getElementById('fullname').value = employeeData.fullname;
-        document.getElementById('email').value = employeeData.email || '';
-        document.getElementById('phonenumber').value = employeeData.phonenumber;
-        document.getElementById('address').value = employeeData.address || '';
-        document.getElementById('roleId').value = employeeData.roleName;
-        document.getElementById('luong').value = employeeData.luong;
-        document.getElementById('createAt').value = employeeData.createDate || '';
+        // Điền dữ liệu vào form từ data attributes
+        document.getElementById('employeeId').value = data.id;
+        document.getElementById('username').value = data.username;
+        document.getElementById('fullname').value = data.fullname;
+        document.getElementById('email').value = data.email || '';
+        document.getElementById('phonenumber').value = data.phone;
+        document.getElementById('address').value = data.address || '';
+        document.getElementById('roleId').value = data.role;
+        document.getElementById('luong').value = data.salary;
+        document.getElementById('createAt').value = data.createat || '';
 
         passwordGroup.style.display = 'none';
         usernameField.readOnly = true;

@@ -55,7 +55,6 @@ class InventoryImportService extends  Service {
 
     public function updateImport($data) {
         try {
-            // Validate dữ liệu
             $this->validateImportData($data);
 
             // Lấy thông tin phiếu nhập cũ để tính toán lại kho

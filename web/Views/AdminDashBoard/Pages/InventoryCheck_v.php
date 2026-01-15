@@ -114,7 +114,7 @@ if (!empty($inventoryData)) {
                 <h3 class="form-title">📋 NHẬP THÔNG TIN KIỂM TRA KHO</h3>
             </div>
             <div class="form-body">
-                <form id="inventoryCheckForm" method="POST">
+                <form id="inventoryCheckForm" method="POST" action="InventoryCheck/save">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="ingredientSelect" class="form-label">Nguyên liệu:</label>

@@ -122,10 +122,6 @@ class StaffController extends Controller {
         $this->GetData();
     }
 
-    /**
-     * Xử lý tạo đơn hàng từ POS (POST) - Giống CheckoutController/placeOrder
-     * URL: http://localhost/COFFEE_PHP/StaffController/createOrder
-     */
     function createOrder() {
         // Kiểm tra phương thức POST
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

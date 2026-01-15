@@ -210,6 +210,124 @@
     transform: scale(1.05);
 }
 
+/* ========== FILTER & SORT BAR ========== */
+.filter-sort-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 40px;
+    max-width: 1160px; /* Match grid approximate width */
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    padding: 0 20px; /* Safety padding */
+}
+
+.price-filter-group {
+    width: 300px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.price-range-display {
+    font-weight: 600;
+    color: var(--text-dark);
+    margin-bottom: 15px;
+    font-size: 1rem;
+}
+
+.range-slider-container {
+    position: relative;
+    width: 100%;
+    height: 5px;
+    margin-top: 5px;
+}
+
+.slider-track {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    right: 0;
+    height: 4px;
+    background-color: #e0e0e0;
+    border-radius: 2px;
+    z-index: 1;
+}
+
+.slider-range-highlight {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 4px;
+    background-color: var(--primary-color);
+    border-radius: 2px;
+    z-index: 2;
+}
+
+.range-input {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    width: 100%;
+    background: none;
+    pointer-events: none;
+    -webkit-appearance: none;
+    appearance: none;
+    z-index: 3;
+    margin: 0;
+}
+
+.range-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    pointer-events: auto;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    border: none;
+    margin-top: -0px; /* Align specifically if needed, standard range height varies */
+}
+
+/* Firefox thumb */
+.range-input::-moz-range-thumb {
+    pointer-events: auto;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    border: none;
+}
+
+.btn-sort {
+    background: white;
+    border: 1px solid #ddd;
+    padding: 10px 25px;
+    border-radius: 50px;
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.btn-sort:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
 /* ========== RESPONSIVE ========== */
 /* Tablet - 2 cột */
 @media (max-width: 1100px) {
@@ -221,6 +339,21 @@
 
 /* Mobile lớn - 2 cột nhỏ hơn */
 @media (max-width: 768px) {
+    .filter-sort-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    .price-filter-group {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .sort-action {
+        align-self: flex-start;
+    }
+
     .category-hero h1 {
         font-size: 2.5rem;
     }

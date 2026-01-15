@@ -66,6 +66,7 @@ class UserController extends Controller {
             'page' => 'CategoryProductsPage',
             'currentPage' => 'categoryProducts',
             'additionalCSS' => ['Public/Css/user-category-products.css'],
+            'additionalJS' => ['Public/Js/user-category-products.js'],
             'category' => $category,
             'products' => $products
         ]);

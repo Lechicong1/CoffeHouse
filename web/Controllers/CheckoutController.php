@@ -5,16 +5,12 @@
  */
 
 class CheckoutController extends Controller {
-    private $cartService;
     private $customerService;
     private $orderService;
-    private $productService;
 
     public function __construct() {
-        $this->cartService = $this->service('CartService');
         $this->customerService = $this->service('CustomerService');
         $this->orderService = $this->service('OrderService');
-        $this->productService = $this->service('ProductService');
     }
 
     // Helper: Kiểm tra auth và trả về customerId
@@ -31,8 +27,8 @@ class CheckoutController extends Controller {
     }
 
     // Lấy dữ liệu checkout (Buy Now hoặc từ Giỏ hàng)
-    private function getCheckoutData($customerId) {
-        // Nếu là Buy Now -> lấy trực tiếp từ POST
+    private function getCheckoutData() {
+        // Nếu là Buy Now -> lấy trực tiếp từ POST màn productDetail
         if (isset($_POST['buy_now']) && $_POST['buy_now'] === '1') {
             $productSizeId = $_POST['txtProductSizeId'] ?? null;
             $quantity = (int)($_POST['txtQuantity'] ?? 1);
@@ -95,7 +91,7 @@ class CheckoutController extends Controller {
         $customerId = $this->checkAuth();
 
         try {
-            $checkoutData = $this->getCheckoutData($customerId);
+            $checkoutData = $this->getCheckoutData();
             $customer = $this->customerService->getCustomerById($customerId);
 
             $this->view('UserDashBoard/MasterLayout', [
@@ -134,17 +130,14 @@ class CheckoutController extends Controller {
 
     // Xử lý đặt hàng
     public function placeOrder() {
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /COFFEE_PHP/Checkout/GetData');
-            exit;
-        }
+
 
         $customerId = $this->checkAuth();
 
         try {
             // Lấy items trực tiếp từ getCheckoutData (không cần hàm riêng)
-            $checkoutData = $this->getCheckoutData($customerId);
-
+            $checkoutData = $this->getCheckoutData();
+            // lay name,phone,...
             $orderData = $this->prepareOrderData();
             $orderData['items'] = $checkoutData['items']; // Dùng lại items từ getCheckoutData
 
@@ -169,52 +162,7 @@ class CheckoutController extends Controller {
         }
     }
 
-    // Trang thanh toán chuyển khoản với QR Code VietQR
-    public function payment() {
-        $customerId = $this->checkAuth();
-        $orderId = $_GET['order_id'] ?? null;
 
-        if (!$orderId) {
-            $_SESSION['error_message'] = 'Không tìm thấy đơn hàng!';
-            header('Location: /COFFEE_PHP/User/index');
-            exit;
-        }
-
-        try {
-            $order = $this->orderService->getOrderById($orderId);
-            $qrUrl = $this->generateVietQRUrl($_GET['order_code'] ?? '', $_GET['amount'] ?? 0);
-
-            $this->view('UserDashBoard/MasterLayout', [
-                'title' => 'Thanh Toán Chuyển Khoản - Coffee House',
-                'page' => 'PaymentPage',
-                'currentPage' => 'payment',
-                'additionalCSS' => ['Public/Css/payment-page.css'],
-                'order' => $order,
-                'qrUrl' => $qrUrl,
-                'bankInfo' => [
-                    'bankName' => 'MBBank',
-                    'accountNo' => '88221020056868',
-                    'accountName' => 'COFFEE HOUSE',
-                    'amount' => number_format($_GET['amount'] ?? 0, 0, ',', '.'),
-                    'description' => 'Thanh toan don hang ' . ($_GET['order_code'] ?? '')
-                ]
-            ]);
-
-        } catch (Exception $e) {
-            $_SESSION['error_message'] = $e->getMessage();
-            header('Location: /COFFEE_PHP/User/index');
-            exit;
-        }
-    }
-
-    // Helper: Tạo URL VietQR
-    private function generateVietQRUrl($orderCode, $amount) {
-        $bankId = 'MB';
-        $accountNo = '88221020056868';
-        $accountName = 'COFFEE HOUSE';
-        $description = urlencode('Thanh toan don hang ' . $orderCode);
-        return "https://img.vietqr.io/image/{$bankId}-{$accountNo}-compact2.png?amount={$amount}&addInfo={$description}&accountName={$accountName}";
-    }
 
     // Trang xác nhận đơn hàng thành công
     public function orderSuccess() {

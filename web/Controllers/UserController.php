@@ -35,9 +35,7 @@ class UserController extends Controller {
         ]);
     }
 
-    /**
-     * Trang menu - Hiển thị tất cả danh mục
-     */
+
     function menu() {
         $this->view('UserDashBoard/MasterLayout', [
             'title' => 'Thực Đơn - Coffee House',
@@ -48,9 +46,6 @@ class UserController extends Controller {
         ]);
     }
 
-    /**
-     * Trang sản phẩm theo danh mục
-     */
     function categoryProducts() {
         $categoryId = $_GET['id'] ?? null;
         if (!$categoryId) {

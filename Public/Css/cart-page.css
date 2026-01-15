@@ -4,7 +4,7 @@
 
 .cart-section {
     max-width: 1200px;
-    margin: 100px auto 50px;
+    margin: 140px auto 50px; /* Tăng margin-top để tránh bị header che */
     padding: 0 20px;
 }
 

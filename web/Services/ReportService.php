@@ -1,7 +1,5 @@
 <?php
-/**
- * ReportService - Xử lý logic nghiệp vụ cho báo cáo thống kê
- */
+
 
 include_once './web/Repositories/ReportRepo.php';
 include_once './web/Services/InventoryImportService.php';

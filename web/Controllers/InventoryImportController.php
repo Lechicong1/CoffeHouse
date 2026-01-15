@@ -24,9 +24,7 @@ class InventoryImportController extends Controller {
         $this->renderView($imports, $ingredients, '');
     }
 
-    /**
-     * Tìm kiếm phiếu nhập
-     */
+
     public function timkiem() {
         $keyword = trim($_POST['txtSearch'] ?? '');
 
@@ -40,9 +38,7 @@ class InventoryImportController extends Controller {
         $this->renderView($imports, $ingredients, $keyword);
     }
 
-    /**
-     * Tạo phiếu nhập mới
-     */
+
     public function store() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $result = $this->inventoryImportService->createImport($_POST);
@@ -52,9 +48,6 @@ class InventoryImportController extends Controller {
         }
     }
 
-    /**
-     * Cập nhật phiếu nhập
-     */
     public function update() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $result = $this->inventoryImportService->updateImport($_POST);
@@ -64,9 +57,7 @@ class InventoryImportController extends Controller {
         }
     }
 
-    /**
-     * Xóa phiếu nhập
-     */
+
     public function delete() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id = $_POST['id'] ?? 0;
@@ -79,11 +70,9 @@ class InventoryImportController extends Controller {
         }
     }
 
-    /**
-     * Xuất Excel danh sách phiếu nhập kho
-     */
+
     public function xuatexcel() {
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['btnXuatexcel'])) {
+        if (isset($_POST['btnXuatexcel'])) {
             $keyword = trim($_POST['txtSearch'] ?? '');
 
             // Lấy dữ liệu phiếu nhập (đã có ingredient_name và unit từ JOIN)
@@ -111,11 +100,7 @@ class InventoryImportController extends Controller {
         }
     }
 
-    // ========== PRIVATE HELPER METHODS ==========
 
-    /**
-     * Hiển thị thông báo
-     */
     private function showMessage($message) {
         if ($message) {
             $messageText = addslashes($message['message']);
@@ -127,9 +112,7 @@ class InventoryImportController extends Controller {
         }
     }
 
-    /**
-     * Render view với dữ liệu
-     */
+
     private function renderView($imports, $ingredients, $keyword) {
         $this->view('AdminDashBoard/MasterLayout', [
             'page' => 'InventoryImports_v',
@@ -140,9 +123,6 @@ class InventoryImportController extends Controller {
         ]);
     }
 
-    /**
-     * Chuẩn bị dữ liệu để xuất Excel
-     */
     private function prepareExcelData($imports) {
         return array_map(function($import) {
             return [

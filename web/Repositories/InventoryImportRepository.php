@@ -4,9 +4,7 @@ use web\Entity\InventoryImportEntity;
 
 class InventoryImportRepository extends ConnectDatabase {
 
-    /**
-     * Lấy tất cả phiếu nhập kho
-     */
+
     public function findAll() {
         $sql = "SELECT ip.*, i.name as ingredient_name, i.unit 
                 FROM inventory_imports ip
@@ -22,9 +20,7 @@ class InventoryImportRepository extends ConnectDatabase {
         return $imports;
     }
 
-    /**
-     * Lấy phiếu nhập theo ID
-     */
+
     public function findById($id) {
         $sql = "SELECT * FROM inventory_imports WHERE id = ?";
         $stmt = mysqli_prepare($this->con, $sql);
@@ -37,9 +33,7 @@ class InventoryImportRepository extends ConnectDatabase {
         return $data ? new InventoryImportEntity($data) : null;
     }
 
-    /**
-     * Tạo phiếu nhập mới
-     */
+
     public function create($import) {
         $sql = "INSERT INTO inventory_imports (ingredient_id, import_quantity, total_cost, import_date, note) VALUES (?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($this->con, $sql);
@@ -49,9 +43,7 @@ class InventoryImportRepository extends ConnectDatabase {
         return mysqli_insert_id($this->con);
     }
 
-    /**
-     * Cập nhật phiếu nhập
-     */
+
     public function update($import) {
         $sql = "UPDATE inventory_imports SET ingredient_id = ?, import_quantity = ?, total_cost = ?, import_date = ?, note = ? WHERE id = ?";
         $stmt = mysqli_prepare($this->con, $sql);
@@ -60,9 +52,7 @@ class InventoryImportRepository extends ConnectDatabase {
         return mysqli_stmt_execute($stmt);
     }
 
-    /**
-     * Xóa phiếu nhập
-     */
+
     public function delete($id) {
         $sql = "DELETE FROM inventory_imports WHERE id = ?";
         $stmt = mysqli_prepare($this->con, $sql);
@@ -71,18 +61,16 @@ class InventoryImportRepository extends ConnectDatabase {
         return mysqli_stmt_execute($stmt);
     }
 
-    /**
-     * Tìm kiếm phiếu nhập theo tên nguyên liệu hoặc ghi chú
-     */
+
     public function search($keyword) {
         $sql = "SELECT ip.*, i.name as ingredient_name, i.unit 
                 FROM inventory_imports ip 
                 JOIN ingredients i ON ip.ingredient_id = i.id 
-                WHERE ip.note LIKE ? OR i.name LIKE ? 
+                WHERE i.name LIKE ? 
                 ORDER BY ip.import_date DESC";
         $stmt = mysqli_prepare($this->con, $sql);
         $searchTerm = "%" . $keyword . "%";
-        mysqli_stmt_bind_param($stmt, "ss", $searchTerm, $searchTerm);
+        mysqli_stmt_bind_param($stmt, "s", $searchTerm);
         mysqli_stmt_execute($stmt);
 
         $result = mysqli_stmt_get_result($stmt);

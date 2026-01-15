@@ -64,7 +64,17 @@ class ReportController extends Controller {
         if (isset($_POST['btnXuatexcelRevenue'])) {
             $fromDate = $_POST['from_date'] ?? date('Y-m-01');
             $toDate = $_POST['to_date'] ?? date('Y-m-d');
-            $data = $this->reportService->getRevenueDetails($fromDate, $toDate);
+            $revenueDetails = $this->reportService->getRevenueDetails($fromDate, $toDate);
+
+            // Chuyển đổi array sang format Excel (dữ liệu từ DB là array, không phải object)
+            $data = array_map(function($item) {
+                return [
+                    'productName' => $item['productName'] ?? '-',
+                    'categoryName' => $item['categoryName'] ?? '-',
+                    'totalQuantitySold' => $item['totalQuantitySold'] ?? 0,
+                    'totalRevenue' => number_format($item['totalRevenue'] ?? 0, 0, ',', '.')
+                ];
+            }, $revenueDetails);
 
             $headers = [
                 'productName' => 'Tên Sản Phẩm',
@@ -83,7 +93,18 @@ class ReportController extends Controller {
         if (isset($_POST['btnXuatexcelEmployee'])) {
             $fromDate = $_POST['from_date'] ?? date('Y-m-01');
             $toDate = $_POST['to_date'] ?? date('Y-m-d');
-            $data = $this->reportService->getEmployeeDetails($fromDate, $toDate);
+            $employeeDetails = $this->reportService->getEmployeeDetails($fromDate, $toDate);
+
+            // Chuyển đổi array sang format Excel (dữ liệu từ DB là array, không phải object)
+            $data = array_map(function($employee) {
+                return [
+                    'id' => $employee['id'] ?? '-',
+                    'fullname' => $employee['fullname'] ?? '-',
+                    'roleName' => $employee['roleName'] ?? '-',
+                    'luong' => number_format($employee['luong'] ?? 0, 0, ',', '.'),
+                    'create_at' => $employee['create_at'] ?? '-'
+                ];
+            }, $employeeDetails);
 
             $headers = [
                 'id' => 'ID',
@@ -103,7 +124,19 @@ class ReportController extends Controller {
         if (isset($_POST['btnXuatexcelInventory'])) {
             $fromDate = $_POST['from_date'] ?? date('Y-m-01');
             $toDate = $_POST['to_date'] ?? date('Y-m-d');
-            $data = $this->reportService->getInventoryImportDetails($fromDate, $toDate);
+            $inventoryDetails = $this->reportService->getInventoryImportDetails($fromDate, $toDate);
+
+            // Chuyển đổi array sang format Excel (dữ liệu từ DB là array, không phải object)
+            $data = array_map(function($item) {
+                return [
+                    'ingredient_name' => $item['ingredient_name'] ?? '-',
+                    'import_quantity' => $item['import_quantity'] ?? 0,
+                    'unit' => $item['unit'] ?? '-',
+                    'total_cost' => number_format($item['total_cost'] ?? 0, 0, ',', '.'),
+                    'import_date' => $item['import_date'] ?? '-',
+                    'note' => $item['note'] ?? '-'
+                ];
+            }, $inventoryDetails);
 
             $headers = [
                 'ingredient_name' => 'Tên Nguyên Liệu',

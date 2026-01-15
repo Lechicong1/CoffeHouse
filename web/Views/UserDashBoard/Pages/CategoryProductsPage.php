@@ -23,7 +23,7 @@ $products = $data['products'] ?? [];
     <div class="filter-sort-bar">
         <div class="price-filter-group">
             <div class="price-range-display">
-                <span id="price-min-display">35.000đ</span> - <span id="price-max-display">55.000đ</span>
+                <span id="price-min-display">0đ</span> - <span id="price-max-display">200.000đ</span>
             </div>
             <div class="range-slider-container">
                 <div class="slider-track"></div>
@@ -32,8 +32,8 @@ $products = $data['products'] ?? [];
                 <input type="hidden" id="category-id" value="<?= $category->id ?>">
                 <input type="hidden" id="current-sort" value="asc">
                 
-                <input type="range" min="10000" max="100000" value="35000" step="5000" id="range-min" class="range-input">
-                <input type="range" min="10000" max="100000" value="55000" step="5000" id="range-max" class="range-input">
+                <input type="range" min="0" max="200000" value="0" step="10000" id="range-min" class="range-input">
+                <input type="range" min="0" max="200000" value="200000" step="10000" id="range-max" class="range-input">
             </div>
         </div>
         

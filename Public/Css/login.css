@@ -170,6 +170,35 @@ body {
   opacity: 0.6;
 }
 
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* Chỉnh lại input trong wrapper để không bị icon che mất chữ khi gõ dài */
+.password-wrapper .form-input {
+    width: 100%;
+    padding-right: 45px; /* Chừa chỗ cho icon mắt */
+}
+
+/* Icon mắt */
+.toggle-password {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--text-light);
+    font-size: 18px;
+    transition: color 0.2s;
+    z-index: 10;
+    display: flex; /* Để căn giữa icon chuẩn nhất */
+}
+
+.toggle-password:hover {
+    color: var(--primary-dark);
+}
+
 /* Checkbox - Remember Me */
 .form-checkbox-group {
   display: flex;

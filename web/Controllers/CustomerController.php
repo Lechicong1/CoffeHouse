@@ -108,19 +108,6 @@ class CustomerController extends Controller {
         }
     }
 
-    public function getById() {
-        $id = (int)($_GET['id'] ?? 0);
-        if ($id <= 0) {
-            echo 'Lỗi: ID không hợp lệ';
-            return;
-        }
-        
-        $customer = $this->service('CustomerService')->getCustomerById($id);
-        echo $customer 
-            ? 'Thành công: Tìm thấy khách hàng ' . $customer->full_name 
-            : 'Lỗi: Không tìm thấy khách hàng';
-    }
-
     public function updatePoints() {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') return;
 

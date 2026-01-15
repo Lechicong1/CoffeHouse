@@ -66,7 +66,6 @@ $currentPage = $data['currentPage'] ?? $currentSection;
             <div class="cart-icon">
                 <a href="/COFFEE_PHP/CartController" style="text-decoration: none; color: inherit;">
                     🛒
-                    <span class="cart-count" id="cart-count">0</span>
                 </a>
             </div>
 
@@ -150,8 +149,8 @@ $currentPage = $data['currentPage'] ?? $currentSection;
                 
                 <div class="footer-section">
                     <h3>LIÊN HỆ</h3>
-                    <p>📍 123 Nguyễn Huệ, Q.1, TP.HCM</p>
-                    <p>📞 1900 8888</p>
+                    <p>📍 138/58 Tân Triều</p>
+                    <p>📞 0862137882</p>
                     <p>✉️ info@coffeehouse.vn</p>
                 </div>
             </div>

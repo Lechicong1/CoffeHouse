@@ -16,10 +16,6 @@ class CustomerService extends Service {
         return $this->repository('CustomerRepository')->findByPhone($phone);
     }
 
-    public function getCustomerAddress($id) {
-        return $this->repository('CustomerRepository')->getAddressById($id);
-    }
-
     public function searchCustomers($keyword) {
         return $this->repository('CustomerRepository')->search($keyword);
     }
@@ -32,6 +28,7 @@ class CustomerService extends Service {
 
         $repository = $this->repository('CustomerRepository');
 
+        //check trùng
         if (!empty($data['email']) && $repository->findByEmail($data['email'])) {
             return ['success' => false, 'message' => 'Email đã được sử dụng bởi khách hàng khác!'];
         }
@@ -79,6 +76,7 @@ class CustomerService extends Service {
             return ['success' => false, 'message' => 'Số điện thoại đã được sử dụng bởi khách hàng khác!'];
         }
 
+        //gán lại field lên object
         $customer->full_name = $data['full_name'];
         $customer->phone = $data['phone'];
         $customer->email = $data['email'] ?? null;
@@ -92,22 +90,31 @@ class CustomerService extends Service {
             : ['success' => false, 'message' => 'Có lỗi xảy ra khi cập nhật khách hàng!'];
     }
 
-    public function posUpsertCustomer($data) {
+    public function posSearchCustomer($phone) {
+        if (!$phone) {
+            return ['success' => false, 'message' => 'Số điện thoại không được để trống'];
+        }
+
+        $repository = $this->repository('CustomerRepository');
+        $customer = $repository->findByPhone($phone);
+
+        if ($customer) {
+            return ['success' => true, 'customer' => $customer];
+        }
+
+        return ['success' => false, 'message' => 'Không tìm thấy khách hàng'];
+    }
+
+    public function posCreateCustomer($data) {
         $phone = $data['phone'] ?? null;
         if (!$phone) {
             return ['success' => false, 'message' => 'Số điện thoại không được để trống'];
         }
 
         $repository = $this->repository('CustomerRepository');
-        $cust = $repository->findByPhone($phone);
-        $pointsToAdd = (int)($data['pointsToAdd'] ?? 0);
 
-        if ($cust) {
-            if ($pointsToAdd > 0) {
-                $cust->points += $pointsToAdd;
-                $repository->updatePoints($cust->id, $cust->points);
-            }
-            return ['success' => true, 'customer' => $cust, 'created' => false];
+        if ($repository->findByPhone($phone)) {
+            return ['success' => false, 'message' => 'Số điện thoại đã được sử dụng!'];
         }
 
         $customer = new CustomerEntity([
@@ -118,13 +125,15 @@ class CustomerService extends Service {
             'email' => $data['email'] ?? '',
             'address' => $data['address'] ?? '',
             'account_type' => 'GUEST_POS',
-            'points' => $pointsToAdd,
+            'points' => 0,
             'status' => 1
         ]);
 
         if ($repository->create($customer)) {
-            return ['success' => true, 'customer' => $repository->findByPhone($phone), 'created' => true];
+            $newCustomer = $repository->findByPhone($phone);
+            return ['success' => true, 'customer' => $newCustomer];
         }
+
         return ['success' => false, 'message' => 'Không thể tạo khách hàng'];
     }
 
@@ -167,10 +176,6 @@ class CustomerService extends Service {
         return ['valid' => true, 'message' => ''];
     }
 
-    public function checkEmailExists($email, $excludeId = null) {
-        return $this->repository('CustomerRepository')->findByEmail($email, $excludeId) !== null;
-    }
-
     public function updateCustomerPoints($id, $points) {
         $repository = $this->repository('CustomerRepository');
         $customer = $repository->findById($id);
@@ -192,7 +197,27 @@ class CustomerService extends Service {
         return $this->repository('CustomerRepository')->count();
     }
 
-    public function countCustomersByStatus($status) {
-        return $this->repository('CustomerRepository')->countByStatus($status);
+    public function awardLoyaltyPoints($customerId, $totalAmount) {
+        if (!$customerId || $totalAmount <= 0) {
+            return 0;
+        }
+
+        $points = (int)floor($totalAmount / 1000);
+        if ($points <= 0) {
+            return 0;
+        }
+
+        $repository = $this->repository('CustomerRepository');
+        $customer = $repository->findById($customerId);
+        if (!$customer) {
+            return 0;
+        }
+
+        $newPoints = (int)$customer->points + $points;
+        if ($repository->updatePoints($customerId, $newPoints)) {
+            return $points;
+        }
+
+        return 0;
     }
 }

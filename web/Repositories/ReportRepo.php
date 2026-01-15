@@ -14,7 +14,7 @@ class ReportRepo extends ConnectDatabase {
     }
     // tong chi tien nguyen lieu
     public function getInventoryExpense($fromDate, $toDate) {
-        $sql = "SELECT SUM(total_cost) as total_cost FROM inventory_imports WHERE import_date BETWEEN ? AND ?";
+        $sql = "SELECT SUM(total_cost) as total_cost FROM inventory_imports WHERE import_date BETWEEN ? AND ? ";
         $stmt = mysqli_prepare($this->con, $sql);
         mysqli_stmt_bind_param($stmt, "ss", $fromDate, $toDate);
         mysqli_stmt_execute($stmt);
@@ -26,7 +26,8 @@ class ReportRepo extends ConnectDatabase {
     public function getTotalExpenseProduct($fromDate, $toDate) {
         $sql = "SELECT SUM(quantity*price_at_purchase) as total_revenue FROM order_items ot
         JOIN orders o ON o.id = ot.order_id 
-        WHERE o.created_at BETWEEN ? AND ?";
+        WHERE o.created_at BETWEEN ? AND ?
+        and o.status = 'COMPLETED'";
         $stmt = mysqli_prepare($this->con, $sql);
         mysqli_stmt_bind_param($stmt, "ss", $fromDate, $toDate);
         mysqli_stmt_execute($stmt);
@@ -44,6 +45,7 @@ class ReportRepo extends ConnectDatabase {
          join products p on p.id= ps.product_id
          join categories c on c.id = p.category_id
          where o.created_at BETWEEN ? AND ?
+         and  o.status = 'COMPLETED'
          group by p.id ";
 
         $stmt = mysqli_prepare($this->con, $sql);

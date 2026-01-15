@@ -16,7 +16,7 @@ class ShipperController extends Controller {
     public function index() {
         $this->view('ShipperDashBoard/MasterLayoutShipper', [
             'page' => 'Shipper-delivery_v',
-            'orders' => $this->shipperService->getReadyOrders(),
+            'orders' => $this->shipperService->getAllDeliveryOrders(),
             'title' => 'Shipper Dashboard - Coffee House'
         ]);
     }

@@ -23,19 +23,10 @@ class CustomerRepository extends ConnectDatabase {
         mysqli_stmt_execute($stmt);
 
         $result = mysqli_stmt_get_result($stmt);
-        $data = mysqli_fetch_assoc($result);
+        $data = mysqli_fetch_assoc($result); //lấy 1 dòng
 
         return $data ? new CustomerEntity($data) : null;
-    }
-
-    public function getAddressById($id) {
-        $customer = $this->findById($id);
-
-        if ($customer) {
-            return $customer->address ?? null;
-        }
-
-        return null;
+        //nếu có dữ liệu thì tạo object CustomerEntity, không có dữ liệu thì trả về null
     }
 
     public function findByEmail($email, $excludeId = null) {
@@ -52,7 +43,6 @@ class CustomerRepository extends ConnectDatabase {
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
         $data = mysqli_fetch_assoc($result);
-
         return $data ? new CustomerEntity($data) : null;
     }
 
@@ -168,18 +158,6 @@ class CustomerRepository extends ConnectDatabase {
     public function count() {
         $sql = "SELECT COUNT(*) as total FROM customers";
         $result = mysqli_query($this->con, $sql);
-        $row = mysqli_fetch_assoc($result);
-
-        return $row['total'];
-    }
-
-    public function countByStatus($status) {
-        $sql = "SELECT COUNT(*) as total FROM customers WHERE status = ?";
-        $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "i", $status);
-        mysqli_stmt_execute($stmt);
-
-        $result = mysqli_stmt_get_result($stmt);
         $row = mysqli_fetch_assoc($result);
 
         return $row['total'];

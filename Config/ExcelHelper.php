@@ -1,12 +1,5 @@
 <?php
 class ExcelHelper {
-    /**
-     * Xuất dữ liệu ra file Excel (định dạng HTML/XLS)
-     *
-     * @param mysqli_result|array $data - Dữ liệu từ database hoặc array
-     * @param array $headers - Mảng tiêu đề cột ['field' => 'label']
-     * @param string $filename - Tên file (không cần extension)
-     */
     public static function exportToExcel($data, $headers, $filename = 'DanhSach') {
         // Xóa tất cả output buffer
         while (ob_get_level()) {

@@ -1,10 +1,4 @@
 <?php
-/**
- * FILE: CartService.php
- * DESCRIPTION: Service xử lý business logic cho giỏ hàng
- * CHUẨN MVC: Service chứa TOÀN BỘ logic nghiệp vụ, validation
- * AUTHOR: Coffee House System
- */
 
 require_once './web/Repositories/CartRepository.php';
 require_once './web/Entity/CartItemEntity.php';
@@ -21,7 +15,6 @@ class CartService extends Service {
 
     public function addToCart($customerId, $productSizeId, $quantity) {
         try {
-            // VALIDATION - Logic ở Service, không phải Controller
             if (!$productSizeId) {
                 return [
                     'success' => false,
@@ -36,7 +29,6 @@ class CartService extends Service {
                 ];
             }
 
-            // BUSINESS LOGIC: Kiểm tra sản phẩm đã có trong giỏ chưa
             $existing = $this->cartRepository->findExisting($customerId, $productSizeId);
 
             if ($existing) {
@@ -93,21 +85,15 @@ class CartService extends Service {
         }
     }
 
-    /**
-     * Cập nhật số lượng sản phẩm
-     * LOGIC: Validate -> Kiểm tra quyền sở hữu -> Cập nhật hoặc xóa
-     */
     public function updateQuantity( $cartItemId, $quantity) {
         try {
-            // VALIDATION
+
             if (!$cartItemId) {
                 return [
                     'success' => false,
                     'message' => 'Thiếu thông tin sản phẩm'
                 ];
             }
-
-
 
             // Nếu số lượng <= 0 thì xóa item
             if ($quantity <= 0) {
@@ -136,7 +122,7 @@ class CartService extends Service {
 
     public function removeItem( $cartItemId) {
         try {
-            // VALIDATION
+
             if (!$cartItemId) {
                 return [
                     'success' => false,
@@ -144,7 +130,6 @@ class CartService extends Service {
                 ];
             }
 
-            // Xóa sản phẩm
             $this->cartRepository->delete($cartItemId);
 
             return [
@@ -176,9 +161,6 @@ class CartService extends Service {
         }
     }
 
-    /**
-     * Lấy số lượng items trong giỏ hàng
-     */
     public function getCartCount($customerId) {
         try {
             $count = $this->cartRepository->countItems($customerId);

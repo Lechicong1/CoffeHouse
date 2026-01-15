@@ -8,6 +8,7 @@ include_once './web/Repositories/IngredientRepository.php';
 include_once './web/Entity/OrderEntity.php';
 include_once './web/Entity/OrderItemEntity.php';
 include_once './web/Services/VoucherService.php';
+include_once './web/Services/CustomerService.php';
 include_once './web/Repositories/CustomerRepository.php';
 include_once './Enums/size.enum.php';
 include_once './Enums/status.enum.php';
@@ -21,6 +22,7 @@ class OrderService  {
     private $cartRepo;
     private $productSizeRepo;
     private $voucherService;
+    private $customerService;
     private $recipeRepo;
     private $ingredientRepo;
 
@@ -30,6 +32,7 @@ class OrderService  {
         $this->cartRepo = new CartRepository();
         $this->productSizeRepo = new ProductSizeRepository();
         $this->voucherService = new VoucherService();
+        $this->customerService = new CustomerService();
         $this->recipeRepo = new RecipeRepository();
         $this->ingredientRepo = new IngredientRepository();
     }
@@ -63,10 +66,10 @@ class OrderService  {
         }
 
         // Validate phone number format
-        if (!preg_match('/^[0-9]{10,11}$/', $data['customer_phone'])) {
+        if (!is_numeric($data['customer_phone'])){
             return [
                 'success' => false,
-                'message' => 'Số điện thoại không hợp lệ (10-11 số)'
+                'message' => 'Số điện thoại kông hợp lệ '
             ];
         }
 
@@ -329,7 +332,7 @@ class OrderService  {
             }
 
             // Cộng điểm cho khách hàng (POS: cộng ngay khi thanh toán)
-            $pointsAwarded = $this->awardLoyaltyPoints($order->customer_id, $order->total_amount);
+            $pointsAwarded = $this->customerService->awardLoyaltyPoints($order->customer_id, $order->total_amount);
 
             return [
                 'success' => true,
@@ -517,7 +520,7 @@ class OrderService  {
             if ($this->orderRepo->update($order)) {
                 // Cộng điểm khi đơn hàng COMPLETED (Web: shipper hoàn thành)
                 if ($newStatus === OrderStatus::COMPLETED && $order->customer_id) {
-                    $this->awardLoyaltyPoints($order->customer_id, $order->total_amount);
+                    $this->customerService->awardLoyaltyPoints($order->customer_id, $order->total_amount);
                 }
                 return ['success' => true, 'message' => 'Cập nhật trạng thái thành công'];
             }
@@ -529,12 +532,6 @@ class OrderService  {
         }
     }
 
-    /**
-     * Cập nhật ghi chú đơn hàng
-     * @param int $orderId
-     * @param string $note
-     * @return array
-     */
     public function updateOrderNote($orderId, $note) {
         try {
             $order = $this->orderRepo->findById($orderId);
@@ -596,12 +593,6 @@ class OrderService  {
         }
     }
 
-    /**
-     * Cập nhật ghi chú cho từng item trong đơn hàng
-     * @param int $itemId
-     * @param string $note
-     * @return array
-     */
     public function updateOrderItemNote($itemId, $note) {
         try {
             // Kiểm tra item có tồn tại không
@@ -639,13 +630,10 @@ class OrderService  {
    // cong le
     public function cancelOrder($orderId, $customerId) {
         try {
-            // 1. Kiểm tra đơn hàng tồn tại
             $order = $this->orderRepo->findById($orderId);
             if (!$order) {
                 return ['success' => false, 'message' => 'Không tìm thấy đơn hàng'];
             }
-
-            // 2. Kiểm tra quyền sở hữu
             if ($order->customer_id != $customerId) {
                 return ['success' => false, 'message' => 'Bạn không có quyền hủy đơn hàng này'];
             }
@@ -678,35 +666,13 @@ class OrderService  {
         }
     }
 
+
     /**
-     * Tính và cộng điểm cho khách hàng
-     * 1.000đ = 1 điểm
-     * @param int|null $customerId
-     * @param float $totalAmount - Tổng tiền đơn hàng (trước giảm)
-     * @return int - Số điểm được cộng
+     * Lấy danh sách đơn hàng theo customerId (chuẩn service)
      */
-    private function awardLoyaltyPoints($customerId, $totalAmount) {
-        if (!$customerId || $totalAmount <= 0) {
-            return 0;
-        }
-
-        $points = (int)floor($totalAmount / 1000);
-        if ($points <= 0) {
-            return 0;
-        }
-
-        $customerRepo = new CustomerRepository();
-        $customer = $customerRepo->findById($customerId);
-        if (!$customer) {
-            return 0;
-        }
-
-        $newPoints = (int)$customer->points + $points;
-        if ($customerRepo->updatePoints($customerId, $newPoints)) {
-            return $points;
-        }
-
-        return 0;
+    public function findByCustomerId($customerId) {
+        return $this->orderRepo->findByCustomerId($customerId);
     }
+
 }
 ?>

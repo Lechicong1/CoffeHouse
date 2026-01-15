@@ -1,6 +1,8 @@
+
 <main class="checkout-container">
     <div class="checkout-wrapper">
         <h1 class="checkout-title">THANH TOÁN</h1>
+
         <div class="checkout-content">
             <!-- Thông tin giao hàng -->
             <div class="checkout-section">
@@ -51,7 +53,7 @@
                     </div>
                     <div class="form-group">
                         <label for="shippingAddress">Địa chỉ giao hàng <span class="required">*</span></label>
-                        <textarea id="shippingAddress" name="txtShippingAddress" rows="3" required><?php echo htmlspecialchars($data['customer']->address ?? ''); ?></textarea>
+                        <textarea id="shippingAddress" name="txtShippingAddress" rows="3" required  ><?php echo htmlspecialchars($data['customer']->address ?? ''); ?></textarea>
                     </div>
                     <div class="form-group">
                         <label for="note">Ghi chú</label>
@@ -135,6 +137,8 @@
     </div>
 </main>
 <script>
+
+
 // Variables required by voucher-web.js
 const CUSTOMER_ID = <?php echo isset($data['customer']->id) ? (int)$data['customer']->id : 'null'; ?>;
 const TOTAL_AMOUNT = <?php echo isset($data['total']) ? (float)$data['total'] : 0; ?>;
@@ -154,4 +158,3 @@ document.querySelectorAll('input[name="payment_method"]').forEach(option => {
 </script>
 <script src="/COFFEE_PHP/Public/Js/voucher-utils.js"></script>
 <script src="/COFFEE_PHP/Public/Js/voucher-web.js"></script>
-

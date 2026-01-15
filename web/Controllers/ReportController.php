@@ -16,7 +16,6 @@ class ReportController extends Controller {
         // Lấy báo cáo tổng hợp
         $report = $this->reportService->getSummaryReport($fromDate, $toDate);
 
-        // Dữ liệu truyền vào view
         $viewData = [
             'page' => 'Report_v',
             'section' => 'report',
@@ -25,17 +24,14 @@ class ReportController extends Controller {
             'to_date' => $toDate
         ];
 
-        // Nếu request yêu cầu xem chi tiết doanh thu
         if (isset($_GET['show_revenue'])) {
             $viewData['revenue_details'] = $this->reportService->getRevenueDetails($fromDate, $toDate);
         }
 
-        // Nếu request yêu cầu xem chi tiết nhân viên
         if (isset($_GET['show_employees'])) {
             $viewData['employees'] = $this->reportService->getEmployeeDetails($fromDate, $toDate);
         }
 
-        // Nếu request yêu cầu xem chi tiết nhập nguyên liệu
         if (isset($_GET['show_inventory'])) {
             $viewData['inventory_imports'] = $this->reportService->getInventoryImportDetails($fromDate, $toDate);
         }
@@ -43,9 +39,7 @@ class ReportController extends Controller {
         $this->view('AdminDashBoard/MasterLayout', $viewData);
     }
 
-    /**
-     * Xuất Excel báo cáo tổng hợp
-     */
+    //bao cao tong hop
     function xuatexcel() {
         if (isset($_POST['btnXuatexcel'])) {
             $fromDate = $_POST['from_date'] ?? date('Y-m-01');
@@ -84,9 +78,7 @@ class ReportController extends Controller {
         }
     }
 
-    /**
-     * Xuất Excel chi tiết nhân viên và lương
-     */
+    //xuat luong nhan vien
     function xuatexcelEmployee() {
         if (isset($_POST['btnXuatexcelEmployee'])) {
             $fromDate = $_POST['from_date'] ?? date('Y-m-01');
@@ -106,9 +98,7 @@ class ReportController extends Controller {
         }
     }
 
-    /**
-     * Xuất Excel chi tiết nhập nguyên liệu
-     */
+    // xuat nhap nguyen lieu
     function xuatexcelInventory() {
         if (isset($_POST['btnXuatexcelInventory'])) {
             $fromDate = $_POST['from_date'] ?? date('Y-m-01');

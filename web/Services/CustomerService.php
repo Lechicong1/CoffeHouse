@@ -28,6 +28,7 @@ class CustomerService extends Service {
 
         $repository = $this->repository('CustomerRepository');
 
+        //check trùng
         if (!empty($data['email']) && $repository->findByEmail($data['email'])) {
             return ['success' => false, 'message' => 'Email đã được sử dụng bởi khách hàng khác!'];
         }
@@ -75,6 +76,7 @@ class CustomerService extends Service {
             return ['success' => false, 'message' => 'Số điện thoại đã được sử dụng bởi khách hàng khác!'];
         }
 
+        //gán lại field lên object
         $customer->full_name = $data['full_name'];
         $customer->phone = $data['phone'];
         $customer->email = $data['email'] ?? null;
@@ -88,22 +90,31 @@ class CustomerService extends Service {
             : ['success' => false, 'message' => 'Có lỗi xảy ra khi cập nhật khách hàng!'];
     }
 
-    public function posUpsertCustomer($data) {
+    public function posSearchCustomer($phone) {
+        if (!$phone) {
+            return ['success' => false, 'message' => 'Số điện thoại không được để trống'];
+        }
+
+        $repository = $this->repository('CustomerRepository');
+        $customer = $repository->findByPhone($phone);
+
+        if ($customer) {
+            return ['success' => true, 'customer' => $customer];
+        }
+
+        return ['success' => false, 'message' => 'Không tìm thấy khách hàng'];
+    }
+
+    public function posCreateCustomer($data) {
         $phone = $data['phone'] ?? null;
         if (!$phone) {
             return ['success' => false, 'message' => 'Số điện thoại không được để trống'];
         }
 
         $repository = $this->repository('CustomerRepository');
-        $cust = $repository->findByPhone($phone);
-        $pointsToAdd = (int)($data['pointsToAdd'] ?? 0);
 
-        if ($cust) {
-            if ($pointsToAdd > 0) {
-                $cust->points += $pointsToAdd;
-                $repository->updatePoints($cust->id, $cust->points);
-            }
-            return ['success' => true, 'customer' => $cust, 'created' => false];
+        if ($repository->findByPhone($phone)) {
+            return ['success' => false, 'message' => 'Số điện thoại đã được sử dụng!'];
         }
 
         $customer = new CustomerEntity([
@@ -114,13 +125,15 @@ class CustomerService extends Service {
             'email' => $data['email'] ?? '',
             'address' => $data['address'] ?? '',
             'account_type' => 'GUEST_POS',
-            'points' => $pointsToAdd,
+            'points' => 0,
             'status' => 1
         ]);
 
         if ($repository->create($customer)) {
-            return ['success' => true, 'customer' => $repository->findByPhone($phone), 'created' => true];
+            $newCustomer = $repository->findByPhone($phone);
+            return ['success' => true, 'customer' => $newCustomer];
         }
+
         return ['success' => false, 'message' => 'Không thể tạo khách hàng'];
     }
 

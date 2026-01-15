@@ -1,10 +1,4 @@
 <?php
-/**
- * VIEW CON - Quản lý Khách hàng
- * Chỉ hiển thị dữ liệu, không xử lý logic
- */
-
-// Lấy dữ liệu từ Controller (đã truyền qua $data)
 $customers = $data['customers'] ?? [];
 $totalCustomers = $data['totalCustomers'] ?? 0;
 $keyword = $data['keyword'] ?? '';

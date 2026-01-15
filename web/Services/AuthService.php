@@ -12,6 +12,7 @@ class AuthService extends Service {
                 'userType' => null
             ];
         }
+        
 
         $custRepo = $this->repository('CustomerRepository');
         $empRepo = $this->repository('EmployeeRepository');

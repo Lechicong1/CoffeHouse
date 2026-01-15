@@ -362,6 +362,9 @@ function updateCartUI() {
                       item.cartId
                     }', 1)">+</button>
                 </div>
+                <div class="item-actions">
+                    <button class="remove-btn" onclick="removeFromCart('${item.cartId}')" title="Xóa" aria-label="Xóa món" style="background:#ff4d4f;color:#fff;border:none;border-radius:8px;padding:6px 10px;cursor:pointer;margin-left:8px;font-weight:700;">&times;</button>
+                </div>
             `;
       list.appendChild(itemEl);
     });
@@ -726,3 +729,4 @@ window.closeSizeModal = closeSizeModal;
 window.openSizeModal = openSizeModal;
 window.updateQty = updateQty;
 window.updateNote = updateNote;
+window.removeFromCart = removeFromCart;

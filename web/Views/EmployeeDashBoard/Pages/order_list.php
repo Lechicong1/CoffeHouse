@@ -164,7 +164,6 @@ $currentSearch = $currentFilter['search'] ?? '';
                                         $statusClass = 'status-pending';
                                         $statusText = 'Chờ xác nhận';
                                         break;
-                                    case 'PROCESSING': // Tương thích với đơn hàng cũ
                                     case 'PREPARING':
                                         $statusClass = 'status-preparing';
                                         $statusText = 'Đang pha chế';

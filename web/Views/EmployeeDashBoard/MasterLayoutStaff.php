@@ -10,14 +10,14 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Kiểm tra đăng nhập (Uncomment khi có Auth)
-// if (!isset($_SESSION['user_logged_in'])) {
-//     header('Location: /COFFEE_PHP/login');
-//     exit;
-// }
+if (empty($_SESSION['user'])) {
+
+    header('Location: /COFFEE_PHP/Auth/showLogin');
+    exit;
+}
 
 // Lấy thông tin nhân viên từ session
-$staffName = $_SESSION['staff_name'] ?? 'Nhân Viên';
-$staffRole = $_SESSION['staff_role'] ?? 'Staff';
+$staffName = $_SESSION['user']['fullname'] ?? 'Nhân Viên';
 
 // Xác định section hiện tại
 $currentSection = $data['section'] ?? 'pos';
@@ -101,7 +101,6 @@ $currentSection = $data['section'] ?? 'pos';
                         </div>
                         <div class="user-info">
                             <span class="user-name"><?= htmlspecialchars($staffName) ?></span>
-                            <span class="user-role"><?= htmlspecialchars($staffRole) ?></span>
                         </div>
                     </div>
                 </div>

@@ -150,29 +150,29 @@ class VoucherService extends Service {
 
         $voucher = $voucherRepo->findById($voucherId);
         if (!$voucher) {
-            return ['success' => false, 'code' => 'VOUCHER_NOT_FOUND', 'message' => 'Không tìm thấy voucher', 'discount_amount' => 0];
+            return ['success' => false, 'message' => 'Không tìm thấy voucher', 'discount_amount' => 0];
         }
 
         if ((int)$voucher->is_active !== 1) {
-            return ['success' => false, 'code' => 'VOUCHER_INACTIVE', 'message' => 'Voucher không còn hoạt động', 'discount_amount' => 0];
+            return ['success' => false, 'message' => 'Voucher không còn hoạt động', 'discount_amount' => 0];
         }
 
         $today = date('Y-m-d');
         if ($voucher->start_date && strtotime($today) < strtotime($voucher->start_date)) {
-            return ['success' => false, 'code' => 'VOUCHER_NOT_STARTED', 'message' => 'Voucher chưa bắt đầu', 'discount_amount' => 0];
+            return ['success' => false, 'message' => 'Voucher chưa bắt đầu', 'discount_amount' => 0];
         }
 
         if ($voucher->end_date && strtotime($today) > strtotime($voucher->end_date)) {
-            return ['success' => false, 'code' => 'VOUCHER_EXPIRED', 'message' => 'Voucher đã hết hạn', 'discount_amount' => 0];
+            return ['success' => false, 'message' => 'Voucher đã hết hạn', 'discount_amount' => 0];
         }
 
         if (!is_null($voucher->quantity) && $voucher->used_count >= $voucher->quantity) {
-            return ['success' => false, 'code' => 'VOUCHER_OUT_OF_STOCK', 'message' => 'Voucher đã hết lượt sử dụng', 'discount_amount' => 0];
+            return ['success' => false, 'message' => 'Voucher đã hết lượt sử dụng', 'discount_amount' => 0];
         }
 
         if ($billTotal < $voucher->min_bill_total) {
             $minBill = number_format($voucher->min_bill_total, 0, ',', '.');
-            return ['success' => false, 'code' => 'MIN_BILL_NOT_MET', 'message' => "Đơn hàng tối thiểu {$minBill}đ", 'discount_amount' => 0];
+            return ['success' => false, 'message' => "Đơn hàng tối thiểu {$minBill}đ", 'discount_amount' => 0];
         }
 
         $pointsUsed = (int)$voucher->point_cost;
@@ -187,25 +187,24 @@ class VoucherService extends Service {
         }
 
         if ($pointsUsed > 0 && $customerPoints < $pointsUsed) {
-            return ['success' => false, 'code' => 'NOT_ENOUGH_POINTS', 'message' => 'Không đủ điểm để đổi voucher', 'discount_amount' => 0];
+            return ['success' => false, 'message' => 'Không đủ điểm để đổi voucher', 'discount_amount' => 0];
         }
 
         $discountAmount = $this->calculateDiscount($voucher, $billTotal);
 
         if (!$voucherRepo->incrementUsedCount($voucherId, $con)) {
-            return ['success' => false, 'code' => 'UPDATE_VOUCHER_FAILED', 'message' => 'Không thể cập nhật voucher', 'discount_amount' => 0];
+            return ['success' => false, 'message' => 'Không thể cập nhật voucher', 'discount_amount' => 0];
         }
 
         if ($pointsUsed > 0 && $customer) {
             $newPoints = max(0, $customerPoints - $pointsUsed);
             if (!$customerRepo->updatePoints($customerId, $newPoints)) {
-                return ['success' => false, 'code' => 'UPDATE_POINTS_FAILED', 'message' => 'Không thể cập nhật điểm khách hàng', 'discount_amount' => 0];
+                return ['success' => false, 'message' => 'Không thể cập nhật điểm khách hàng', 'discount_amount' => 0];
             }
         }
 
         return [
             'success' => true,
-            'code' => 'OK',
             'message' => 'Đổi voucher thành công',
             'discount_amount' => (float)$discountAmount,
             'voucher_name' => $voucher->name,

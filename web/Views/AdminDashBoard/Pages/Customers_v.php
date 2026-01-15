@@ -4,9 +4,6 @@ $totalCustomers = $data['totalCustomers'] ?? 0;
 $keyword = $data['keyword'] ?? '';
 ?>
 
-<!-- Import Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
 <!-- Import Customer Page CSS -->
 <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/customer-page.css">
 
@@ -17,9 +14,6 @@ $keyword = $data['keyword'] ?? '';
             <div class="header-title">
                 <h2><i class="fas fa-users"></i> Quản Lý Khách Hàng</h2>
                 <p class="subtitle">Tổng số: <strong><?php echo $totalCustomers; ?></strong> khách hàng</p>
-            </div>
-            <div class="header-actions">
-                <!-- reserved for actions (filters / add) -->
             </div>
         </div>
 
@@ -84,11 +78,11 @@ $keyword = $data['keyword'] ?? '';
                                     <div class="action-buttons">
                                         <button class="btn btn-primary btn-sm" 
                                                 onclick='openEditModal(<?php echo json_encode($customer->toArray()); ?>)'>
-                                            <i class="fas fa-edit"></i>
+                                            <i class="fas fa-edit"></i> Sửa
                                         </button>
                                         <button class="btn btn-danger btn-sm" 
                                                 onclick="confirmDelete(<?php echo $customer->id; ?>, '<?php echo htmlspecialchars($customer->full_name); ?>')">
-                                            <i class="fas fa-trash"></i>
+                                            <i class="fas fa-trash"></i> Xóa
                                         </button>
                                     </div>
                                 </td>
@@ -107,11 +101,11 @@ $keyword = $data['keyword'] ?? '';
         </div>
     </div>
 
-    <!-- Modal Thêm/Sửa Khách Hàng -->
+    <!-- Modal Sửa Khách Hàng -->
     <div id="customerModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 id="modalTitle">Thêm Khách Hàng</h3>
+                <h3 id="modalTitle">Sửa Khách Hàng</h3>
                 <span class="close" onclick="closeModal()">&times;</span>
             </div>
             <form id="customerForm" method="POST">
@@ -166,6 +160,5 @@ $keyword = $data['keyword'] ?? '';
 
     <!-- Import Customer Page JS -->
     <script src="/COFFEE_PHP/Public/Js/customer-page.js"></script>
-    </div>
 </section>
 

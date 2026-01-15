@@ -240,7 +240,6 @@ function showInvoice(orderId) {
 function generateInvoiceHTML(order, items) {
     const orderType = order.order_type === 'AT_COUNTER' ? 'TẠI QUẦY' : 'MANG VỀ / TAKE AWAY';
     const tableInfo = order.table_number ? `BÀN SỐ: ${order.table_number}` : orderType;
-    
     // Calculate totals
     let subtotal = 0;
     items.forEach(item => {

@@ -63,6 +63,7 @@ class OrderAdminController extends Controller {
             $data = array_map(function($order) {
                 return [
                     'order_code' => $order['order_code'],
+                    'order_type' => $order['order_type'] ?? '-',
                     'status' => $this->getStatusLabel($order['status']),
                     'payment_status' => $this->getPaymentStatusLabel($order['payment_status']),
                     'total_amount' => number_format($order['total_amount'], 0, ',', '.') . 'đ',
@@ -74,6 +75,7 @@ class OrderAdminController extends Controller {
             // Định nghĩa tiêu đề cột
             $headers = [
                 'order_code' => 'Mã Đơn Hàng',
+                'order_type' => 'Loại Đơn Hàng',
                 'status' => 'Trạng Thái',
                 'payment_status' => 'Thanh Toán',
                 'total_amount' => 'Tổng Tiền',
@@ -106,8 +108,6 @@ class OrderAdminController extends Controller {
     private function getPaymentStatusLabel($paymentStatus) {
         $labels = [
             'PAID' => 'Đã thanh toán',
-            'REFUNDED' => 'Đã hoàn tiền',
-            'UNPAID' => 'Chưa thanh toán'
         ];
         return $labels[$paymentStatus] ?? $paymentStatus;
     }

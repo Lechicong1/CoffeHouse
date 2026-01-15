@@ -10,53 +10,32 @@ class IngredientController extends Controller {
         $this->ingredientService = $this->service('IngredientService');
     }
 
-    /**
-     * Hiển thị danh sách nguyên liệu (Method mặc định)
-     */
     function GetData() {
-        // Đồng bộ trạng thái: tự động deactivate nguyên liệu hết hạn
-        $this->ingredientService->syncExpiryStatuses();
-        
-        $stats = $this->ingredientService->getStats();
-
         $this->view('AdminDashBoard/MasterLayout', [
             'page' => 'Ingredients_v',
             'section' => 'ingredients',
-            'ingredients' => $this->ingredientService->getAllIngredients(),
-            'stats' => $stats
+            'ingredients' => $this->ingredientService->getAllIngredients()
         ]);
     }
 
-    /**
-     * Tìm kiếm nguyên liệu (GET)
-     */
     function timkiem() {
-        // Đồng bộ trạng thái: tự động deactivate nguyên liệu hết hạn
-        $this->ingredientService->syncExpiryStatuses();
-        
         $keyword = $_GET['search'] ?? '';
         $kq = $this->ingredientService->searchIngredients($keyword);
-        $stats = $this->ingredientService->getStats();
 
         $this->view('AdminDashBoard/MasterLayout', [
             'page' => 'Ingredients_v',
             'section' => 'ingredients',
             'ingredients' => $kq,
-            'stats' => $stats,
             'keyword' => $keyword
         ]);
     }
 
-    /**
-     * Thêm nguyên liệu mới (POST)
-     */
     function ins() {
         if (isset($_POST['btnThem'])) {
             try {
                 $data = [
                     'name' => $_POST['txtName'],
-                    'unit' => $_POST['txtUnit'],
-                    'expiry_date' => !empty($_POST['txtExpiryDate']) ? $_POST['txtExpiryDate'] : null
+                    'unit' => $_POST['txtUnit']
                 ];
 
                 $result = $this->ingredientService->createIngredient($data);
@@ -70,19 +49,14 @@ class IngredientController extends Controller {
                 echo "<script>alert('Lỗi: " . $e->getMessage() . "')</script>";
             }
 
-            $stats = $this->ingredientService->getStats();
             $this->view('AdminDashBoard/MasterLayout', [
                 'page' => 'Ingredients_v',
                 'section' => 'ingredients',
-                'ingredients' => $this->ingredientService->getAllIngredients(),
-                'stats' => $stats
+                'ingredients' => $this->ingredientService->getAllIngredients()
             ]);
         }
     }
 
-    /**
-     * Cập nhật nguyên liệu (POST)
-     */
     function upd() {
         if (isset($_POST['btnCapnhat'])) {
             try {
@@ -90,8 +64,7 @@ class IngredientController extends Controller {
 
                 $data = [
                     'name' => $_POST['txtName'],
-                    'unit' => $_POST['txtUnit'],
-                    'expiry_date' => !empty($_POST['txtExpiryDate']) ? $_POST['txtExpiryDate'] : null
+                    'unit' => $_POST['txtUnit']
                 ];
 
                 $result = $this->ingredientService->updateIngredient($id, $data);
@@ -109,15 +82,11 @@ class IngredientController extends Controller {
             $this->view('AdminDashBoard/MasterLayout', [
                 'page' => 'Ingredients_v',
                 'section' => 'ingredients',
-                'ingredients' => $this->ingredientService->getAllIngredients(),
-                'stats' => $stats
+                'ingredients' => $this->ingredientService->getAllIngredients()
             ]);
         }
     }
 
-    /**
-     * Xóa nguyên liệu (POST)
-     */
     function del() {
         if (isset($_POST['btnXoa'])) {
             try {
@@ -133,19 +102,14 @@ class IngredientController extends Controller {
                 echo "<script>alert('Lỗi: " . $e->getMessage() . "')</script>";
             }
 
-            $stats = $this->ingredientService->getStats();
             $this->view('AdminDashBoard/MasterLayout', [
                 'page' => 'Ingredients_v',
                 'section' => 'ingredients',
-                'ingredients' => $this->ingredientService->getAllIngredients(),
-                'stats' => $stats
+                'ingredients' => $this->ingredientService->getAllIngredients()
             ]);
         }
     }
 
-    /**
-     * Xuất Excel danh sách nguyên liệu
-     */
     function xuatexcel() {
         if (isset($_POST['btnXuatexcel'])) {
             // Lấy từ khóa tìm kiếm nếu có

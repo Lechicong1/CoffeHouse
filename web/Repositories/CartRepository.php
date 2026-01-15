@@ -11,11 +11,7 @@ use web\Entity\CartItemEntity;
 
 class CartRepository extends ConnectDatabase {
 
-    /**
-     * Lấy tất cả items trong giỏ hàng của customer
-     * @param int $customerId
-     * @return array
-     */
+
     public function findCartByCustomerId($customerId) {
         $sql = "SELECT ci.*, p.id as product_id, p.name as product_name, p.image_url, ps.size_name, ps.price
                 FROM cart_items ci
@@ -26,8 +22,7 @@ class CartRepository extends ConnectDatabase {
         $stmt = mysqli_prepare($this->con, $sql);
         mysqli_stmt_bind_param($stmt, "i", $customerId);
         mysqli_stmt_execute($stmt);
-        
-        $result = mysqli_stmt_get_result($stmt);
+        $result = mysqli_stmt_get_result($stmt);  // kq tu cau lenh execute
         $cartItems = [];
         
         while ($row = mysqli_fetch_assoc($result)) {
@@ -38,12 +33,6 @@ class CartRepository extends ConnectDatabase {
         return $cartItems;
     }
 
-    /**
-     * Kiểm tra xem sản phẩm (với biến thể size) đã có trong giỏ hàng chưa
-     * @param int $customerId
-     * @param int $productSizeId
-     * @return CartItemEntity|null
-     */
     public function findExisting($customerId, $productSizeId) {
         $sql = "SELECT * FROM cart_items WHERE customer_id = ? AND product_size_id = ?";
         $stmt = mysqli_prepare($this->con, $sql);
@@ -56,11 +45,6 @@ class CartRepository extends ConnectDatabase {
         return $data ? new CartItemEntity($data) : null;
     }
 
-    /**
-     * Tìm cart item theo ID (để kiểm tra quyền sở hữu)
-     * @param int $id
-     * @return CartItemEntity|null
-     */
     public function findById($id) {
         $sql = "SELECT * FROM cart_items WHERE id = ?";
         $stmt = mysqli_prepare($this->con, $sql);
@@ -73,11 +57,6 @@ class CartRepository extends ConnectDatabase {
         return $data ? new CartItemEntity($data) : null;
     }
 
-    /**
-     * Thêm sản phẩm vào giỏ hàng
-     * @param CartItemEntity $cartItem
-     * @return int ID của item vừa thêm
-     */
     public function create($cartItem) {
         $sql = "INSERT INTO cart_items (customer_id, product_size_id, quantity) 
                 VALUES (?, ?, ?)";
@@ -92,12 +71,7 @@ class CartRepository extends ConnectDatabase {
         return mysqli_insert_id($this->con);
     }
 
-    /**
-     * Cập nhật số lượng của item trong giỏ hàng
-     * @param int $id
-     * @param int $quantity
-     * @return bool
-     */
+
     public function updateQuantity($id, $quantity) {
         $sql = "UPDATE cart_items SET quantity = ? WHERE id = ?";
         $stmt = mysqli_prepare($this->con, $sql);
@@ -106,11 +80,7 @@ class CartRepository extends ConnectDatabase {
         return mysqli_stmt_execute($stmt);
     }
 
-    /**
-     * Xóa item khỏi giỏ hàng
-     * @param int $id
-     * @return bool
-     */
+
     public function delete($id) {
         $sql = "DELETE FROM cart_items WHERE id = ?";
         $stmt = mysqli_prepare($this->con, $sql);
@@ -119,11 +89,7 @@ class CartRepository extends ConnectDatabase {
         return mysqli_stmt_execute($stmt);
     }
 
-    /**
-     * Xóa toàn bộ giỏ hàng của customer
-     * @param int $customerId
-     * @return bool
-     */
+
     public function clearCart($customerId) {
         $sql = "DELETE FROM cart_items WHERE customer_id = ?";
         $stmt = mysqli_prepare($this->con, $sql);
@@ -132,11 +98,6 @@ class CartRepository extends ConnectDatabase {
         return mysqli_stmt_execute($stmt);
     }
 
-    /**
-     * Đếm số lượng items trong giỏ hàng
-     * @param int $customerId
-     * @return int
-     */
     public function countItems($customerId) {
         $sql = "SELECT SUM(quantity) as total FROM cart_items WHERE customer_id = ?";
         $stmt = mysqli_prepare($this->con, $sql);
@@ -149,11 +110,6 @@ class CartRepository extends ConnectDatabase {
         return $data['total'] ?? 0;
     }
 
-    /**
-     * Tính tổng giá trị giỏ hàng
-     * @param int $customerId
-     * @return float
-     */
     public function calculateTotal($customerId) {
         $sql = "SELECT SUM(ci.quantity * ps.price) as total
                 FROM cart_items ci

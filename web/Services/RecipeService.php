@@ -94,10 +94,10 @@ class RecipeService extends Service
             throw new Exception("Dữ liệu công thức không hợp lệ!");
         }
 
-        // Check if ingredient is active
+        // Check if ingredient exists
         $ingredient = $this->ingredientRepo->findById($recipe->ingredient_id);
-        if (!$ingredient || !$ingredient->is_active) {
-            throw new Exception("Nguyên liệu này hiện đang ngừng hoạt động hoặc đã hết hạn!");
+        if (!$ingredient) {
+            throw new Exception("Nguyên liệu không tồn tại!");
         }
     }
 }

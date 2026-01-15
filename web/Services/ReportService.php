@@ -15,62 +15,42 @@ class ReportService extends Service {
         $this->inventoryImportService = new InventoryImportService();
     }
 
-    /**
-     * Lấy tổng lương nhân viên theo khoảng thời gian
-     */
     public function getTotalSalaryExpense($fromDate, $toDate) {
         return $this->reportRepo->getSalaryEmployeeExpense($fromDate, $toDate);
     }
 
-    /**
-     * Lấy danh sách nhân viên và lương theo thời gian (thay thế EmployeeService)
-     */
     public function getEmployeeDetails($fromDate, $toDate) {
         return $this->reportRepo->getAllSalaryEmployee($fromDate, $toDate);
     }
 
-    /**
-     * Lấy tổng chi phí nhập nguyên liệu theo khoảng thời gian
-     */
     public function getTotalInventoryExpense($fromDate, $toDate) {
         return $this->reportRepo->getInventoryExpense($fromDate, $toDate);
     }
 
-    /**
-     * Lấy tổng doanh thu từ đơn hàng (Tổng Thu thực tế)
-     */
     public function getTotalRevenue($fromDate, $toDate) {
         return $this->reportRepo->getTotalExpenseProduct($fromDate, $toDate);
     }
 
-    /**
-     * Lấy chi tiết doanh thu theo sản phẩm
-     */
     public function getRevenueDetails($fromDate, $toDate) {
         return $this->reportRepo->getDetailRevenue($fromDate, $toDate);
     }
 
-    /**
-     * Lấy chi tiết phiếu nhập nguyên liệu theo thời gian (cho modal)
-     */
     public function getInventoryImportDetails($fromDate, $toDate) {
         return $this->inventoryImportService->getImportsByDateRange($fromDate, $toDate);
     }
 
-    /**
-     * Tính toán báo cáo tổng hợp
-     */
+     // bao cao tong hop
     public function getSummaryReport($fromDate, $toDate) {
-        // Lấy tổng lương nhân viên theo thời gian
+        // tong luong nhan vien
         $totalSalary = $this->getTotalSalaryExpense($fromDate, $toDate);
 
-        // Lấy tổng chi phí nhập nguyên liệu
+        // tong chi phi nguyen lieu
         $totalInventory = $this->getTotalInventoryExpense($fromDate, $toDate);
 
-        // Tổng chi
+        // tong chi
         $totalExpense = $totalSalary + $totalInventory;
 
-        // Tổng thu từ đơn hàng
+        // tong thu
         $totalRevenue = $this->getTotalRevenue($fromDate, $toDate);
 
         // Lợi nhuận

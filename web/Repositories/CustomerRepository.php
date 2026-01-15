@@ -23,9 +23,10 @@ class CustomerRepository extends ConnectDatabase {
         mysqli_stmt_execute($stmt);
 
         $result = mysqli_stmt_get_result($stmt);
-        $data = mysqli_fetch_assoc($result);
+        $data = mysqli_fetch_assoc($result); //lấy 1 dòng
 
         return $data ? new CustomerEntity($data) : null;
+        //nếu có dữ liệu thì tạo object CustomerEntity, không có dữ liệu thì trả về null
     }
 
     public function findByEmail($email, $excludeId = null) {
@@ -42,7 +43,6 @@ class CustomerRepository extends ConnectDatabase {
         mysqli_stmt_execute($stmt);
         $result = mysqli_stmt_get_result($stmt);
         $data = mysqli_fetch_assoc($result);
-
         return $data ? new CustomerEntity($data) : null;
     }
 

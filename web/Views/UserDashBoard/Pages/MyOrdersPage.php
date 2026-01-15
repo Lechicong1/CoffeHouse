@@ -1,14 +1,5 @@
 <?php
 $orders = $data['orders'] ?? [];
-// Hiển thị alert JS nếu có message trong session
-if (isset($_SESSION['success'])) {
-    echo "<script>alert('" . addslashes($_SESSION['success']) . "');</script>";
-    unset($_SESSION['success']);
-}
-if (isset($_SESSION['error'])) {
-    echo "<script>alert('" . addslashes($_SESSION['error']) . "');</script>";
-    unset($_SESSION['error']);
-}
 ?>
 
 <section class="my-orders-section">

@@ -20,10 +20,7 @@ class CartItemEntity {
     public $size_name;
     public $price;
 
-    /**
-     * Constructor - Khởi tạo entity rỗng hoặc từ array
-     * @param array $data - Dữ liệu từ database (optional)
-     */
+
     public function __construct($data = []) {
         if (!empty($data)) {
             $this->id = $data['id'] ?? null;

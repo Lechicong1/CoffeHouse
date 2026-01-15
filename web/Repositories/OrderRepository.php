@@ -7,19 +7,13 @@ use web\Entity\OrderEntity;
 class OrderRepository extends ConnectDatabase {
     
     public function create(OrderEntity $order) {
-        // Debug log
-        error_log("DEBUG OrderRepository->create - table_number: " . ($order->table_number ?? 'NULL'));
         
         $sql = "INSERT INTO orders (order_code, staff_id, customer_id, order_type, status, payment_status, payment_method, total_amount, receiver_name, receiver_phone, shipping_address, note, table_number) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         $stmt = mysqli_prepare($this->con, $sql);
-        
-        // Định nghĩa kiểu dữ liệu cho các tham số (s: string, i: integer, d: double, b: blob)
-        // order_code(s), staff_id(i), customer_id(i), order_type(s), status(s), 
-        // payment_status(s), payment_method(s), total_amount(i), receiver_name(s), 
-        // receiver_phone(s), shipping_address(s), note(s), table_number(s)
-        $types = "siisssssissss";
+
+        $types = "siissssssssss";
         
         mysqli_stmt_bind_param($stmt, $types, 
             $order->order_code,
@@ -227,7 +221,7 @@ class OrderRepository extends ConnectDatabase {
      * @return array
      */
     public function getAllOrdersForAdmin() {
-        $sql = "SELECT order_code, status, payment_status, total_amount, receiver_name, receiver_phone 
+        $sql = "SELECT order_code, order_type, status, payment_status, total_amount, receiver_name, receiver_phone 
                 FROM orders 
                 ORDER BY id DESC";
         $result = mysqli_query($this->con, $sql);
@@ -249,7 +243,7 @@ class OrderRepository extends ConnectDatabase {
     public function searchOrdersForAdmin($keyword) {
         $keyword = '%' . mysqli_real_escape_string($this->con, $keyword) . '%';
 
-        $sql = "SELECT order_code, status, payment_status, total_amount, receiver_name, receiver_phone 
+        $sql = "SELECT order_code, order_type, status, payment_status, total_amount, receiver_name, receiver_phone 
                 FROM orders 
                 WHERE order_code LIKE ? OR receiver_name LIKE ? OR receiver_phone LIKE ?
                 ORDER BY id DESC";

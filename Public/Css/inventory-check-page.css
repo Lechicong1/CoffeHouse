@@ -76,7 +76,7 @@
     font-weight: 700;
     font-size: 0.85rem;
     text-transform: uppercase;
-    color: var(--white);
+    color: var(#1c0d0d) !important;
     white-space: nowrap;
 }
 

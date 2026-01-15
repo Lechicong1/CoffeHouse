@@ -2,21 +2,6 @@
 <link rel="stylesheet" href="Public/Css/pos-style.css">
 <link rel="stylesheet" href="Public/Css/voucher-page.css">
 
-<!-- Small POS layout tweaks for compact customer+voucher and voucher highlight -->
-<style>
-    .customer-details { display:flex; flex-wrap:wrap; gap:8px; align-items:flex-start; }
-    .customer-details .input-box { flex: 1 1 180px; min-width:160px; }
-    #pos-selected-customer, #pos-selected-voucher { white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .voucher-card { border:1px solid #eee; padding:14px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; cursor:pointer; min-height:84px; background: #fff; }
-    .voucher-card:hover { background:#f7fff2; }
-    .voucher-card.selected { background:#e6f9d9; border-color:#b6da9f; box-shadow:0 0 0 4px rgba(182,218,159,0.12); }
-    .voucher-card .v-left { flex:1; padding-right:12px; }
-    .voucher-card .v-name { font-weight:700; font-size:1rem; margin-bottom:6px; }
-    .voucher-card .v-meta { font-size:0.9rem; color:#444; }
-    .voucher-card .v-note { font-size:0.85rem; color:#666; margin-top:6px; }
-    .voucher-card .v-actions { margin-left:8px; }
-    .voucher-card.disabled { opacity:0.55; }
-</style>
 
 <!-- Truyền dữ liệu menu từ PHP sang JavaScript -->
 <script>
@@ -182,44 +167,12 @@
     </div>
 </div>
 
+
+<?php include __DIR__ . '/poscreatecustomer_v.php'; ?>
+
 <!-- Logic JS riêng cho POS (cache-bust để luôn load phiên bản mới) -->
 <script src="Public/Js/pos-logic.js?v=<?php echo time(); ?>"></script>
 <script src="Public/Js/pos-customer.js?v=<?php echo time(); ?>"></script>
 <script src="Public/Js/voucher-utils.js"></script>
 <script src="Public/Js/pos-voucher.js?v=<?php echo time(); ?>"></script>
 
-<!-- Customer Modal -->
-<div id="posCustomerModal" class="modal" style="display:none; position: fixed; z-index: 1200; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4);">
-    <div class="modal-content" style="max-width:420px; margin: 80px auto; background: #fff; border-radius:8px; overflow:hidden;">
-        <div style="padding:12px 16px; border-bottom:1px solid #eee; display:flex; align-items:center; justify-content:space-between;">
-            <h3 style="margin:0; font-size:1.1rem;">Tìm / Thêm Khách</h3>
-            <button style="background:none;border:none;font-size:1.4rem;cursor:pointer;" onclick="closePosCustomerModal()">&times;</button>
-        </div>
-        <div style="padding:16px;">
-            <!-- Form tìm kiếm khách hàng -->
-            <form id="search-customer-form" method="POST" action="/COFFEE_PHP/StaffController/searchCustomer">
-                <label>Số điện thoại</label>
-                <input type="text" name="phone" id="posPhone" placeholder="Nhập số điện thoại" style="width:100%;padding:8px;margin-bottom:8px;" required>
-                <button type="button" id="posFindBtn" class="btn btn-primary" onclick="posFindCustomer()">Tìm Khách</button>
-            </form>
-            <div id="posCustomerMessage" style="margin-top:8px;color:#444;font-size:0.95rem;"></div>
-            
-            <hr style="margin: 16px 0;">
-            
-            <!-- Form tạo/cập nhật khách hàng -->
-            <form id="upsert-customer-form" method="POST" action="/COFFEE_PHP/StaffController/upsertCustomer">
-                <label>Số điện thoại</label>
-                <input type="text" name="phone" id="posPhoneUpsert" placeholder="Nhập số điện thoại" style="width:100%;padding:8px;margin-bottom:8px;" required>
-                <label>Tên (tùy chọn)</label>
-                <input type="text" name="fullname" id="posFullName" placeholder="Khách lẻ" style="width:100%;padding:8px;margin-bottom:8px;">
-                <label>Email (tùy chọn)</label>
-                <input type="email" name="email" id="posEmail" placeholder="example@email.com" style="width:100%;padding:8px;margin-bottom:12px;">
-                <input type="hidden" name="pointsToAdd" value="0">
-                <div style="display:flex; gap:8px;">
-                    <button type="button" id="posCreateBtn" class="btn btn-success" onclick="posCreateOrUseCustomer()">Tạo / Dùng</button>
-                    <button type="button" class="btn" onclick="closePosCustomerModal()">Đóng</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>

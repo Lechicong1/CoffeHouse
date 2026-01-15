@@ -3,6 +3,17 @@
     if (!el) return;
     el.style.color = color || "";
     el.textContent = text || "";
+    // Add background for better visibility
+    if (color === "#080" || color.includes("green")) {
+      el.style.background = "#e8f5e9";
+      el.style.border = "1px solid #4caf50";
+    } else if (color === "#c00" || color.includes("red")) {
+      el.style.background = "#ffebee";
+      el.style.border = "1px solid #f44336";
+    } else {
+      el.style.background = "";
+      el.style.border = "";
+    }
   }
 
   function updateUiWithCustomer(c) {
@@ -66,7 +77,7 @@
   async function posFindCustomer(phone) {
     const msgEl = document.getElementById("posCustomerMessage");
     if (!phone) {
-      const phoneInput = document.getElementById("posPhone");
+      const phoneInput = document.getElementById("posPhoneFind");
       phone = phoneInput ? phoneInput.value.trim() : "";
     }
     if (!phone) {
@@ -90,7 +101,8 @@
           phone: parts[3],
           points: Number(parts[4] || 0),
         });
-        closePosCustomerModal();
+        formatMsg(msgEl, "Đã chọn khách hàng: " + parts[2], "#080");
+        setTimeout(() => closePosCustomerModal(), 800);
         return;
       }
       if (parts[0] === "ERROR") {
@@ -104,18 +116,18 @@
     }
   }
 
-  async function posCreateOrUseCustomer(phone, fullname, email) {
+  async function posCreateCustomer(phone, fullname, email) {
     const msgEl = document.getElementById("posCustomerMessage");
     if (!phone) {
-      const p = document.getElementById("posPhoneUpsert") || document.getElementById("posPhone");
+      const p = document.getElementById("posPhoneCreate") || document.getElementById("posPhone");
       phone = p ? p.value.trim() : "";
     }
     if (!fullname) {
-      const n = document.getElementById("posFullName") || document.getElementById("posFullnameCreate");
+      const n = document.getElementById("posFullnameCreate") || document.getElementById("posFullName");
       fullname = n ? n.value.trim() : "Khách lẻ";
     }
     if (!email) {
-      const e = document.getElementById("posEmail") || document.getElementById("posEmailCreate");
+      const e = document.getElementById("posEmailCreate") || document.getElementById("posEmail");
       email = e ? e.value.trim() : "";
     }
     if (!phone) {
@@ -124,10 +136,10 @@
     }
 
     try {
-      const r = await fetch("/COFFEE_PHP/Staff/upsertCustomerPos", {
+      const r = await fetch("/COFFEE_PHP/Staff/createCustomerPos", {
         method: "POST",
         headers: { "X-Requested-With": "XMLHttpRequest", "Content-Type": "application/x-www-form-urlencoded" },
-        body: new URLSearchParams({ phone, fullname, email, pointsToAdd: 0 }),
+        body: new URLSearchParams({ phone, fullname, email }),
       });
       const text = (await r.text()).trim();
       const parts = text.split("|");
@@ -139,7 +151,7 @@
           phone: parts[3],
           points: Number(parts[4] || 0),
         });
-        formatMsg(msgEl, "Tạo / dùng khách thành công", "#080");
+        formatMsg(msgEl, "Tạo khách hàng thành công", "#080");
         closePosCustomerModal();
         return;
       }
@@ -149,53 +161,84 @@
       }
       formatMsg(msgEl, "Phản hồi không hợp lệ từ server", "#c00");
     } catch (err) {
-      console.error("posCreateOrUseCustomer error:", err);
+      console.error("posCreateCustomer error:", err);
       formatMsg(msgEl, "Lỗi kết nối server", "#c00");
     }
   }
 
   function openPosCustomerModal() {
-    let modal = document.getElementById("posCustomerModal");
+    const modal = document.getElementById("posCustomerModal");
     if (!modal) {
-      modal = document.createElement("div");
-      modal.id = "posCustomerModal";
-      Object.assign(modal.style, {
-        position: "fixed", left: 0, top: 0, width: "100%", height: "100%",
-        display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(0,0,0,0.4)"
-      });
-      modal.innerHTML = `
-        <div style="background:#fff;padding:20px;border-radius:12px;min-width:560px;max-width:760px;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-            <strong style="font-size:18px;color:#333;">Tìm / Chọn Khách</strong>
-            <button id="closePosCustomerBtn" type="button" style="background:none;border:none;font-size:26px;cursor:pointer;color:#999;">×</button>
-          </div>
-          <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
-            <input id="posPhone" placeholder="SĐT khách" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:8px;" />
-            <button id="posFindBtnModal" onclick="posFindCustomer()" class="btn" style="padding:8px 12px;border-radius:8px;border:1px solid #ddd;background:#fff;">Tìm</button>
-            <button id="posApplyBtn" class="btn btn-success" style="padding:8px 12px;border-radius:8px;border:none;background:#4caf50;color:#fff;">Chọn</button>
-          </div>
-          <div id="posCustomerMessage" style="min-height:18px;margin-bottom:8px;color:#c00"></div>
-          <div id="posCustomerList" style="max-height:380px;overflow:auto;border-top:1px solid #f0f0f0;padding-top:8px;"></div>
-          <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;">
-            <button id="posClearBtn" class="btn" style="padding:8px 12px;border-radius:8px;border:1px solid #ddd;background:#fff;">Bỏ chọn</button>
-            <button id="posCreateBtn" class="btn" style="padding:8px 12px;border-radius:8px;border:1px solid #ddd;background:#fff;">Tạo / Dùng</button>
-          </div>
-        </div>
-      `;
-      document.body.appendChild(modal);
+      console.error("posCustomerModal not found!");
+      return;
+    }
+
+    // Bind events chỉ 1 lần
+    if (!modal.dataset.bound) {
+      // Event listeners
       document.getElementById("closePosCustomerBtn").addEventListener("click", closePosCustomerModal);
       document.getElementById("posApplyBtn").addEventListener("click", applySelectedCustomer);
       document.getElementById("posClearBtn").addEventListener("click", clearSelectedCustomer);
-      document.getElementById("posCreateBtn").addEventListener("click", () => {
-        posCreateOrUseCustomer(document.getElementById("posPhone").value.trim());
+      document.getElementById("posFindBtnModal").addEventListener("click", () => {
+        posFindCustomer();
       });
-    } else {
-      modal.style.display = "flex";
+      document.getElementById("posCreateBtn").addEventListener("click", () => {
+        posCreateCustomer();
+      });
+
+      // Enter key support
+      document.getElementById("posPhoneFind").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") posFindCustomer();
+      });
+      document.getElementById("posPhoneCreate").addEventListener("keypress", (e) => {
+        if (e.key === "Enter") posCreateCustomer();
+      });
+
+      // Tab switching
+      document.getElementById("tabFindBtn").addEventListener("click", () => {
+        document.getElementById("tabFindBtn").style.borderBottom = "3px solid #4caf50";
+        document.getElementById("tabFindBtn").style.color = "#333";
+        document.getElementById("tabFindBtn").style.fontWeight = "bold";
+        document.getElementById("tabCreateBtn").style.borderBottom = "3px solid transparent";
+        document.getElementById("tabCreateBtn").style.color = "#999";
+        document.getElementById("tabCreateBtn").style.fontWeight = "normal";
+        document.getElementById("tabFindContent").style.display = "block";
+        document.getElementById("tabCreateContent").style.display = "none";
+        clearMessage();
+      });
+
+      document.getElementById("tabCreateBtn").addEventListener("click", () => {
+        document.getElementById("tabCreateBtn").style.borderBottom = "3px solid #4caf50";
+        document.getElementById("tabCreateBtn").style.color = "#333";
+        document.getElementById("tabCreateBtn").style.fontWeight = "bold";
+        document.getElementById("tabFindBtn").style.borderBottom = "3px solid transparent";
+        document.getElementById("tabFindBtn").style.color = "#999";
+        document.getElementById("tabFindBtn").style.fontWeight = "normal";
+        document.getElementById("tabCreateContent").style.display = "block";
+        document.getElementById("tabFindContent").style.display = "none";
+        clearMessage();
+      });
+
+      modal.dataset.bound = "true";
     }
+
+    // Show modal
+    modal.style.display = "flex";
+    clearMessage();
+
+    // Clear inputs
+    document.getElementById("posPhoneFind").value = "";
+    document.getElementById("posPhoneCreate").value = "";
+    document.getElementById("posFullnameCreate").value = "";
+    document.getElementById("posEmailCreate").value = "";
+  }
+
+  function clearMessage() {
     const msgEl = document.getElementById("posCustomerMessage");
     if (msgEl) {
       msgEl.textContent = "";
       msgEl.style.color = "";
+      msgEl.style.background = "";
     }
   }
 
@@ -215,7 +258,7 @@
   window.openPosCustomerModal = openPosCustomerModal;
   window.closePosCustomerModal = closePosCustomerModal;
   window.posFindCustomer = posFindCustomer;
-  window.posCreateOrUseCustomer = posCreateOrUseCustomer;
+  window.posCreateCustomer = posCreateCustomer;
   window.applySelectedCustomer = applySelectedCustomer;
   window.clearSelectedCustomer = clearSelectedCustomer;
 })();

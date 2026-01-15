@@ -55,9 +55,7 @@ $keyword = $data['keyword'] ?? '';
                     <th>Tên nguyên liệu</th>
                     <th>Đơn vị</th>
                     <th>Số lượng tồn kho</th>
-                    <th>Hạn sử dụng</th>
                     <th>Tồn kho</th>
-                    <th>Trạng thái</th>
                     <th>Thao tác</th>
                 </tr>
             </thead>
@@ -80,14 +78,10 @@ $keyword = $data['keyword'] ?? '';
                             <td style="font-weight: 600;">
                                 <?= number_format($ingredient->stock_quantity, 0, ',', '.') . ' ' . htmlspecialchars($ingredient->unit) ?>
                             </td>
-                            <!-- Cột Hạn sử dụng - Xử lý hiển thị bằng JS -->
-                            <td class="col-expiry" data-date="<?= $ingredient->expiry_date ?>"></td>
                             
                             <!-- Cột Tồn kho - Xử lý hiển thị bằng JS -->
                             <td class="col-stock" data-qty="<?= $ingredient->stock_quantity ?>"></td>
-                            
-                            <!-- Cột Trạng thái - Xử lý hiển thị bằng JS -->
-                            <td class="col-status" data-active="<?= $ingredient->is_active ?>"></td>
+
                             <td>
                                 <button class="btn-edit" onclick='openIngredientModal("edit", <?= htmlspecialchars(json_encode($ingredient->toArray())) ?>)' title="Sửa">
                                     ✏️ Sửa
@@ -130,11 +124,6 @@ $keyword = $data['keyword'] ?? '';
                 <div class="form-group">
                     <label><span class="label-icon">📏</span> Đơn vị</label>
                     <input type="text" id="unit" name="txtUnit" required placeholder="VD: kg, lít, gói">
-                </div>
-
-                <div class="form-group">
-                    <label><span class="label-icon">📅</span> Hạn sử dụng</label>
-                    <input type="date" id="expiryDate" name="txtExpiryDate">
                 </div>
             </div>
 

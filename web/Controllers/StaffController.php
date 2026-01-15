@@ -154,107 +154,6 @@ class StaffController extends Controller {
         }
     }
 
-    /**
-     * Tìm khách hàng theo số điện thoại (POST) - Không dùng JSON
-     * URL: http://localhost/COFFEE_PHP/StaffController/searchCustomer
-     */
-    function searchCustomer() {
-        // Kiểm tra phương thức POST
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /COFFEE_PHP/StaffController/GetData');
-            exit;
-        }
-
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-
-        $phone = trim($_POST['phone'] ?? '');
-        
-        if (empty($phone)) {
-            $_SESSION['flash_error'] = 'Vui lòng nhập số điện thoại';
-            header('Location: /COFFEE_PHP/StaffController/GetData');
-            exit;
-        }
-
-        try {
-            $customer = $this->customerService->getCustomerByPhone($phone);
-            
-            if ($customer) {
-                // Lưu thông tin khách hàng vào session và redirect
-                $_SESSION['pos_customer_search'] = $customer->toArray();
-                $_SESSION['flash_success'] = 'Đã tìm thấy khách hàng: ' . $customer->full_name;
-            } else {
-                $_SESSION['flash_error'] = 'Không tìm thấy khách hàng với số điện thoại: ' . $phone;
-            }
-
-        } catch (Exception $e) {
-            $_SESSION['flash_error'] = 'Lỗi: ' . $e->getMessage();
-        }
-
-        header('Location: /COFFEE_PHP/StaffController/GetData');
-        exit;
-    }
-
-
-    /**
-     * Tạo hoặc cập nhật khách hàng (POST) - Không dùng JSON
-     * URL: http://localhost/COFFEE_PHP/StaffController/upsertCustomer
-     */
-    function upsertCustomer() {
-        // Kiểm tra phương thức POST
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /COFFEE_PHP/StaffController/GetData');
-            exit;
-        }
-
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-            session_start();
-        }
-
-        header("Content-Type: text/plain; charset=utf-8");
-
-        $phone = $_REQUEST['phone'] ?? '';
-        $fullname = $_REQUEST['fullname'] ?? 'Khách lẻ';
-        $email = $_REQUEST['email'] ?? '';
-        $pointsToAdd = (int)($_REQUEST['pointsToAdd'] ?? 0);
-
-        if (!$phone) {
-            echo "ERROR|Vui lòng nhập số điện thoại";
-            exit;
-        }
-
-        try {
-            $result = $this->customerService->posUpsertCustomer([
-                'phone' => $phone,
-                'fullname' => $fullname,
-                'email' => $email,
-                'pointsToAdd' => $pointsToAdd
-            ]);
-
-            if ($result['success']) {
-                $_SESSION['pos_customer_search'] = $result['customer']->toArray();
-                header('Location: /COFFEE_PHP/StaffController/GetData');
-                exit;
-            }
-
-            $c = $result['customer'];
-
-            // OK|id|name|phone|points
-            echo "OK|{$c->id}|{$c->full_name}|{$c->phone}|{$c->points}";
-            exit;
-
-        } catch (Exception $e) {
-            echo "ERROR|" . $e->getMessage();
-            exit;
-        }
-    }
-
-    /**
-     * AJAX: Tìm khách hàng theo SĐT (cho POS modal)
-     * URL: /COFFEE_PHP/Staff/searchCustomerPos
-     * Response: OK|id|name|phone|points hoặc ERROR|message
-     */
     function searchCustomerPos() {
         header("Content-Type: text/plain; charset=utf-8");
         
@@ -278,18 +177,12 @@ class StaffController extends Controller {
         exit;
     }
 
-    /**
-     * AJAX: Tạo/Dùng khách hàng (cho POS modal)
-     * URL: /COFFEE_PHP/Staff/upsertCustomerPos
-     * Response: OK|id|name|phone|points hoặc ERROR|message
-     */
-    function upsertCustomerPos() {
+    function createCustomerPos() {
         header("Content-Type: text/plain; charset=utf-8");
         
         $phone = trim($_POST['phone'] ?? '');
         $fullname = trim($_POST['fullname'] ?? 'Khách lẻ');
         $email = trim($_POST['email'] ?? '');
-        $pointsToAdd = (int)($_POST['pointsToAdd'] ?? 0);
 
         if (empty($phone)) {
             echo "ERROR|Vui lòng nhập số điện thoại";
@@ -297,11 +190,10 @@ class StaffController extends Controller {
         }
 
         try {
-            $result = $this->customerService->posUpsertCustomer([
+            $result = $this->customerService->posCreateCustomer([
                 'phone' => $phone,
                 'fullname' => $fullname,
-                'email' => $email,
-                'pointsToAdd' => $pointsToAdd
+                'email' => $email
             ]);
 
             if ($result['success'] && $result['customer']) {

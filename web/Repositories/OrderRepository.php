@@ -227,7 +227,7 @@ class OrderRepository extends ConnectDatabase {
      * @return array
      */
     public function getAllOrdersForAdmin() {
-        $sql = "SELECT order_code, status, payment_status, total_amount, receiver_name, receiver_phone 
+        $sql = "SELECT order_code, order_type, status, payment_status, total_amount, receiver_name, receiver_phone 
                 FROM orders 
                 ORDER BY id DESC";
         $result = mysqli_query($this->con, $sql);
@@ -249,7 +249,7 @@ class OrderRepository extends ConnectDatabase {
     public function searchOrdersForAdmin($keyword) {
         $keyword = '%' . mysqli_real_escape_string($this->con, $keyword) . '%';
 
-        $sql = "SELECT order_code, status, payment_status, total_amount, receiver_name, receiver_phone 
+        $sql = "SELECT order_code, order_type, status, payment_status, total_amount, receiver_name, receiver_phone 
                 FROM orders 
                 WHERE order_code LIKE ? OR receiver_name LIKE ? OR receiver_phone LIKE ?
                 ORDER BY id DESC";

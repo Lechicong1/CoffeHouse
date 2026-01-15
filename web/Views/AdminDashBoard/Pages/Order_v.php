@@ -112,18 +112,19 @@ function getPaymentStatusClass($paymentStatus) {
             <thead>
                 <tr>
                     <th>STT</th>
-                    <th>Mã đơn hàng</th>
-                    <th>Trạng thái</th>
-                    <th>Thanh toán</th>
-                    <th>Tổng tiền</th>
-                    <th>Tên người nhận</th>
-                    <th>SĐT người nhận</th>
+                    <th>Mã Đơn Hàng</th>
+                    <th>Loại Đơn Hàng</th>
+                    <th>Trạng Thái</th>
+                    <th>Thanh Toán</th>
+                    <th>Tổng Tiền</th>
+                    <th>Tên Người Nhận</th>
+                    <th>SĐT Người Nhận</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($orders)): ?>
                     <tr>
-                        <td colspan="7" style="padding: 40px; text-align: center; color: #999;">
+                        <td colspan="8" style="padding: 40px; text-align: center; color: #999;">
                             📭 Không có đơn hàng nào!
                         </td>
                     </tr>
@@ -135,6 +136,7 @@ function getPaymentStatusClass($paymentStatus) {
                         <tr>
                             <td><?= $i++ ?></td>
                             <td><strong><?= htmlspecialchars($order['order_code']) ?></strong></td>
+                            <td><?= htmlspecialchars($order['order_type'] ?? '-') ?></td>
                             <td>
                                 <span class="status-badge <?= getStatusClass($order['status']) ?>">
                                     <?= getStatusLabel($order['status']) ?>

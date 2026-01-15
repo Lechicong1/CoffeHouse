@@ -59,12 +59,12 @@ if (!empty($inventoryData)) {
                                 <tr>
                                     <td class="text-bold"><?php echo htmlspecialchars($ingredient['name']); ?></td>
                                     <td><?php echo htmlspecialchars($ingredient['unit']); ?></td>
-                                    <td class="text-right"><?php echo number_format($ingredient['stock_quantity'], 2); ?></td>
+                                    <td class="text-bold"><?php echo number_format($ingredient['stock_quantity'], 2); ?></td>
                                     
                                     <?php if ($hasCheck): ?>
                                         <!-- Đã kiểm kho -->
-                                        <td class="text-right"><?php echo number_format($check['actualQuantity'], 2); ?></td>
-                                        <td class="text-right"><?php echo number_format($check['difference'], 2); ?></td>
+                                        <td class="text-center"><?php echo number_format($check['actualQuantity'], 2); ?></td>
+                                        <td class="text-center"><?php echo number_format($check['difference'], 2); ?></td>
                                         <td>
                                             <?php
                                             // Tính trạng thái

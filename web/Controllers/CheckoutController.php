@@ -1,8 +1,4 @@
 <?php
-/**
- * Checkout Controller - Xử lý thanh toán đơn hàng
- * Refactored để ngắn gọn và dễ bảo trì
- */
 
 class CheckoutController extends Controller {
     private $customerService;
@@ -13,7 +9,6 @@ class CheckoutController extends Controller {
         $this->orderService = $this->service('OrderService');
     }
 
-    // Helper: Kiểm tra auth và trả về customerId
     private function checkAuth() {
         if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 
@@ -26,9 +21,9 @@ class CheckoutController extends Controller {
         return $_SESSION['user']['id'];
     }
 
-    // Lấy dữ liệu checkout (Buy Now hoặc từ Giỏ hàng)
+    // lay du lieu fill vao man checkout
     private function getCheckoutData() {
-        // Nếu là Buy Now -> lấy trực tiếp từ POST màn productDetail
+        // mua ngay -> lay tu productDetail
         if (isset($_POST['buy_now']) && $_POST['buy_now'] === '1') {
             $productSizeId = $_POST['txtProductSizeId'] ?? null;
             $quantity = (int)($_POST['txtQuantity'] ?? 1);
@@ -82,33 +77,77 @@ class CheckoutController extends Controller {
             ];
         }
 
-        // Fallback: Nếu không có dữ liệu POST
         throw new Exception('Vui lòng chọn sản phẩm từ giỏ hàng hoặc trang sản phẩm!');
     }
 
     // Hiển thị trang Checkout
-    public function GetData() {
+    public function GetData($message = null) {
         $customerId = $this->checkAuth();
 
-        try {
-            $checkoutData = $this->getCheckoutData();
-            $customer = $this->customerService->getCustomerById($customerId);
+        // Hiển thị thông báo lỗi/thành công nếu có
+        $this->showMessage($message);
 
-            $this->view('UserDashBoard/MasterLayout', [
+        try {
+            // Chuẩn bị dữ liệu view mặc định
+            $viewData = [
                 'title' => 'Thanh Toán - Coffee House',
                 'page' => 'CheckoutPage',
                 'currentPage' => 'checkout',
-                'additionalCSS' => ['Public/Css/checkout-page.css'],
-                'cartItems' => $checkoutData['items'],
-                'total' => $checkoutData['total'],
-                'customer' => $customer,
-                'isBuyNow' => $checkoutData['isBuyNow']
-            ]);
+                'additionalCSS' => ['Public/Css/checkout-page.css']
+            ];
+
+            // Kiểm tra có dữ liệu lỗi từ session không (khi validate lỗi quay lại)
+            if (isset($_SESSION['checkout_data']) && isset($_SESSION['checkout_items'])) {
+                $checkoutData = $_SESSION['checkout_items'];
+                $orderData = $_SESSION['checkout_data'];
+
+                // Xóa session sau khi lấy
+                unset($_SESSION['checkout_data'], $_SESSION['checkout_items']);
+
+                $customer = $this->customerService->getCustomerById($customerId);
+
+                // Merge dữ liệu đã nhập với thông tin customer
+                $customer->name = $orderData['customer_name'];
+                $customer->phone = $orderData['customer_phone'];
+                $customer->address = $orderData['shipping_address'];
+
+                // Thêm dữ liệu đã nhập để giữ lại
+                $viewData['savedNote'] = $orderData['note'] ?? '';
+                $viewData['savedPaymentMethod'] = $orderData['payment_method'] ?? '';
+            } else {
+                // Lấy dữ liệu checkout bình thường từ POST
+                $checkoutData = $this->getCheckoutData();
+                $customer = $this->customerService->getCustomerById($customerId);
+            }
+
+            // Gộp dữ liệu chung
+            $viewData['cartItems'] = $checkoutData['items'];
+            $viewData['total'] = $checkoutData['total'];
+            $viewData['customer'] = $customer;
+            $viewData['isBuyNow'] = $checkoutData['isBuyNow'];
+
+            $this->view('UserDashBoard/MasterLayout', $viewData);
 
         } catch (Exception $e) {
             $_SESSION['error_message'] = $e->getMessage();
             header('Location: /COFFEE_PHP/Cart/GetData');
             exit;
+        }
+    }
+
+    // ========== PRIVATE HELPER METHODS ==========
+
+    /**
+     * Hiển thị thông báo lỗi hoặc thành công
+     */
+    private function showMessage($message) {
+        if ($message) {
+            $messageText = addslashes($message['message']);
+            if ($message['success']) {
+                echo "<script>alert('$messageText')</script>";
+            } else {
+                echo "<script>alert('Lỗi: $messageText')</script>";
+            }
         }
     }
 
@@ -128,38 +167,27 @@ class CheckoutController extends Controller {
         ];
     }
 
-    // Xử lý đặt hàng
     public function placeOrder() {
-
-
         $customerId = $this->checkAuth();
 
-        try {
-            // Lấy items trực tiếp từ getCheckoutData (không cần hàm riêng)
-            $checkoutData = $this->getCheckoutData();
-            // lay name,phone,...
-            $orderData = $this->prepareOrderData();
-            $orderData['items'] = $checkoutData['items']; // Dùng lại items từ getCheckoutData
+        // Lấy items trực tiếp từ getCheckoutData (không cần hàm riêng)
+        $checkoutData = $this->getCheckoutData();
+        // lay name,phone,...
+        $orderData = $this->prepareOrderData();
+        $orderData['items'] = $checkoutData['items']; // Dùng lại items từ getCheckoutData
 
+        $result = $this->orderService->createOrderFromCheckout($customerId, $orderData);
 
-
-            // Tạo đơn hàng
-            $result = $this->orderService->createOrderFromCheckout($customerId, $orderData);
-
-            if (!$result['success']) {
-                throw new Exception($result['message'] ?? 'Không xác định');
-            }
-
-            // Thành công
-            $_SESSION['success_message'] = 'Đặt hàng thành công! Mã đơn hàng: ' . $result['order_code'];
-            header('Location: /COFFEE_PHP/Checkout/orderSuccess?order_id=' . $result['order_id']);
-            exit;
-
-        } catch (Exception $e) {
-            $_SESSION['error_message'] = 'Lỗi đặt hàng: ' . $e->getMessage();
-            header('Location: ' . ($_SERVER['HTTP_REFERER'] ?? '/COFFEE_PHP/Checkout/GetData'));
-            exit;
+        if (!$result['success']) {
+            $_SESSION['checkout_data'] = $orderData;
+            $_SESSION['checkout_items'] = $checkoutData;
+            // Gọi lại GetData với message lỗi
+            return $this->GetData($result);
         }
+
+        // Thành công - redirect đến trang success
+        header('Location: /COFFEE_PHP/Checkout/orderSuccess?order_id=' . $result['order_id']);
+        exit;
     }
 
 

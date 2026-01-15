@@ -66,10 +66,10 @@ class OrderService  {
         }
 
         // Validate phone number format
-        if (!preg_match('/^[0-9]{10,11}$/', $data['customer_phone'])) {
+        if (!is_numeric($data['customer_phone'])){
             return [
                 'success' => false,
-                'message' => 'Số điện thoại không hợp lệ (10-11 số)'
+                'message' => 'Số điện thoại kông hợp lệ '
             ];
         }
 

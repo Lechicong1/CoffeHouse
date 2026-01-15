@@ -2,7 +2,6 @@
     <h1 class="cart-title">Giỏ hàng của bạn</h1>
 
     <?php if (empty($data['cartItems'])): ?>
-        <!-- Giỏ hàng trống -->
         <div class="empty-cart">
             <h2>🛒 Giỏ hàng trống</h2>
             <p>Bạn chưa có sản phẩm nào trong giỏ hàng. Hãy khám phá thực đơn của chúng tôi!</p>
@@ -67,7 +66,7 @@
             <div class="cart-summary">
                 <div class="cart-summary-header">
                     <h3>Tóm tắt đơn hàng</h3>
-                    <!-- Form xóa tất cả sản phẩm - di chuyển lên đây -->
+
                     <form method="POST" action="/COFFEE_PHP/Cart/clear" style="display: inline;">
                         <button type="submit" name="btnXoaTatCa" class="clear-cart-btn-small" onclick="return confirm('Bạn có chắc muốn xóa tất cả sản phẩm khỏi giỏ hàng?')">
                             🗑️ Xóa tất cả
@@ -95,7 +94,6 @@
                     <span><?= number_format($data['total'], 0, ',', '.') ?>đ</span>
                 </div>
 
-                <!-- Form checkout toàn bộ giỏ hàng -->
                 <form method="POST" action="/COFFEE_PHP/Checkout/GetData" style="margin-top: 20px;">
                     <!-- Gửi tổng tiền -->
                     <input type="hidden" name="txtTotalAmount" value="<?= $data['total'] ?>">

@@ -24,17 +24,12 @@ class CartController extends Controller {
         return $_SESSION['user']['id'];
     }
 
-    /**
-     * Hiển thị trang giỏ hàng (Method mặc định)
-     */
     public function GetData() {
         $customerId = $this->checkAuth();
 
         try {
-            // Gọi Service để lấy dữ liệu - KHÔNG có logic ở đây
             $cartData = $this->cartService->getCart($customerId);
 
-            // Chỉ render view với data từ Service - Sử dụng MasterLayout
             $this->view('UserDashBoard/MasterLayout', [
                 'title' => 'Giỏ Hàng - Coffee House',
                 'page' => 'CartPage',
@@ -54,9 +49,7 @@ class CartController extends Controller {
         }
     }
 
-    /**
-     * Thêm sản phẩm vào giỏ hàng (POST)
-     */
+
     public function ins() {
         $customerId = $this->checkAuth();
 
@@ -66,10 +59,8 @@ class CartController extends Controller {
 
             $result = $this->cartService->addToCart($customerId, $productSizeId, $quantity);
 
-            // Set message
             $_SESSION[$result['success'] ? 'success_message' : 'error_message'] = $result['message'];
 
-            // Redirect về trang trước hoặc giỏ hàng
             $redirectUrl = $_SERVER['HTTP_REFERER'] ?? '/COFFEE_PHP/Cart/GetData';
             header('Location: ' . $redirectUrl);
         } catch (Exception $e) {
@@ -79,27 +70,17 @@ class CartController extends Controller {
         exit();
     }
 
-    /**
-     * Cập nhật số lượng sản phẩm trong giỏ (POST)
-     */
     public function upd() {
-        // Kiểm tra method POST
-        if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['btnCapnhat'])) {
-            header('Location: /COFFEE_PHP/Cart/GetData');
-            exit();
-        }
+
 
         $customerId = $this->checkAuth();
 
         try {
-            // Lấy dữ liệu từ request
             $cartItemId = $_POST['txtCartItemId'] ?? null;
             $quantity = (int)($_POST['txtQuantity'] ?? 0);
 
-            // Gọi Service xử lý - Service sẽ validate
             $result = $this->cartService->updateQuantity( $cartItemId, $quantity);
 
-            // Set message
             $_SESSION[$result['success'] ? 'success_message' : 'error_message'] = $result['message'];
 
         } catch (Exception $e) {

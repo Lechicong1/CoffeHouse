@@ -21,10 +21,27 @@ class OrderController extends Controller {
         return $_SESSION['user']['id'];
     }
 
-    function GetData() {
+    /**
+     * Hiển thị thông báo lỗi hoặc thành công
+     */
+    private function showMessage($message) {
+        if ($message) {
+            $messageText = addslashes($message['message']);
+            if ($message['success']) {
+                echo "<script>alert('$messageText')</script>";
+            } else {
+                echo "<script>alert('Lỗi: $messageText')</script>";
+            }
+        }
+    }
+
+    function GetData($message = null) {
         $customerId = $this->checkAuth();
 
-        // Lấy danh sách đơn hàng của khách hàng (gọi trực tiếp repo từ controller)
+        // Hiển thị thông báo nếu có
+        $this->showMessage($message);
+
+        // Lấy danh sách đơn hàng của khách hàng
         $orders = $this->orderService->findByCustomerId($customerId);
 
         $this->view('UserDashBoard/MasterLayout', [
@@ -47,22 +64,16 @@ class OrderController extends Controller {
         $orderId = $_POST['order_id'] ?? null;
 
         if (!$orderId) {
-            $_SESSION['error'] = 'Không tìm thấy đơn hàng';
-            header('Location: ?url=OrderController/GetData');
-            exit;
+            return $this->GetData([
+                'success' => false,
+                'message' => 'Không tìm thấy đơn hàng'
+            ]);
         }
-
         // Gọi service để xử lý logic hủy đơn
         $result = $this->orderService->cancelOrder($orderId, $customerId);
 
-        if ($result['success']) {
-            $_SESSION['success'] = $result['message'];
-        } else {
-            $_SESSION['error'] = $result['message'];
-        }
-
-        header('Location: ?url=OrderController/GetData');
-        exit;
+        // Hiển thị kết quả
+        return $this->GetData($result);
     }
 }
 ?>

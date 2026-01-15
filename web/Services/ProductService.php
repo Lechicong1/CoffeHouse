@@ -23,6 +23,7 @@ class ProductService {
 
             $sizes = $this->productRepository->getSizesByProductId($product->id);
             $sizeList = [];
+            // lấy danh sách size
             foreach ($sizes as $size) {
                 $sizeList[] = [
                     'id' => $size->id,  // product_size_id - QUAN TRỌNG!
@@ -39,6 +40,7 @@ class ProductService {
                     break;
                 }
             }
+            // lấy size đầu tiên
             if ($price == 0 && count($sizes) > 0) {
                 $price = $sizes[0]->price;
             }
@@ -333,46 +335,6 @@ class ProductService {
         // Validate category_id
         if (empty($data['category_id'])) {
             throw new Exception("Vui lòng chọn danh mục");
-        }
-    }
-
-    /**
-     * Lấy thông tin sản phẩm cho "Buy Now" (không cần giỏ hàng)
-     */
-    public function getBuyNowData($productSizeId, $quantity) {
-        try {
-            // Lấy thông tin sản phẩm từ database
-            $productSize = $this->productRepository->getProductSizeInfo($productSizeId);
-
-            if (!$productSize) {
-                return [
-                    'success' => false,
-                    'message' => 'Sản phẩm không tồn tại'
-                ];
-            }
-
-            // Tạo item data cho buy now
-            $item = (object)[
-                'id' => 0, // Fake ID
-                'product_name' => $productSize->product_name,
-                'size_name' => $productSize->size_name,
-                'price' => $productSize->price,
-                'quantity' => $quantity,
-                'subtotal' => $productSize->price * $quantity,
-                'image_url' => $productSize->image_url,
-                'product_size_id' => $productSizeId
-            ];
-
-            return [
-                'success' => true,
-                'items' => [$item],
-                'total' => $item->subtotal
-            ];
-        } catch (Exception $e) {
-            return [
-                'success' => false,
-                'message' => 'Có lỗi xảy ra: ' . $e->getMessage()
-            ];
         }
     }
 }

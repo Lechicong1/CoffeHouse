@@ -209,129 +209,28 @@ class InventoryCheckRepository extends ConnectDatabase {
         return $executeResult;
     }
 
-    /**
-     * Lưu mới một bản ghi kiểm kho
-     * @param array $data
-     * @return bool|int
-     */
-    public function create($data) {
-        $sql = "INSERT INTO inventory_checks 
-                (ingredient, theoryQuantity, actualQuantity, difference, note) 
-                VALUES (?, ?, ?, ?, ?)";
-        
-        $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param(
-            $stmt, 
-            "sddds", 
-            $data['ingredient'], 
-            $data['theoryQuantity'], 
-            $data['actualQuantity'], 
-            $data['difference'], 
-            $data['note']
-        );
-        
-        if (mysqli_stmt_execute($stmt)) {
-            return mysqli_insert_id($this->con);
-        }
-        
-        return false;
-    }
+
 
     /**
-     * Cập nhật thông tin kiểm kho
-     * @param int $id
-     * @param array $data
-     * @return bool
-     */
-    public function update($id, $data) {
-        $sql = "UPDATE inventory_checks 
-                SET ingredient = ?, 
-                    theoryQuantity = ?, 
-                    actualQuantity = ?, 
-                    difference = ?, 
-                    note = ?
-                WHERE id = ?";
-        
-        $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param(
-            $stmt, 
-            "sdddsi", 
-            $data['ingredient'], 
-            $data['theoryQuantity'], 
-            $data['actualQuantity'], 
-            $data['difference'], 
-            $data['note'],
-            $id
-        );
-        
-        return mysqli_stmt_execute($stmt);
-    }
-
-    /**
-     * Xóa bản ghi kiểm kho
-     * @param int $id
-     * @return bool
-     */
-    public function delete($id) {
-        $sql = "DELETE FROM inventory_checks WHERE id = ?";
-        $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "i", $id);
-        
-        return mysqli_stmt_execute($stmt);
-    }
-
-    /**
-     * Lấy báo cáo thất thoát theo tháng (tất cả tháng)
+     * Lấy báo cáo thất thoát theo khoảng thời gian (từ ngày - đến ngày)
+     * @param string $fromDate Ngày bắt đầu (format: Y-m-d)
+     * @param string $toDate Ngày kết thúc (format: Y-m-d)
      * @return array
      */
-    public function getInventoryCheckByMonth() {
+    public function getInventoryCheckByDateRange($fromDate, $toDate) {
         $sql = "SELECT 
                     ingredient, 
-                    MONTH(checked_at) AS month, 
+                    DATE(checked_at) AS check_date,
                     SUM(theoryQuantity) AS totalTheory, 
                     SUM(actualQuantity) AS totalActual, 
                     SUM(difference) AS totalDifference 
                 FROM inventory_checks 
-                GROUP BY ingredient, MONTH(checked_at) 
-                ORDER BY MONTH(checked_at) DESC, ingredient";
-
-        $result = mysqli_query($this->con, $sql);
-        $data = [];
-
-        if ($result) {
-            while ($row = mysqli_fetch_assoc($result)) {
-                $entity = new InventoryCheckEntity();
-                $entity->setIngredient($row['ingredient']);
-                $entity->setMonth($row['month']);
-                $entity->setTheoryQuantity($row['totalTheory']);
-                $entity->setActualQuantity($row['totalActual']);
-                $entity->setDifference($row['totalDifference']);
-                $data[] = $entity;
-            }
-        }
-
-        return $data;
-    }
-
-    /**
-     * Lấy báo cáo thất thoát theo tháng cụ thể
-     * @param int $month Tháng cần lọc (1-12)
-     * @return array
-     */
-    public function getInventoryCheckBySpecificMonth($month) {
-        $sql = "SELECT 
-                    ingredient, 
-                    MONTH(checked_at) AS month, 
-                    SUM(theoryQuantity) AS totalTheory, 
-                    SUM(actualQuantity) AS totalActual, 
-                    SUM(difference) AS totalDifference 
-                FROM inventory_checks 
-                WHERE MONTH(checked_at) = ? 
-                GROUP BY ingredient, MONTH(checked_at) 
-                ORDER BY ingredient";
+                WHERE DATE(checked_at) BETWEEN ? AND ?
+                GROUP BY ingredient, DATE(checked_at) 
+                ORDER BY DATE(checked_at) DESC, ingredient";
 
         $stmt = mysqli_prepare($this->con, $sql);
-        mysqli_stmt_bind_param($stmt, "i", $month);
+        mysqli_stmt_bind_param($stmt, "ss", $fromDate, $toDate);
         mysqli_stmt_execute($stmt);
 
         $result = mysqli_stmt_get_result($stmt);
@@ -340,7 +239,7 @@ class InventoryCheckRepository extends ConnectDatabase {
         while ($row = mysqli_fetch_assoc($result)) {
             $entity = new InventoryCheckEntity();
             $entity->setIngredient($row['ingredient']);
-            $entity->setMonth($row['month']);
+            $entity->setCheckedAt($row['check_date']);
             $entity->setTheoryQuantity($row['totalTheory']);
             $entity->setActualQuantity($row['totalActual']);
             $entity->setDifference($row['totalDifference']);

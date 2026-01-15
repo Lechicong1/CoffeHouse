@@ -72,7 +72,7 @@ $currentSection = $data['section'] ?? 'dashboard';
                         </a>
                     </li>
                     <li class="menu-item <?= $currentSection === 'orders' ? 'active' : '' ?>" data-target="orders">
-                        <a href="/COFFEE_PHP/admin/orders" class="menu-link">
+                        <a href="http://localhost/COFFEE_PHP/OrderAdminController" class="menu-link">
                             <span class="menu-icon">📦</span>
                             <span class="menu-text">ĐƠN HÀNG</span>
                         </a>

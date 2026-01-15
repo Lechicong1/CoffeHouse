@@ -63,5 +63,63 @@ class ProductReportController extends Controller
         // Trả về view thông qua MasterLayout
         $this->view('AdminDashBoard/MasterLayout', $viewData);
     }
+
+    /**
+     * Xuất Excel báo cáo sản phẩm
+     * URL: http://localhost/COFFEE_PHP/ProductReportController/xuatexcel
+     */
+    public function xuatexcel() {
+        if(isset($_POST['btnXuatexcel'])){
+            try {
+                // Lấy filter từ POST
+                $reqFromDate = isset($_POST['from_date']) ? $_POST['from_date'] : date('Y-m-01');
+                $reqToDate = isset($_POST['to_date']) ? $_POST['to_date'] : date('Y-m-d');
+
+                // Tạo full datetime cho query
+                $fromDate = $reqFromDate . ' 00:00:00';
+                $toDate = $reqToDate . ' 23:59:59';
+
+                $categoryId = isset($_POST['category_id']) ? $_POST['category_id'] : 'all';
+                $sortBy = isset($_POST['sort_by']) ? $_POST['sort_by'] : 'desc';
+
+                // Lấy dữ liệu báo cáo
+                $reportData = $this->service->getProductReportData($fromDate, $toDate, $categoryId, $sortBy);
+
+                // Chuyển đổi dữ liệu sang format Excel
+                $data = array_map(function($row, $index) {
+                    return [
+                        'stt' => $index + 1,
+                        'product_name' => $row['product_name'],
+                        'category_name' => $row['category_name'],
+                        'total_quantity' => $row['total_quantity'],
+                        'total_revenue' => number_format($row['total_revenue'], 0, ',', '.') . ' ₫',
+                        'percent' => $row['percent'] . '%',
+                        'avg_price' => number_format($row['avg_price'], 0, ',', '.') . ' ₫'
+                    ];
+                }, $reportData['details'], array_keys($reportData['details']));
+
+                // Định nghĩa cấu trúc cột cho Excel
+                $headers = [
+                    'stt' => 'STT',
+                    'product_name' => 'Sản Phẩm',
+                    'category_name' => 'Danh Mục',
+                    'total_quantity' => 'Số Lượng',
+                    'total_revenue' => 'Doanh Thu',
+                    'percent' => 'Tỷ Trọng (%)',
+                    'avg_price' => 'Giá Trung Bình'
+                ];
+
+                // Gọi hàm xuất Excel từ Helper
+                $fileName = 'BaoCaoSanPham_' . date('Ymd', strtotime($reqFromDate)) . '_' . date('Ymd', strtotime($reqToDate));
+                ExcelHelper::exportToExcel($data, $headers, $fileName);
+
+            } catch (Exception $e) {
+                echo "<script>
+                    alert('Lỗi xuất Excel: " . addslashes($e->getMessage()) . "');
+                    window.history.back();
+                </script>";
+            }
+        }
+    }
 }
 

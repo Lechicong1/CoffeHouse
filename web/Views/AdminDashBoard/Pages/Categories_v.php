@@ -140,10 +140,9 @@ $errorMessage = $data['errorMessage'] ?? null;
 
 <!-- JavaScript -->
 <script src="Public/Js/categories-page.js"></script>
-<script>
-    // Truyền messages từ PHP sang JavaScript
-    window.CATEGORY_MESSAGES = {
-        success: <?= $successMessage ? "'" . addslashes($successMessage) . "'" : 'null' ?>,
-        error: <?= $errorMessage ? "'" . addslashes($errorMessage) . "'" : 'null' ?>
-    };
-</script>
+<?php if ($successMessage): ?>
+<script>alert('<?= addslashes($successMessage) ?>');</script>
+<?php endif; ?>
+<?php if ($errorMessage): ?>
+<script>alert('<?= addslashes($errorMessage) ?>');</script>
+<?php endif; ?>

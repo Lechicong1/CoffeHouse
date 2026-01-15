@@ -1,22 +1,12 @@
 (function () {
-  function getSubtotalFromPage(fallback) {
-    const subtotalEl =
-      document.querySelector(".summary-total .total-row.subtotal span:last-child") ||
-      document.getElementById("grandTotal");
-    if (subtotalEl && subtotalEl.textContent) {
-      return parseVND(subtotalEl.textContent) || fallback;
-    }
-    return fallback || 0;
-  }
 
   function openVoucherList() {
     const fd = new FormData();
     if (typeof CUSTOMER_ID !== "undefined" && CUSTOMER_ID !== null) {
       fd.append("customer_id", CUSTOMER_ID);
     }
-    const subtotal = getSubtotalFromPage(
-      typeof TOTAL_AMOUNT !== "undefined" ? TOTAL_AMOUNT : 0
-    );
+    // Luôn dùng TOTAL_AMOUNT gốc để filter voucher
+    const subtotal = typeof TOTAL_AMOUNT !== "undefined" ? TOTAL_AMOUNT : 0;
     fd.append("bill_total", subtotal);
 
     fetch("/COFFEE_PHP/Voucher/getEligibleVouchers", {
@@ -46,6 +36,10 @@
             if (hid) hid.value = vid;
             if (modal) modal.style.display = "none";
             
+            // Show cancel button
+            const cancelBtn = document.getElementById("cancelVoucherBtn");
+            if (cancelBtn) cancelBtn.style.display = "inline-block";
+            
             previewAndApplyVoucher(vid, subtotal);
           });
         });
@@ -57,6 +51,29 @@
         const modal = document.getElementById("voucherModalCheckout");
         if (modal) modal.style.display = "flex";
       });
+  }
+
+  function cancelVoucher() {
+    const input = document.getElementById("customerVoucher");
+    const hid = document.getElementById("appliedVoucherId");
+    const msgEl = document.getElementById("checkoutVoucherMsg");
+    const cancelBtn = document.getElementById("cancelVoucherBtn");
+    const totalInput = document.querySelector('input[name="txtTotalAmount"]');
+    const originalTotal = document.getElementById("originalTotal");
+    const grand = document.getElementById("grandTotal");
+    
+    if (input) input.value = "";
+    if (hid) hid.value = "";
+    if (msgEl) msgEl.textContent = "";
+    if (cancelBtn) cancelBtn.style.display = "none";
+    
+    // Restore original total
+    if (originalTotal && totalInput) {
+      totalInput.value = originalTotal.value;
+    }
+    if (originalTotal && grand) {
+      grand.textContent = formatVND(Number(originalTotal.value));
+    }
   }
 
   function previewAndApplyVoucher(voucherId, totalAmount) {
@@ -143,6 +160,12 @@
         if (m) m.style.display = "none";
       });
     }
+    
+    // Cancel voucher button
+    const cancelBtn = document.getElementById("cancelVoucherBtn");
+    if (cancelBtn) {
+      cancelBtn.addEventListener("click", cancelVoucher);
+    }
   }
 
   if (document.readyState === "loading") {
@@ -153,4 +176,6 @@
 
   window.openVoucherList = openVoucherList;
   window.previewAndApplyVoucher = previewAndApplyVoucher;
+  window.cancelVoucher = cancelVoucher;
 })();
+

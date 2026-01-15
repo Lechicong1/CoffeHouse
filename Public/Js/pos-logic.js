@@ -183,7 +183,7 @@ function renderMenuGrid(items) {
 
   grid.innerHTML = "";
 
-  // ✅ Đảm bảo voucher_id được set từ state (nguồn sự thật)
+  // Đảm bảo voucher_id được set từ state (nguồn sự thật)
   const voucherInput = document.getElementById("form-voucher-id");
   if (voucherInput) {
     const vid = window.currentOrder?.voucher?.voucher_id || "";
@@ -370,42 +370,62 @@ function updateCartUI() {
   // Calculate totals
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
 
-  // Voucher discount calculation (if any)
-  // Voucher discount calculation (prefer server preview if present)
+  // Voucher discount calculation (Recalculate based on current subtotal)
   let voucherDiscount = 0;
-  let totalAfter = null;
-  if (window.currentOrder && window.currentOrder.voucherPreview) {
-    voucherDiscount = Number(
-      window.currentOrder.voucherPreview.discount_amount || 0
-    );
-    totalAfter = Number(window.currentOrder.voucherPreview.total_after || null);
-  } else if (window.currentOrder && window.currentOrder.voucher) {
+
+  if (window.currentOrder && window.currentOrder.voucher) {
     const v = window.currentOrder.voucher;
+
+    // Nếu voucher có thông tin (đã được áp dụng)
     if (v) {
+      // Ưu tiên convert sang number kỹ
+      const discVal = Number(v.discount_value) || 0;
+
       if (v.discount_type === "FIXED") {
-        voucherDiscount = Number(v.discount_value) || 0;
+        voucherDiscount = discVal;
       } else {
-        voucherDiscount = subtotal * ((Number(v.discount_value) || 0) / 100.0);
+        // PERCENT
+        voucherDiscount = subtotal * (discVal / 100.0);
       }
-      if (v.max_discount_value) {
+
+      // Kiểm tra giảm giá tối đa
+      if (v.max_discount_value && Number(v.max_discount_value) > 0) {
         voucherDiscount = Math.min(
           voucherDiscount,
           Number(v.max_discount_value)
         );
       }
+
+      // Giảm giá không quá tổng tiền
       voucherDiscount = Math.min(voucherDiscount, subtotal);
+
+      // Làm tròn
       voucherDiscount = Math.round(voucherDiscount);
     }
   }
 
   // Update totals (NO TAX)
-  const total =
-    totalAfter !== null
-      ? Math.max(0, totalAfter)
-      : Math.max(0, subtotal - voucherDiscount);
+  const total = Math.max(0, subtotal - voucherDiscount);
 
+  // Update UI Elements
   const subtotalEl = document.getElementById("subtotal-price");
   if (subtotalEl) subtotalEl.textContent = formatCurrency(subtotal);
+
+  // Update Discount Row
+  const discountRow = document.getElementById("discount-row");
+  const discountNameEl = document.getElementById("discount-voucher-name");
+  const discountPriceEl = document.getElementById("discount-price");
+
+  if (voucherDiscount > 0) {
+    if (discountRow) discountRow.style.display = "flex";
+    if (discountNameEl && window.currentOrder.voucher) {
+      discountNameEl.textContent = window.currentOrder.voucher.code || window.currentOrder.voucher.name || "Voucher";
+    }
+    if (discountPriceEl) discountPriceEl.textContent = "-" + formatCurrency(voucherDiscount);
+  } else {
+    // Nếu không có giảm giá nhưng vẫn đang hiển thị voucher cũ (trường hợp xóa hết món chẳng hạn), reset
+    if (discountRow) discountRow.style.display = "none";
+  }
 
   // Hide or zero out tax if element exists
   const taxEl = document.getElementById("tax-price");
@@ -414,12 +434,17 @@ function updateCartUI() {
   const totalEl = document.getElementById("total-price");
   if (totalEl) totalEl.textContent = formatCurrency(total);
 
-
   const btnTotalEl = document.getElementById("btn-total");
   if (btnTotalEl) btnTotalEl.textContent = formatCurrency(total);
 
   const modalTotalEl = document.getElementById("modal-total");
   if (modalTotalEl) modalTotalEl.textContent = formatCurrency(total);
+
+  // QUAN TRỌNG: Cập nhật giá trị vào form ẩn dùng để submit
+  const formTotalEl = document.getElementById("form-total-amount");
+  if (formTotalEl) {
+      formTotalEl.value = total;
+  }
 }
 
 function updateNote(cartItemId, note) {
@@ -476,25 +501,40 @@ function openPaymentModal() {
   const modal = document.getElementById("payment-modal");
   if (modal) {
     modal.style.display = "flex";
-    // Update total in modal — ưu tiên dùng #form-total-amount (nguồn sự thật),
-    // nếu không có thì dùng #total-price, cuối cùng mới tính tạm từ cart
-    let total = 0;
-    const formTotalEl = document.getElementById("form-total-amount");
-    if (formTotalEl && formTotalEl.value) {
-      total = Number(formTotalEl.value) || 0;
-    } else {
-      const totalPriceEl = document.getElementById("total-price");
-      if (totalPriceEl && totalPriceEl.textContent) {
-        total =
-          Number(String(totalPriceEl.textContent).replace(/[^0-9\-]+/g, "")) ||
-          0;
+
+    // TÍNH TOÁN LẠI TỪ ĐẦU ĐỂ CHÍNH XÁC TUYỆT ĐỐI
+    // 1. Tính subtotal
+    const subtotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+
+    // 2. Tính voucher discount
+    let voucherDiscount = 0;
+    if (window.currentOrder && window.currentOrder.voucher) {
+      const v = window.currentOrder.voucher;
+      const discVal = Number(v.discount_value) || 0;
+
+      if (v.discount_type === "FIXED") {
+        voucherDiscount = discVal;
       } else {
-        total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+        voucherDiscount = subtotal * (discVal / 100.0);
       }
+
+      if (v.max_discount_value && Number(v.max_discount_value) > 0) {
+        voucherDiscount = Math.min(voucherDiscount, Number(v.max_discount_value));
+      }
+      voucherDiscount = Math.min(voucherDiscount, subtotal);
+      voucherDiscount = Math.round(voucherDiscount);
     }
 
+    // 3. Tính Total
+    const total = Math.max(0, subtotal - voucherDiscount);
+
+    // Update modal UI & Hidden Form
     const modalTotalEl = document.getElementById("modal-total");
     if (modalTotalEl) modalTotalEl.textContent = formatCurrency(total);
+
+    // Cập nhật lại form input total để khi submit đúng giá
+    const formTotalEl = document.getElementById("form-total-amount");
+    if (formTotalEl) formTotalEl.value = total;
   }
 }
 

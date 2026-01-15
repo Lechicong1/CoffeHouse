@@ -7,9 +7,9 @@
 
 // Lấy dữ liệu từ Controller (đã truyền qua $data)
 $employees = $data['employees'] ?? [];
-$stats = $data['stats'] ?? ['total' => 0, 'manager' => 0, 'barista' => 0, 'cashier' => 0, 'waiter' => 0, 'cleaner' => 0];
 $keyword = $data['keyword'] ?? '';
 $roleFilter = $data['roleFilter'] ?? 'all';
+$totalEmployees = count($employees);
 $successMessage = $data['successMessage'] ?? null;
 $errorMessage = $data['errorMessage'] ?? null;
 
@@ -29,21 +29,9 @@ $roles = $data['roles'] ?? [
     <div class="section-header">
         <div class="header-title">
             <h2>👔 Quản lý Nhân viên</h2>
-            <p class="subtitle">Tổng số: <strong><?= $stats['total'] ?></strong> nhân viên</p>
+            <p class="subtitle">Tổng số: <strong><?= $totalEmployees ?></strong> nhân viên</p>
         </div>
         <div class="header-actions">
-            <!-- Filter by Role -->
-            <form method="GET" style="margin: 0;">
-                <input type="hidden" name="url" value="Employee">
-                <select class="filter-select" name="role" onchange="this.form.submit()">
-                    <option value="all" <?= $roleFilter === 'all' ? 'selected' : '' ?>>Tất cả vai trò</option>
-                    <?php foreach ($roles as $value => $name): ?>
-                        <option value="<?= $value ?>" <?= $roleFilter == $value ? 'selected' : '' ?>>
-                            <?= $name ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </form>
 
             <!-- Button Xuất Excel -->
             <form method="POST" action="EmployeeController/xuatexcel" style="margin: 0;">
@@ -86,7 +74,7 @@ $roles = $data['roles'] ?? [
             <tbody>
                 <?php if (empty($employees)): ?>
                     <tr>
-                        <td colspan="8" style="padding: 40px; text-align: center; color: #999;">
+                        <td colspan="9" style="padding: 40px; text-align: center; color: #999;">
                             📭 Không có nhân viên nào!
                         </td>
                     </tr>
@@ -99,11 +87,7 @@ $roles = $data['roles'] ?? [
                             <td><?= $i++ ?></td>
                             <td><strong><?= htmlspecialchars($employee->username) ?></strong></td>
                             <td><?= htmlspecialchars($employee->fullname) ?></td>
-                            <td>
-                                <span class="badge badge-role-<?= strtolower($employee->roleName) ?>">
-                                    <?= $employee->getRoleDisplayName() ?>
-                                </span>
-                            </td>
+                            <td><?= $employee->getRoleDisplayName() ?></td>
                             <td><?= htmlspecialchars($employee->email ?? '-') ?></td>
                             <td><?= htmlspecialchars($employee->phonenumber) ?></td>
                             <td style="font-weight: 600; color: #27ae60;">

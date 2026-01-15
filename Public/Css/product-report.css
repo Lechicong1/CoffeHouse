@@ -6,6 +6,28 @@
     --border-color: #e9ecef;
 }
 
+/* Alert Error */
+.alert-error {
+    background-color: #fde8e8;
+    border: 1px solid #f8b4b4;
+    color: #c81e1e;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+    40%, 60% { transform: translate3d(4px, 0, 0); }
+}
+
 .product-report-container {
     padding: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -13,25 +35,28 @@
 
 .report-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 15px;
     margin-bottom: 25px;
     background: #fff;
-    padding: 15px;
+    padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .report-header h2 {
-    margin: 0;
+    margin: 0 0 15px 0;
     color: var(--text-color);
     font-size: 24px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--border-color);
 }
 
 .filter-form {
     display: flex;
     gap: 15px;
     align-items: flex-end;
+    flex-wrap: wrap;
 }
 
 .filter-group label {
@@ -48,18 +73,32 @@
     font-size: 14px;
 }
 
-.btn-filter {
+/* Đồng bộ style cho cả 2 nút */
+.btn-filter,
+.btn-export {
     background: var(--primary-color);
     color: white;
     border: none;
-    padding: 9px 20px;
+    padding: 10px 24px;
     border-radius: 4px;
     cursor: pointer;
     font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.btn-filter:hover {
+.btn-filter:hover,
+.btn-export:hover {
     background: var(--primary-dark);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.btn-filter:active,
+.btn-export:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* KPI CARDS */
@@ -99,27 +138,28 @@
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
+.kpi-content {
+    flex: 1;
+}
+
 .kpi-content h3 {
-    margin: 0 0 5px 0;
+    margin: 0 0 8px 0;
     font-size: 14px;
-    color: #6c757d;
-    font-weight: 500;
+    font-weight: 600;
+    color: #868e96;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
 
 .kpi-value {
-    margin: 0;
-    font-size: 24px;
+    font-size: 28px;
     font-weight: 700;
+    margin: 5px 0;
     color: var(--text-color);
 }
 
 .kpi-value.small-text {
-    font-size: 18px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    font-size: 20px;
 }
 
 .kpi-desc {
@@ -138,14 +178,26 @@
     border: 1px solid rgba(0,0,0,0.03);
 }
 
+.section-title-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
 .section-title {
     font-size: 18px;
     font-weight: 700;
-    margin-bottom: 25px;
     color: var(--text-color);
     border-left: 4px solid var(--primary-color);
     padding-left: 15px;
     border-bottom: none;
+    margin: 0;
+}
+
+.export-form-inline {
+    display: inline-flex;
+    margin: 0;
 }
 
 .report-table {
@@ -158,12 +210,16 @@
     background: linear-gradient(to bottom, #f8f9fa, #e9ecef);
     padding: 15px;
     font-weight: 700;
-    color: #495057;
+    color: #222;
     border-bottom: 2px solid #dee2e6;
     text-transform: uppercase;
     font-size: 13px;
     letter-spacing: 0.5px;
-    border-right: 1px solid rgba(0,0,0,0.05); /* Divider */
+    border-right: 1px solid rgba(0,0,0,0.05);
+}
+
+.report-table thead th {
+    color: #222 !important;
 }
 
 .report-table th:last-child {
@@ -175,16 +231,9 @@
     border-top-left-radius: 8px;
 }
 
-/* Specific Header Colors */
 .report-table thead tr {
     background-color: #f1f3f5;
-    border-bottom: 2px solid var(--primary-color); 
-}
-
-/* Header Text Primary Color Accent for Key Columns */
-.report-table th:nth-child(2), /* Product */
-.report-table th:nth-child(5) { /* Revenue */
-    color: var(--primary-dark);
+    border-bottom: 2px solid var(--primary-color);
 }
 
 .report-table td {
@@ -193,7 +242,7 @@
     vertical-align: middle;
     color: #495057;
     font-size: 14px;
-    border-right: 1px dashed rgba(0,0,0,0.03); /* Subtle guide lines */
+    border-right: 1px dashed rgba(0,0,0,0.03);
     transition: background-color 0.2s;
 }
 
@@ -201,14 +250,14 @@
     border-right: none;
 }
 
-/* Striping Rows for better readability */
+/* Striping Rows */
 .report-table tbody tr:nth-child(even) {
     background-color: #fcfcfc;
 }
 
 .report-table tbody tr:hover td {
-    background-color: #f1f8e9; /* Light Green Tint on Hover */
-    color: #2e7d32; /* Dark Green Text on Hover */
+    background-color: #f1f8e9;
+    color: #2e7d32;
     cursor: default;
 }
 
@@ -216,7 +265,7 @@
     border-bottom: none;
 }
 
-/* Utility Classes for Alignment */
+/* Utility Classes */
 .text-right { text-align: right !important; }
 .text-center { text-align: center !important; }
 .text-left { text-align: left !important; }
@@ -240,10 +289,6 @@
     display: inline-block;
 }
 
-.text-right {
-    text-align: right;
-}
-
 .bold {
     font-weight: 600;
     color: #2c3e50;
@@ -257,21 +302,27 @@
 }
 
 .progress-text {
-    font-size: 12px;
-    min-width: 40px;
-    text-align: right;
+    font-weight: 600;
+    min-width: 45px;
+    color: var(--text-color);
 }
 
 .progress-bar-bg {
     flex: 1;
-    height: 6px;
-    background: #eee;
-    border-radius: 3px;
+    height: 8px;
+    background: #e9ecef;
+    border-radius: 10px;
     overflow: hidden;
 }
 
 .progress-bar-fill {
     height: 100%;
-    background: var(--primary-color);
-    border-radius: 3px;
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    border-radius: 10px;
+    transition: width 0.3s ease;
 }
+
+.table-responsive {
+    overflow-x: auto;
+}
+

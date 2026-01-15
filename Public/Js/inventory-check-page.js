@@ -76,8 +76,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     return false;
                 }
 
-                // Set action và submit (dùng URL format cho Router)
-                form.action = 'index.php?url=InventoryCheck/save';
+                // Set action và submit (dùng URL format giống cô giáo)
+                form.action = 'InventoryCheck/save';
                 console.log('Form action set to:', form.action);
                 console.log('Form data:', {
                     txtIngredient: ingredientName,
@@ -107,8 +107,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     return false;
                 }
 
-                // Set action và submit (dùng URL format cho Router)
-                form.action = 'index.php?url=InventoryCheck/update';
+                // Set action và submit (dùng URL format giống cô giáo)
+                form.action = 'InventoryCheck/update';
                 console.log('Form action set to:', form.action);
 
                 form.submit();

@@ -75,7 +75,7 @@
         <!-- Hàng 1: Tên khách và Bàn số -->
         <div style="display: flex; gap: 10px; margin-bottom: 10px;">
             <div style="flex: 1;">
-                <input type="text" id="pos-customer-name" value="Khách Lẻ" placeholder="Tên Khách" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem;">
+                <input type="text" id="pos-customer-name" value="Khách Lẻ" placeholder="Tên Khách" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem;" readonly>
             </div>
             <div id="table-box" style="flex: 1;">
                 <select id="pos-table-select" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; background: white; cursor: pointer;">

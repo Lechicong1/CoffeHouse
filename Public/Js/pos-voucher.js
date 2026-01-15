@@ -80,7 +80,7 @@ function wireVoucherCardClicks() {
       const point_cost = Number(card.dataset.pointCost || card.getAttribute("data-point-cost") || 0);
       const discount_type = card.dataset.discountType || card.getAttribute("data-discount-type") || "";
       const discount_value = card.dataset.discountValue || card.getAttribute("data-discount-value") || "";
-      
+
       // Lưu vào DOM thay vì global variable
       const modal = document.getElementById("voucherModal");
       if (modal) {
@@ -189,7 +189,7 @@ function previewVoucherServer(voucherId) {
       if (!pv) return;
 
       if (pv.dataset.ok !== "1") {
-        console.warn(pv.dataset.msg || "Preview failed");
+        console.warn(pv.dataset.msg || "Xem trước voucher thất bại");
         return;
       }
 

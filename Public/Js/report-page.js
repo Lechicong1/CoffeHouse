@@ -1,10 +1,3 @@
-/**
- * Report Page JavaScript
- * Xử lý logic hiển thị modal và gọi API lấy chi tiết
- */
-
-// ========== REPORT PAGE - MINIMAL JS ==========
-// Chỉ validation cơ bản - KHÔNG có AJAX, modal, animation
 
 document.addEventListener('DOMContentLoaded', function() {
     // Validation form lọc ngày

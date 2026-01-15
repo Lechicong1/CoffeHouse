@@ -35,6 +35,9 @@ $category = $data['category'] ?? null;
                 <input type="hidden" name="txtProductSizeId" id="selected-product-size-id"
                        value="<?= !empty($product->sizes) ? $product->sizes[0]->id : '' ?>">
                 <input type="hidden" name="txtQuantity" id="selected-quantity" value="1">
+                <!-- Thêm các field cho Buy Now - không cần query lại database -->
+                <input type="hidden" name="txtProductName" id="selected-product-name" value="<?= htmlspecialchars($product->name) ?>">
+                <input type="hidden" name="txtPrice" id="selected-price" value="<?= !empty($product->sizes) ? $product->sizes[0]->price : 0 ?>">
 
                 <!-- Giá sản phẩm -->
                 <div class="product-price" id="product-price">
@@ -124,30 +127,3 @@ $category = $data['category'] ?? null;
     <p><a href="?url=UserController/menu">← Quay lại thực đơn</a></p>
 </section>
 <?php endif; ?>
-
-<script>
-// Chọn size
-document.querySelectorAll('.size-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        document.getElementById('selected-product-size-id').value = this.dataset.productSizeId;
-        document.getElementById('product-price').textContent = new Intl.NumberFormat('vi-VN').format(this.dataset.price) + 'đ';
-    });
-});
-
-// Xử lý số lượng
-let qty = 1;
-document.getElementById('decrease-qty').addEventListener('click', function() {
-    if (qty > 1) {
-        qty--;
-        document.getElementById('quantity').textContent = qty;
-        document.getElementById('selected-quantity').value = qty;
-    }
-});
-document.getElementById('increase-qty').addEventListener('click', function() {
-    qty++;
-    document.getElementById('quantity').textContent = qty;
-    document.getElementById('selected-quantity').value = qty;
-});
-</script>

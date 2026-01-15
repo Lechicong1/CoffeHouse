@@ -93,11 +93,6 @@ $currentSection = $data['section'] ?? 'pos';
                 </div>
 
                 <div class="header-right" style="display: flex; align-items: center; gap: 20px;">
-                    <!-- Notifications -->
-                    <div class="notification-btn" style="position: relative; cursor: pointer;">
-                        <i class="fa-regular fa-bell" style="font-size: 1.2rem; color: var(--primary-green);"></i>
-                        <span class="badge" style="position: absolute; top: -5px; right: -5px; background: var(--accent-red); color: white; font-size: 0.6rem; padding: 2px 5px; border-radius: 10px;">3</span>
-                    </div>
 
                     <!-- User Profile -->
                     <div class="user-profile">

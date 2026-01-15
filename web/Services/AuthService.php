@@ -51,6 +51,16 @@ class AuthService extends Service {
             ];
         }
 
+        // Chặn tài khoản GUEST_POS đăng nhập trên Web
+        if ($userType === 'customer' && strtoupper($user->account_type ?? '') === 'GUEST_POS') {
+            return [
+                'success' => false,
+                'message' => 'Tài khoản khách vãng lai chưa được kích hoạt. Vui lòng đăng ký để nâng cấp tài khoản!',
+                'user' => null,
+                'userType' => null
+            ];
+        }
+
         // Đăng nhập thành công
         return [
             'success' => true,

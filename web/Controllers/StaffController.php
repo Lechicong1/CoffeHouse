@@ -303,7 +303,7 @@ class StaffController extends Controller {
                         'id' => $order['id'],
                         'order_code' => $order['order_code'] ?? '-',
                         'customer_name' => $order['customer_name'] ?? 'Khách lẻ',
-                        'customer_phone' => $order['customer_phone'] ?? '-',
+                        'customer_phone' => !empty($order['customer_phone']) ? "'" . $order['customer_phone'] : '-',
                         'table_number' => $order['table_number'] ?? '-',
                         'order_type' => $orderTypeText,
                         'total_amount' => number_format($order['total_amount'], 0, ',', '.') . ' ₫',

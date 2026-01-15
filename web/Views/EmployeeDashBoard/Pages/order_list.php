@@ -32,6 +32,9 @@ $currentSearch = $currentFilter['search'] ?? '';
             <a href="/COFFEE_PHP/StaffController/orders" class="filter-btn <?php echo empty($currentStatus) ? 'active' : ''; ?>">
                 Tất cả
             </a>
+            <a href="/COFFEE_PHP/StaffController/orders?status=PENDING" class="filter-btn <?php echo $currentStatus === 'PENDING' ? 'active' : ''; ?>">
+                Chờ xác nhận
+            </a>
             <a href="/COFFEE_PHP/StaffController/orders?status=PROCESSING" class="filter-btn <?php echo $currentStatus === 'PROCESSING' ? 'active' : ''; ?>">
                 Đang pha chế
             </a>

@@ -24,8 +24,8 @@ class OrderController extends Controller {
     function GetData() {
         $customerId = $this->checkAuth();
 
-        // Lấy danh sách đơn hàng của khách hàng
-        $orders = $this->orderService->getOrderRepo()->findByCustomerId($customerId);
+        // Lấy danh sách đơn hàng của khách hàng (gọi trực tiếp repo từ controller)
+        $orders = $this->orderService->findByCustomerId($customerId);
 
         $this->view('UserDashBoard/MasterLayout', [
             'title' => 'Đơn Hàng Của Tôi - Coffee House',

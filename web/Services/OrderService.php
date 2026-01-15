@@ -630,13 +630,10 @@ class OrderService  {
    // cong le
     public function cancelOrder($orderId, $customerId) {
         try {
-            // 1. Kiểm tra đơn hàng tồn tại
             $order = $this->orderRepo->findById($orderId);
             if (!$order) {
                 return ['success' => false, 'message' => 'Không tìm thấy đơn hàng'];
             }
-
-            // 2. Kiểm tra quyền sở hữu
             if ($order->customer_id != $customerId) {
                 return ['success' => false, 'message' => 'Bạn không có quyền hủy đơn hàng này'];
             }
@@ -669,6 +666,13 @@ class OrderService  {
         }
     }
 
+
+    /**
+     * Lấy danh sách đơn hàng theo customerId (chuẩn service)
+     */
+    public function findByCustomerId($customerId) {
+        return $this->orderRepo->findByCustomerId($customerId);
+    }
 
 }
 ?>

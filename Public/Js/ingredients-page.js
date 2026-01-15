@@ -167,54 +167,10 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 /**
- * Xử lý hiển thị bảng nguyên liệu (Date format, Stock status, Active status)
+ * Xử lý hiển thị bảng nguyên liệu (Stock status only)
  */
 function processIngredientTable() {
-    // 1. Process Expiry Date
-    const expiryCells = document.querySelectorAll('.col-expiry');
-    expiryCells.forEach(cell => {
-        const dateStr = cell.getAttribute('data-date');
-        if (!dateStr) {
-            cell.innerHTML = '<span class="badge badge-status-none">Chưa có HSD</span>';
-            return;
-        }
-
-        const date = new Date(dateStr);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Reset time part for accurate comparison
-
-        const diffTime = date - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
-        // Format date dd/mm/yyyy
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const year = date.getFullYear();
-        const formattedDate = `${day}/${month}/${year}`;
-
-        let statusLabel = '';
-        let badgeClass = '';
-
-        if (diffDays < 0) {
-            statusLabel = 'Hết hạn';
-            badgeClass = 'badge-status-expired';
-        } else if (diffDays <= 7) {
-            statusLabel = 'Sắp hết hạn';
-            badgeClass = 'badge-status-warning';
-        } else {
-            statusLabel = 'Còn hạn';
-            badgeClass = 'badge-status-ok';
-        }
-
-        cell.innerHTML = `
-            <span class="badge ${badgeClass}">
-                ${statusLabel}<br>
-                <small>(${formattedDate})</small>
-            </span>
-        `;
-    });
-
-    // 2. Process Stock Status
+    // Process Stock Status
     const stockCells = document.querySelectorAll('.col-stock');
     stockCells.forEach(cell => {
         const qty = parseFloat(cell.getAttribute('data-qty'));
@@ -232,34 +188,6 @@ function processIngredientTable() {
             badgeClass = 'badge-status-ok';
         }
 
-        cell.innerHTML = `<span class="badge ${badgeClass}">${label}</span>`;
-    });
-
-    // 3. Process Active Status
-    // Logic đồng bộ với BE: Nếu hết hạn thì coi như ngừng hoạt động
-    const statusCells = document.querySelectorAll('.col-status');
-    statusCells.forEach(cell => {
-        const isActiveFromDB = cell.getAttribute('data-active') === '1';
-        
-        // Lấy ngày hết hạn từ cùng row để kiểm tra
-        const row = cell.closest('tr');
-        const expiryCell = row ? row.querySelector('.col-expiry') : null;
-        const expiryDateStr = expiryCell ? expiryCell.getAttribute('data-date') : null;
-        
-        // Tính toán xem đã hết hạn chưa
-        let isExpired = false;
-        if (expiryDateStr) {
-            const expiryDate = new Date(expiryDateStr);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            isExpired = expiryDate < today;
-        }
-        
-        // Logic đồng bộ: Ngừng hoạt động nếu is_active=0 HOẶC đã hết hạn
-        const isActive = isActiveFromDB && !isExpired;
-        const label = isActive ? 'Đang hoạt động' : 'Ngừng hoạt động';
-        const badgeClass = isActive ? 'badge-success' : 'badge-danger';
-        
         cell.innerHTML = `<span class="badge ${badgeClass}">${label}</span>`;
     });
 }

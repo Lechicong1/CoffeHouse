@@ -11,7 +11,7 @@ class RecipeController extends Controller
 
         $products = $productService->getAllProducts();
         // Lấy danh sách ingredients (chỉ lấy active)
-        $ingredients = $ingredientService->getActiveIngredients();
+        $ingredients = $ingredientService->getAllIngredients();
 
         $currentRecipe = [];
         $selectedProduct = null;

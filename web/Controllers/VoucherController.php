@@ -5,8 +5,7 @@ class VoucherController extends Controller {
 
     public function GetData() {
         $service = $this->service('VoucherService');
-        $service->syncExpiryStatuses();
-        
+
         $this->view('AdminDashBoard/MasterLayout', [
             'section' => 'vouchers',
             'page' => 'Vouchers_v',
@@ -16,7 +15,6 @@ class VoucherController extends Controller {
 
     public function timkiem() {
         $service = $this->service('VoucherService');
-        $service->syncExpiryStatuses();
         $keyword = trim($_POST['txtTimKiem'] ?? '');
         
         $vouchers = empty($keyword) 

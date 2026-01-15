@@ -4,9 +4,6 @@ use web\Entity\VoucherEntity;
 
 class VoucherService extends Service {
 
-    public function syncExpiryStatuses() {
-        return $this->repository('VoucherRepository')->deactivateExpiredVouchers();
-    }
 
     public function getAllVouchers() {
         return $this->repository('VoucherRepository')->findAll();

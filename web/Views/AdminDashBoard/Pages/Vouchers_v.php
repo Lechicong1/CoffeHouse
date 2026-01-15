@@ -1,19 +1,7 @@
 <?php
-/**
- * VIEW CON - Quản lý Voucher
- * Chỉ hiển thị dữ liệu, không xử lý logic
- */
-
-// Lấy dữ liệu từ Controller (đã truyền qua $data)
 $vouchers = $data['vouchers'] ?? [];
 $keyword = $data['keyword'] ?? '';
-
 ?>
-
-<!-- Import Font Awesome -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
-<!-- Import Voucher Page CSS -->
 <link rel="stylesheet" href="/COFFEE_PHP/Public/Css/voucher-page.css">
 
 <section id="vouchers" class="content-section">
@@ -133,11 +121,11 @@ $keyword = $data['keyword'] ?? '';
                                     <div class="action-buttons">
                                         <button class="btn btn-primary btn-sm" 
                                                 onclick='openEditModal(<?php echo json_encode($voucher->toArray()); ?>)'>
-                                            <i class="fas fa-edit"></i>
+                                            <i class="fas fa-edit"></i> Sửa
                                         </button>
                                         <button class="btn btn-danger btn-sm" 
                                                 onclick="confirmDelete(<?php echo $voucher->id; ?>, '<?php echo htmlspecialchars($voucher->name); ?>')">
-                                            <i class="fas fa-trash"></i>
+                                            <i class="fas fa-trash"></i> Xóa
                                         </button>
                                     </div>
                                 </td>

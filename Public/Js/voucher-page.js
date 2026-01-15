@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (discountType === 'FIXED') {
             label.innerHTML = 'Giá Trị Giảm (VNĐ) <span style="color: red;">*</span>';
             if (maxGroup) maxGroup.style.display = 'none';
-            if (maxInput) maxInput.value = '';  // Clear max_discount khi là FIXED
+            if (maxInput) maxInput.value = ''; 
         } else {
             label.innerHTML = 'Giá Trị Giảm (%) <span style="color: red;">*</span>';
             if (maxGroup) maxGroup.style.display = 'block';

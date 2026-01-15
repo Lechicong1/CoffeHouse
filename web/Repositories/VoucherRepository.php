@@ -141,16 +141,6 @@ class VoucherRepository extends ConnectDatabase {
         return $vouchers;
     }
 
-    public function deactivateExpiredVouchers() {
-        $sql = "UPDATE vouchers 
-                SET is_active = 0 
-                WHERE is_active = 1 
-                AND end_date IS NOT NULL 
-                AND end_date < CURDATE()";
-        
-        mysqli_query($this->con, $sql);
-        return mysqli_affected_rows($this->con);
-    }
 
     public function incrementUsedCount($id, $con = null) {
         $connection = $con ?? $this->con;

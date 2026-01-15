@@ -110,5 +110,17 @@ class IngredientRepository extends ConnectDatabase {
 
         return $row['total'];
     }
+
+    public function getByName($name)
+    {
+        $sql = "SELECT * FROM ingredients WHERE name = ?";
+        $stmt = mysqli_prepare($this->con, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $name);
+        mysqli_stmt_execute($stmt);
+
+        $result = mysqli_stmt_get_result($stmt);
+        return mysqli_fetch_assoc($result);
+
+    }
 }
 ?>

@@ -80,26 +80,18 @@
             <div id="table-box" style="flex: 1;">
                 <select id="pos-table-select" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 8px; font-size: 0.9rem; background: white; cursor: pointer;">
                     <option value="">-- Chọn Bàn --</option>
-                    <option value="1" selected>Bàn 1</option>
-                    <option value="2">Bàn 2</option>
-                    <option value="3">Bàn 3</option>
-                    <option value="4">Bàn 4</option>
-                    <option value="5">Bàn 5</option>
-                    <option value="6">Bàn 6</option>
-                    <option value="7">Bàn 7</option>
-                    <option value="8">Bàn 8</option>
-                    <option value="9">Bàn 9</option>
-                    <option value="10">Bàn 10</option>
-                    <option value="11">Bàn 11</option>
-                    <option value="12">Bàn 12</option>
-                    <option value="13">Bàn 13</option>
-                    <option value="14">Bàn 14</option>
-                    <option value="15">Bàn 15</option>
-                    <option value="16">Bàn 16</option>
-                    <option value="17">Bàn 17</option>
-                    <option value="18">Bàn 18</option>
-                    <option value="19">Bàn 19</option>
-                    <option value="20">Bàn 20</option>
+
+                    <?php
+                    $totalTables = 30;
+
+                    // Dùng vòng for để in ra các option
+                    for ($i = 1; $i <= $totalTables; $i++):
+                        ?>
+                        <option value="<?= $i ?>" <?= ($i == 1) ? 'selected' : '' ?>>
+                            Bàn <?= $i ?>
+                        </option>
+                    <?php endfor; ?>
+
                 </select>
             </div>
         </div>

@@ -62,15 +62,16 @@ class InventoryImportRepository extends ConnectDatabase {
     }
 
 
-    public function search($keyword) {
+    public function search($keyword1,$keyword2) {
         $sql = "SELECT ip.*, i.name as ingredient_name, i.unit 
                 FROM inventory_imports ip 
                 JOIN ingredients i ON ip.ingredient_id = i.id 
-                WHERE i.name LIKE ? 
+                WHERE i.name LIKE ? and i.import_quantity= ? 
                 ORDER BY ip.import_date DESC";
         $stmt = mysqli_prepare($this->con, $sql);
-        $searchTerm = "%" . $keyword . "%";
-        mysqli_stmt_bind_param($stmt, "s", $searchTerm);
+        $searchTerm = "%" . $keyword1 . "%";
+        $searchTerm1 = $keyword2;
+        mysqli_stmt_bind_param($stmt, "sd", $searchTerm,$searchTerm1);
         mysqli_stmt_execute($stmt);
 
         $result = mysqli_stmt_get_result($stmt);

@@ -27,9 +27,9 @@ class InventoryImportController extends Controller {
 
     public function timkiem() {
         $keyword = trim($_POST['txtSearch'] ?? '');
-
+        $keyword2 = trim($_POST['txtSearch1'] ?? '');
         if ($keyword) {
-            $imports = $this->inventoryImportService->searchImports($keyword);
+            $imports = $this->inventoryImportService->searchImports($keyword, $keyword2);
         } else {
             $imports = $this->inventoryImportService->getAllImports();
         }

@@ -24,8 +24,8 @@ class ProductReportRepository extends ConnectDatabase
         ";
 
         // Add category filter if present
-        if ($categoryId && $categoryId !== 'all') {
-            $sql .= " AND p.category_id = ? ";
+        if ($categoryId == 'all') {
+            $sql .= " AND p.category_id = 1  ";
         }
 
         $sql .= " GROUP BY p.id, p.name, c.name ORDER BY total_revenue DESC";

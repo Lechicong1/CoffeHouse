@@ -44,6 +44,9 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) 
         <input type="text" name="txtSearch" class="search-input"
                placeholder="🔍 Tìm kiếm theo tên nguyên liệu hoặc ghi chú..."
                value="<?= htmlspecialchars($keyword) ?>">
+        <input type="text" name="txtSearch1" class="search-input"
+               placeholder="🔍 Tìm kiếm theo số lượng"
+               value="<?= htmlspecialchars($keyword) ?>">
         <button type="submit" class="btn-primary">Tìm kiếm</button>
         <?php if ($keyword): ?>
             <a href="?url=InventoryImportController/GetData" class="btn-secondary">Xóa bộ lọc</a>
@@ -132,7 +135,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['id'])) 
                         <?php foreach ($ingredients as $ing): ?>
                             <option value="<?= $ing->id ?>"
                                     <?= ($editImport && $editImport->ingredient_id == $ing->id) ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($ing->name) ?> (<?= htmlspecialchars($ing->unit) ?>)
+                                <?= htmlspecialchars($ing->name     ) ?> (<?= htmlspecialchars($ing->unit) ?>)
                             </option>
                         <?php endforeach; ?>
                     </select>

@@ -18,16 +18,18 @@ class CustomerController extends Controller {
     public function timkiem() {
         $service = $this->service('CustomerService');
         $keyword = trim($_POST['txtTimKiem'] ?? '');
+        $keyword1 = trim($_POST['txtTimKiem1'] ?? '');
         
-        $customers = empty($keyword) 
+        $customers = empty($keyword) && empty($keyword1)
             ? $service->getAllCustomers() 
-            : $service->searchCustomers($keyword);
+            : $service->searchCustomers($keyword,$keyword1);
         
         $this->view('AdminDashBoard/MasterLayout', [
             'section' => 'customers',
             'page' => 'Customers_v',
             'customers' => $customers,
             'keyword' => $keyword,
+            'keyword1' => $keyword1,
             'totalCustomers' => count($customers)
         ]);
     }

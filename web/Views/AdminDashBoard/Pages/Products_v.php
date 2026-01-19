@@ -61,6 +61,9 @@ $keyword = $data['keyword'] ?? '';
                                 break;
                             }
                         }
+                        if($i % 2 == 0){
+
+                        }
                     ?>
                         <tr>
                             <td><?= $i++ ?></td>

@@ -16,8 +16,8 @@ class CustomerService extends Service {
         return $this->repository('CustomerRepository')->findByPhone($phone);
     }
 
-    public function searchCustomers($keyword) {
-        return $this->repository('CustomerRepository')->search($keyword);
+    public function searchCustomers($keyword,$keyword1) {
+        return $this->repository('CustomerRepository')->search($keyword,$keyword1);
     }
 
     public function createCustomer($data) {

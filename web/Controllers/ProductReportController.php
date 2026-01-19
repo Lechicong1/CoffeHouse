@@ -92,7 +92,7 @@ class ProductReportController extends Controller
                         'product_name' => $row['product_name'],
                         'category_name' => $row['category_name'],
                         'total_quantity' => $row['total_quantity'],
-                        'total_revenue' => number_format($row['total_revenue'], 0, ',', '.') . ' ₫',
+//                        'total_revenue' => number_format($row['total_revenue'], 0, ',', '.') . ' ₫',
                         'percent' => $row['percent'] . '%',
                         'avg_price' => number_format($row['avg_price'], 0, ',', '.') . ' ₫'
                     ];
@@ -104,7 +104,7 @@ class ProductReportController extends Controller
                     'product_name' => 'Sản Phẩm',
                     'category_name' => 'Danh Mục',
                     'total_quantity' => 'Số Lượng',
-                    'total_revenue' => 'Doanh Thu',
+//                    'total_revenue' => 'Doanh Thu',
                     'percent' => 'Tỷ Trọng (%)',
                     'avg_price' => 'Giá Trung Bình'
                 ];

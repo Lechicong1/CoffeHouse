@@ -76,16 +76,17 @@ class CustomerRepository extends ConnectDatabase {
         return $data ? new CustomerEntity($data) : null;
     }
 
-    public function search($keyword) {
+    public function search($keyword,$keyword1) {
         $sql = "SELECT * FROM customers 
                 WHERE full_name LIKE ? 
-                OR phone LIKE ? 
-                OR email LIKE ?
+          
+                AND email LIKE ?
                 ORDER BY full_name";
 
         $stmt = mysqli_prepare($this->con, $sql);
         $searchTerm = "%$keyword%";
-        mysqli_stmt_bind_param($stmt, "sss", $searchTerm, $searchTerm, $searchTerm);
+        $searchTerm1 = "%$keyword1%";
+        mysqli_stmt_bind_param($stmt, "ss", $searchTerm, $searchTerm1);
         mysqli_stmt_execute($stmt);
 
         $result = mysqli_stmt_get_result($stmt);

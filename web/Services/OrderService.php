@@ -112,9 +112,7 @@ class OrderService  {
         return ['success' => true];
     }
 
-    /**
-     * Tạo đơn hàng từ checkout
-     */
+
     public function createOrderFromCheckout($customerId, $data) {
         try {
             // 1. Lấy items trực tiếp từ $data (đã được Controller xử lý sẵn)

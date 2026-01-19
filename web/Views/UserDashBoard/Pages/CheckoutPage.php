@@ -43,10 +43,10 @@
                         <input type="hidden" id="originalTotal" value="<?php echo $data['total']; ?>">
                         <div id="checkoutVoucherMsg" style="margin-top:8px;color:#0a6; font-size:0.95rem"></div>
                     </div>
-                    <div class="form-group">
-                        <label for="customerName">Họ và tên <span class="required">*</span></label>
-                        <input type="text" id="customerName" name="txtCustomerName" value="<?php echo htmlspecialchars($data['customer']->full_name ?? ''); ?>" required>
-                    </div>
+<!--                    <div class="form-group">-->
+<!--                        <label for="customerName">Họ và tên <span class="required">*</span></label>-->
+<!--                        <input type="text" id="customerName" name="txtCustomerName" value="--><?php //echo htmlspecialchars($data['customer']->full_name ?? ''); ?><!--" required>-->
+<!--                    </div>-->
                     <div class="form-group">
                         <label for="customerPhone">Số điện thoại <span class="required">*</span></label>
                         <input type="tel" id="customerPhone" name="txtCustomerPhone" value="<?php echo htmlspecialchars($data['customer']->phone ?? ''); ?>" pattern="[0-9]{10}" required>

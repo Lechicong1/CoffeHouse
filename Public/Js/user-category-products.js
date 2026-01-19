@@ -80,8 +80,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // 4. Sort logic
-        // Only sort the visible ones? No, sort all, the hidden ones stay hidden.
-        // But re-appending moves them in DOM.
         
         const sortedProducts = Array.from(productCards).sort((a, b) => {
             const priceA = parseInt(a.getAttribute('data-price')) || 0;
@@ -94,8 +92,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Re-append to grid in new order
-        // Note: verify if this causes flicker. Usually fast enough.
         productsGrid.innerHTML = '';
         sortedProducts.forEach(card => productsGrid.appendChild(card));
     }
@@ -106,9 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
     rangeMin.addEventListener('input', (e) => {
         updateSlider(e);
         filterAndSortProducts(); // Filter efficiently on drag? Or wait for change? 
-        // Modern browsers handle layout thrashing well, but 'change' is safer for heavy DOM.
-        // User asked for "smoother", real-time feel usually implies 'input'.
-        // Let's try 'input' for instant feedback.
+
     });
 
     rangeMax.addEventListener('input', (e) => {
@@ -137,6 +131,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // --- INIT ---
     updateSlider();
-    // Do one initial sort/filter based on default state
     filterAndSortProducts(); 
 });

@@ -124,8 +124,8 @@ class InventoryImportService extends  Service {
         }
     }
 
-    public function searchImports($keyword) {
-        return $this->inventoryImportRepository->search($keyword);
+    public function searchImports($keyword,$keyword2) {
+        return $this->inventoryImportRepository->search($keyword,$keyword2);
     }
 
 //    public function getImportsByIngredient($ingredientId) {

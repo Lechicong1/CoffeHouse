@@ -40,13 +40,6 @@ function openIngredientModal(mode, data = null) {
         document.getElementById('ingredientId').value = data.id;
         document.getElementById('name').value = data.name;
         document.getElementById('unit').value = data.unit;
-        
-        // Populate expiry date if exists
-        if (data.expiry_date) {
-            document.getElementById('expiryDate').value = data.expiry_date;
-        } else {
-            document.getElementById('expiryDate').value = '';
-        }
 
         // Không cần điền stock_quantity vì không có input này nữa
         document.getElementById('formAction').value = 'update';

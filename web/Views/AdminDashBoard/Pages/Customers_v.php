@@ -23,6 +23,8 @@ $keyword = $data['keyword'] ?? '';
                 <form action="/COFFEE_PHP/CustomerController/timkiem" method="POST">
                     <input type="text" name="txtTimKiem" placeholder="Tìm kiếm theo tên, số điện thoại, email..." 
                            value="<?php echo isset($keyword) ? htmlspecialchars($keyword) : ''; ?>">
+                    <input type="text" name="txtTimKiem1" placeholder="Tìm kiếm theo tên, số điện thoại, email..."
+                           value="<?php echo isset($keyword1) ? htmlspecialchars($keyword1) : ''; ?>">
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-search"></i> Tìm kiếm
                     </button>

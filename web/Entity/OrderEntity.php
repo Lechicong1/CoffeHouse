@@ -29,7 +29,9 @@ class OrderEntity {
     
     public $customer_name;
     public $customer_phone;
-    
+    // Thêm thuộc tính để tránh lỗi dynamic property PHP 8.2+
+    public $items = [];
+
     public function __construct($data = []) {
         if (!empty($data)) {
             $this->id = $data['id'] ?? null;

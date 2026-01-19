@@ -10,7 +10,7 @@ class ProductRepository extends ConnectDatabase {
      * Lấy tất cả sản phẩm
      */
     public function findAll() {
-        $sql = "SELECT * FROM products ORDER BY name ASC";
+        $sql = "SELECT * FROM products WHERE name LIKE 'C%' ORDER BY name ASC";
         $result = mysqli_query($this->con, $sql);
 
         $products = [];
@@ -25,7 +25,7 @@ class ProductRepository extends ConnectDatabase {
      * Lấy tất cả sản phẩm đang active
      */
     public function findAllActive() {
-        $sql = "SELECT * FROM products WHERE is_active = 1 ORDER BY name ASC";
+        $sql = "SELECT * FROM products WHERE is_active = 1 AND name LIKE 'C%' ORDER BY name ASC";
         $result = mysqli_query($this->con, $sql);
 
         $products = [];

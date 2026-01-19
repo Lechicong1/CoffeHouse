@@ -201,10 +201,10 @@ $roles = $data['roles'] ?? [
             </div>
 
             <!-- Row 5: Address -->
-            <div class="form-group">
-                <label><span class="label-icon">📍</span> Địa chỉ</label>
-                <input type="text" id="address" name="txtAddress" placeholder="Nhập địa chỉ (không bắt buộc)">
-            </div>
+<!--            <div class="form-group">-->
+<!--                <label><span class="label-icon">📍</span> Địa chỉ</label>-->
+<!--                <input type="text" id="address" name="txtAddress" placeholder="Nhập địa chỉ (không bắt buộc)">-->
+<!--            </div>-->
 
             <div class="form-actions">
                 <button type="button" class="btn-cancel" onclick="closeEmployeeModal()">
